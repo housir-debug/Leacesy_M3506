@@ -16,8 +16,8 @@
 #include "control/web_server.h"
 #include "control/can_server.h"
 #include "control/uart_server.h"
-//#include "windows/mainwindow.h"
 #include "widgets/mainwindow.h"
+#include "widgets/test.h"
 
 Q_LOGGING_CATEGORY(application, "APP")
 
@@ -46,7 +46,7 @@ std::vector<ScpiSign_toUartCh> scpi_signal = {
 int main(int argc, char *argv[])
 {
     // create APP
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);  // 设置画面自动伸缩
+    //QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);  // 自动伸缩 - 会变形
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);  // 设置图片采用高分辨率
     QApplication::setApplicationName("Leacesy_Ryan");
     QApplication app(argc, argv);
@@ -74,23 +74,24 @@ int main(int argc, char *argv[])
     std::shared_ptr<GuiBridge> GuiBridge_share = std::make_shared<GuiBridge>();
     GuiBridge_share->m_modelManager = BatteryModel_share;
 
-    QGraphicsScene scene;
+    /*QGraphicsScene scene;
     QGraphicsView view(&scene);
     view.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    view.setFrameShape(QFrame::NoFrame);
+    view.setFrameShape(QFrame::NoFrame);*/
 
-    std::unique_ptr<Mainwindow> mainwindow(new Mainwindow());
-    //std::unique_ptr<MainWindow> mainwindow(new MainWindow());
+    //std::unique_ptr<test> testview(new test);
+    //testview->show();
+    std::unique_ptr<Mainwindow> mainwindow;
     if (ConfigManager::s_enableDisplay){
-        //BatteryModel_share, GuiBridge_share
+        mainwindow = std::make_unique<Mainwindow>();
+        mainwindow->show();
 
-        QGraphicsProxyWidget *proxy = scene.addWidget(mainwindow.get());
-        proxy->setRotation(0);  // rotatee 90
-        view.setFixedSize(1280, 800);  // 物理竖屏尺寸
-        view.show();
+        //QGraphicsProxyWidget *proxy = scene.addWidget(mainwindow.get());
+        //proxy->setRotation(0);  // rotatee 90
+        //view.setFixedSize(1280, 800);  // 物理竖屏尺寸
+        //view.show();
 
-        //mainWidget->show();
         //GuiBridge_share->load_BatteryModel();
     }
 

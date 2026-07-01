@@ -2,28 +2,15 @@
 #include "ui_digitalcard.h"
 #include <QMouseEvent>
 #include <QTimer>
+#include <QStyle>
+#include <QtDebug>
 
 
 digitalcard::digitalcard(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::digitalCard)
+    QFrame(parent),
+    ui(new Ui::digitalcard) // objectname
 {
     ui->setupUi(this);
-
-    m_scaleAnimation = new QPropertyAnimation(this, "geometry");
-    m_scaleAnimation->setDuration(110);
-    m_scaleAnimation->setEasingCurve(QEasingCurve::OutQuad);
-
-    QRect currentGeo = geometry();
-    m_scaleAnimation->setStartValue(currentGeo);
-
-    int shrink = 3;
-    QRect targetGeo = currentGeo;
-    targetGeo.setX(currentGeo.x() + shrink);
-    targetGeo.setY(currentGeo.y() + shrink);
-    targetGeo.setWidth(currentGeo.width() - shrink * 2);
-    targetGeo.setHeight(currentGeo.height() - shrink * 2);
-    m_scaleAnimation->setEndValue(targetGeo);
 
     m_longPressTimer = new QTimer(this);
     m_longPressTimer->setSingleShot(true);
@@ -48,14 +35,11 @@ void digitalcard::mousePressEvent(QMouseEvent *event)
 {
     m_isPressed = true;
     m_pressPos = event->pos();
-    m_scaleAnimation->start();
 
     m_longPressTriggered = false;
     m_longPressTimer->start();
 
-    // Marked as processed
-    event->accept();
-
+    // event->accept();
     // Pass to the parent class
     QWidget::mousePressEvent(event);
 }
@@ -63,20 +47,20 @@ void digitalcard::mousePressEvent(QMouseEvent *event)
 void digitalcard::mouseReleaseEvent(QMouseEvent *event)
 {
     if (m_isPressed){
-        m_isPressed = false;
         m_longPressTimer->stop();
 
         if (!m_longPressTriggered) {
             QPoint delta = event->pos() - m_pressPos;
             if (delta.manhattanLength() < 18) {
+                qDebug()<<"触发打印";
                 emit clicked();
             }
         }
     }
 
-    // Marked as processed
-    event->accept();
+    m_isPressed = false;
 
+    // event->accept();
     // Pass to the parent class
     QWidget::mouseReleaseEvent(event);
 }
@@ -87,6 +71,7 @@ void digitalcard::mouseMoveEvent(QMouseEvent *event)
         QPoint delta = event->pos() - m_pressPos;
         if (delta.manhattanLength() > 18) {
             m_longPressTimer->stop();
+            m_isPressed = false;
         }
     }
 
@@ -99,11 +84,15 @@ void digitalcard::mouseMoveEvent(QMouseEvent *event)
 void digitalcard::setChannelState(bool state)
 {
     setProperty("outputed",state);
+    style()->unpolish(this);
+    style()->polish(this);
+    update();
 }
 
 void digitalcard::setChannelName(const QString &name)
 {
     ui->channellabel->setText(name);
+    m_ChannelName = name;
 }
 
 void digitalcard::setVoltage(float value)
@@ -120,8 +109,8 @@ void digitalcard::setCurrent(float value)
 
 void digitalcard::setCurrentUnit(const QString &unit)
 {
-    QFont font = ui->currentunitlabel->font();
-    font.setPointSize(unit.size()==1 ? 27:18);
+    QFont font = ui->currentunitlabel->font(); // get source all property
+    font.setPixelSize(unit.size()==1 ? 36 : 18);
     ui->currentunitlabel->setFont(font);
     ui->currentunitlabel->setText(unit);
 }

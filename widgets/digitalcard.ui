@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>digitalCard</class>
- <widget class="QWidget" name="digitalCard">
+ <class>digitalcard</class>
+ <widget class="QFrame" name="digitalcard">
   <property name="enabled">
    <bool>true</bool>
   </property>
@@ -46,28 +46,30 @@
    <string>digitalCard</string>
   </property>
   <property name="windowOpacity">
-   <double>0.960000000000000</double>
+   <double>1.000000000000000</double>
   </property>
   <property name="styleSheet">
-   <string notr="true">#digitalCard
+   <string notr="true">#digitalcard
 {
 background-color: #101C30;
 border-radius: 18px;
-border: 2px solid rgba(74, 74, 90, 0.3);
+border: 3px solid rgba(63, 63, 90, 0.81);
 }
-#digitalCard:hover
+#digitalcard:hover
+{
+ border-color: rgba(99, 99, 136, 0.96); 
+}
+#digitalcard[outputed=true]
 {
 background-color: #1A2A45;
-border-color: rgba(100, 100, 130, 0.6);
-}
-#digitalCard[outputed=true]
-{
-background-color: #1A2A45;
-border-color: rgba(100, 100, 130, 0.6);
+border-color: rgba(100, 100, 130, 0.9);
 }</string>
   </property>
   <property name="locale">
    <locale language="Chinese" country="China"/>
+  </property>
+  <property name="lineWidth">
+   <number>0</number>
   </property>
   <property name="outputed" stdset="0">
    <bool>false</bool>
@@ -79,8 +81,14 @@ border-color: rgba(100, 100, 130, 0.6);
    <property name="leftMargin">
     <number>6</number>
    </property>
+   <property name="topMargin">
+    <number>9</number>
+   </property>
    <property name="rightMargin">
     <number>6</number>
+   </property>
+   <property name="bottomMargin">
+    <number>9</number>
    </property>
    <item>
     <layout class="QHBoxLayout" name="headerhorizontalLayout">
@@ -102,10 +110,13 @@ border-color: rgba(100, 100, 130, 0.6);
      </item>
      <item>
       <widget class="QLabel" name="channellabel">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="font">
         <font>
          <family>WenQuanYi Micro Hei</family>
-         <pointsize>27</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
          <bold>true</bold>
         </font>
@@ -117,7 +128,13 @@ border-color: rgba(100, 100, 130, 0.6);
         <enum>Qt::NoContextMenu</enum>
        </property>
        <property name="styleSheet">
-        <string notr="true"/>
+        <string notr="true">#channellabel
+{
+font-family: &quot;WenQuanYi Micro Hei&quot;;
+font-weight: bold;
+font-size: 36px;
+color: #C9C9C9;
+}</string>
        </property>
        <property name="lineWidth">
         <number>0</number>
@@ -126,7 +143,7 @@ border-color: rgba(100, 100, 130, 0.6);
         <string>CH-1</string>
        </property>
        <property name="scaledContents">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -150,10 +167,13 @@ border-color: rgba(100, 100, 130, 0.6);
    </item>
    <item>
     <widget class="QFrame" name="measureframe">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="font">
       <font>
        <family>WenQuanYi Micro Hei</family>
-       <pointsize>18</pointsize>
+       <pointsize>27</pointsize>
       </font>
      </property>
      <property name="cursor">
@@ -168,10 +188,13 @@ border-color: rgba(100, 100, 130, 0.6);
 }</string>
      </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
      </property>
      <layout class="QGridLayout" name="gridLayout" rowstretch="0,0" columnstretch="7,0">
       <property name="leftMargin">
@@ -194,7 +217,9 @@ border-color: rgba(100, 100, 130, 0.6);
         <property name="font">
          <font>
           <family>WenQuanYi Micro Hei</family>
-          <pointsize>27</pointsize>
+          <pointsize>-1</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
          </font>
         </property>
         <property name="cursor">
@@ -206,14 +231,20 @@ border-color: rgba(100, 100, 130, 0.6);
         <property name="styleSheet">
          <string notr="true">#voltageunitlabel
 {
+font-family: &quot;WenQuanYi Micro Hei&quot;;
+font-weight: bold;
+font-size: 36px;
 color: #0DAF65;
 }</string>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
         </property>
         <property name="text">
          <string>V</string>
         </property>
         <property name="scaledContents">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -225,7 +256,9 @@ color: #0DAF65;
         <property name="font">
          <font>
           <family>WenQuanYi Micro Hei</family>
-          <pointsize>27</pointsize>
+          <pointsize>-1</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
          </font>
         </property>
         <property name="cursor">
@@ -237,8 +270,14 @@ color: #0DAF65;
         <property name="styleSheet">
          <string notr="true">#currentunitlabel
 {
+font-family: &quot;WenQuanYi Micro Hei&quot;;
+font-weight: bold;
+font-size: 36px;
 color: #DF1D32;
 }</string>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
         </property>
         <property name="text">
          <string>A</string>
@@ -250,10 +289,16 @@ color: #DF1D32;
       </item>
       <item row="0" column="0">
        <widget class="QLabel" name="voltagelabel">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="font">
          <font>
           <family>WenQuanYi Micro Hei</family>
-          <pointsize>27</pointsize>
+          <pointsize>-1</pointsize>
+          <weight>50</weight>
+          <bold>false</bold>
+          <stylestrategy>PreferDefault</stylestrategy>
          </font>
         </property>
         <property name="cursor">
@@ -265,14 +310,19 @@ color: #DF1D32;
         <property name="styleSheet">
          <string notr="true">#voltagelabel
 {
+font-family: &quot;WenQuanYi Micro Hei&quot;;
+font-size: 36px;
 color: #0DAF65;
 }</string>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
         </property>
         <property name="text">
          <string>0.0000</string>
         </property>
         <property name="scaledContents">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -281,10 +331,15 @@ color: #0DAF65;
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="currentlabel">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="font">
          <font>
           <family>WenQuanYi Micro Hei</family>
-          <pointsize>27</pointsize>
+          <pointsize>-1</pointsize>
+          <weight>50</weight>
+          <bold>false</bold>
          </font>
         </property>
         <property name="cursor">
@@ -296,14 +351,19 @@ color: #0DAF65;
         <property name="styleSheet">
          <string notr="true">#currentlabel
 {
+font-family: &quot;WenQuanYi Micro Hei&quot;;
+font-size: 36px;
 color: #DF1D32;
 }</string>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
         </property>
         <property name="text">
          <string>0.0000</string>
         </property>
         <property name="scaledContents">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -324,18 +384,18 @@ color: #DF1D32;
      <property name="rightMargin">
       <number>6</number>
      </property>
-     <property name="horizontalSpacing">
-      <number>6</number>
-     </property>
-     <property name="verticalSpacing">
+     <property name="spacing">
       <number>0</number>
      </property>
      <item row="0" column="0">
       <widget class="QLabel" name="cvlabel">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="font">
         <font>
          <family>WenQuanYi Micro Hei</family>
-         <pointsize>12</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
          <italic>false</italic>
          <bold>true</bold>
@@ -350,22 +410,32 @@ color: #DF1D32;
        <property name="styleSheet">
         <string notr="true">#cvlabel
 {
+font-family: &quot;WenQuanYi Micro Hei&quot;;
+font-weight: bold;
+font-size: 18px;
 color: #0DAF65;
 }</string>
+       </property>
+       <property name="lineWidth">
+        <number>0</number>
        </property>
        <property name="text">
         <string>CV</string>
        </property>
        <property name="scaledContents">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
       <widget class="QLabel" name="ccvaluelabel">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="font">
         <font>
-         <pointsize>12</pointsize>
+         <family>WenQuanYi Micro Hei</family>
+         <pointsize>-1</pointsize>
         </font>
        </property>
        <property name="cursor">
@@ -374,11 +444,22 @@ color: #0DAF65;
        <property name="contextMenuPolicy">
         <enum>Qt::NoContextMenu</enum>
        </property>
+       <property name="styleSheet">
+        <string notr="true">#ccvaluelabel
+{
+font-family: &quot;WenQuanYi Micro Hei&quot;;
+font-size: 18px;
+color: #C9C9C9;
+}</string>
+       </property>
+       <property name="lineWidth">
+        <number>0</number>
+       </property>
        <property name="text">
         <string>1.000 A</string>
        </property>
        <property name="scaledContents">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -405,12 +486,23 @@ color: #0DAF65;
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
        </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::NoContextMenu</enum>
+       </property>
        <property name="layoutDirection">
         <enum>Qt::RightToLeft</enum>
        </property>
        <property name="styleSheet">
-        <string notr="true">#ovpcheckbox::indicator:disabled {
-    border: 2px solid #4A4A5A;
+        <string notr="true">#ovpcheckbox::indicator{
+	width:12px;
+	height:12px;
+ 	background-color: transparent;
+    border: 3px solid #4A4A5A;
+    border-radius: 9px;
+}
+
+#ovpcheckbox::indicator:checked {
+    background-color:  #E5C27D;;
 }</string>
        </property>
        <property name="text">
@@ -463,8 +555,16 @@ color: #0DAF65;
         <enum>Qt::RightToLeft</enum>
        </property>
        <property name="styleSheet">
-        <string notr="true">#cvcheckbox::indicator:disabled {
-    border: 2px solid #4A4A5A;
+        <string notr="true">#cvcheckbox::indicator{
+	width:12px;
+	height:12px;
+ 	background-color: transparent;
+    border: 3px solid #4A4A5A;
+    border-radius: 9px;
+}
+
+#cvcheckbox::indicator:checked {
+    background-color:  #0DAF65;;
 }</string>
        </property>
        <property name="text">
@@ -486,10 +586,13 @@ color: #0DAF65;
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="ovplabel">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="font">
         <font>
          <family>WenQuanYi Micro Hei</family>
-         <pointsize>12</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
          <bold>true</bold>
         </font>
@@ -503,24 +606,50 @@ color: #0DAF65;
        <property name="styleSheet">
         <string notr="true">#ovplabel
 {
+font-family: &quot;WenQuanYi Micro Hei&quot;;
+font-weight: bold;
+font-size: 18px;
 color: #E5C27D;
 }</string>
+       </property>
+       <property name="lineWidth">
+        <number>0</number>
        </property>
        <property name="text">
         <string>OVP</string>
        </property>
        <property name="scaledContents">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
       <widget class="QLabel" name="ovpvaluelabel">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="font">
+        <font>
+         <family>WenQuanYi Micro Hei</family>
+         <pointsize>-1</pointsize>
+        </font>
+       </property>
        <property name="cursor">
         <cursorShape>BlankCursor</cursorShape>
        </property>
        <property name="contextMenuPolicy">
         <enum>Qt::NoContextMenu</enum>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">#ovpvaluelabel
+{
+font-family: &quot;WenQuanYi Micro Hei&quot;;
+font-size: 18px;
+color: #C9C9C9;
+}</string>
+       </property>
+       <property name="lineWidth">
+        <number>0</number>
        </property>
        <property name="text">
         <string>8.000 V</string>
@@ -550,12 +679,23 @@ color: #E5C27D;
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
        </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::NoContextMenu</enum>
+       </property>
        <property name="layoutDirection">
         <enum>Qt::RightToLeft</enum>
        </property>
        <property name="styleSheet">
-        <string notr="true">#cccheckbox::indicator:disabled {
-    border: 2px solid #4A4A5A;
+        <string notr="true">#cccheckbox::indicator{
+	width:12px;
+	height:12px;
+ 	background-color: transparent;
+    border: 3px solid #4A4A5A;
+    border-radius: 9px;
+}
+
+#cccheckbox::indicator:checked {
+    background-color:  #DF1D32;;
 }</string>
        </property>
        <property name="text">
@@ -574,10 +714,13 @@ color: #E5C27D;
      </item>
      <item row="0" column="1">
       <widget class="QLabel" name="cvvaluelabel">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="font">
         <font>
          <family>WenQuanYi Micro Hei</family>
-         <pointsize>12</pointsize>
+         <pointsize>-1</pointsize>
          <underline>false</underline>
         </font>
        </property>
@@ -587,11 +730,22 @@ color: #E5C27D;
        <property name="contextMenuPolicy">
         <enum>Qt::NoContextMenu</enum>
        </property>
+       <property name="styleSheet">
+        <string notr="true">#cvvaluelabel
+{
+font-family: &quot;WenQuanYi Micro Hei&quot;;
+font-size: 18px;
+color: #C9C9C9;
+}</string>
+       </property>
+       <property name="lineWidth">
+        <number>0</number>
+       </property>
        <property name="text">
         <string>0.000 V</string>
        </property>
        <property name="scaledContents">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -600,10 +754,13 @@ color: #E5C27D;
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="cclabel">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="font">
         <font>
          <family>WenQuanYi Micro Hei</family>
-         <pointsize>12</pointsize>
+         <pointsize>-1</pointsize>
          <weight>75</weight>
          <bold>true</bold>
         </font>
@@ -617,14 +774,20 @@ color: #E5C27D;
        <property name="styleSheet">
         <string notr="true">#cclabel
 {
+font-family: &quot;WenQuanYi Micro Hei&quot;;
+font-weight: bold;
+font-size: 18px;
 color: #DF1D32;
 }</string>
+       </property>
+       <property name="lineWidth">
+        <number>0</number>
        </property>
        <property name="text">
         <string>CC  </string>
        </property>
        <property name="scaledContents">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </item>

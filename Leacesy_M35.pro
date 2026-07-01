@@ -27,8 +27,8 @@ HEADERS += \
     #windows/digitalpage.h \
  \    #windows/mainwindow.h
     widgets/digitalcard.h \
-    widgets/digitalcardpage.h \
-    widgets/mainwindow.h
+    widgets/mainwindow.h \
+    widgets/test.h
 
 
 SOURCES += \
@@ -49,8 +49,8 @@ SOURCES += \
     #windows/digitalpage.cpp \
  \    #windows/mainwindow.cpp
     widgets/digitalcard.cpp \
-    widgets/digitalcardpage.cpp \
-    widgets/mainwindow.cpp
+    widgets/mainwindow.cpp \
+    widgets/test.cpp
 
 
 RESOURCES += qml.qrc
@@ -71,5 +71,5 @@ INSTALLS += auxiliary_files
 
 FORMS += \
     widgets/digitalcard.ui \
-    widgets/digitalcardpage.ui \
-    widgets/mainwindow.ui
+    widgets/mainwindow.ui \
+    widgets/test.ui

@@ -1,12 +1,11 @@
 #pragma once
-#include <QWidget>
-#include <QPropertyAnimation>
+#include <QFrame>
 
 namespace Ui {
-    class digitalCard;
+    class digitalcard; // = UI_digitalcard instead
 }
 
-class digitalcard : public QWidget
+class digitalcard : public QFrame
 {
     Q_OBJECT
 
@@ -16,6 +15,7 @@ public:
 
     void setChannelState(bool state);
     void setChannelName(const QString &name);
+    QString getChannelName(){return m_ChannelName;}
 
     void setVoltage(float value);
     void setCurrent(float value);
@@ -29,14 +29,15 @@ public:
     void setOvpValue(float value);
 
 private:
-    Ui::digitalCard *ui;
-    QPropertyAnimation *m_scaleAnimation;
+    Ui::digitalcard *ui;
 
     bool m_isPressed;
     QPoint m_pressPos;
 
     QTimer *m_longPressTimer;
     bool m_longPressTriggered;
+
+    QString m_ChannelName;
 
 signals:
     void clicked();
