@@ -260,13 +260,13 @@ void UartChannelManager::handleOutputcmd(quint8 func){
             return;
         case 0x00: // :OUTP[:STAT] {OFF|0}
             m_scpiManager->processCHVoidResponse();
-            m_qmlbridge->update_IsOutput(m_channel,false);
+            emit CH_isOutputChanged(m_channel,false);
             emit to_CanServer(m_channel,0x01,m_readparam);
             qCDebug(uart_channel)<<"[handleOutputcmd]:Channel_"<<m_channel<<" Set[0x00] OFF";
             return;
         case 0x01: // :OUTP[:STAT] {ON|1}
             m_scpiManager->processCHVoidResponse();
-            m_qmlbridge->update_IsOutput(m_channel,true);
+            emit CH_isOutputChanged(m_channel,true);
             m_readparam.append(1);
             emit to_CanServer(m_channel,0x01,m_readparam);
             qCDebug(uart_channel)<<"[handleOutputcmd]:Channel_"<<m_channel<<" Set[0x01] ON";
@@ -330,7 +330,7 @@ void UartChannelManager::handleSettingcmd(quint8 func){
             qCDebug(uart_channel)<<"[handleSettingcmd]:Channel_"<<m_channel<<" Query[0x80] "<<shf;
             return;
         case 0x00: // :SOUR:VOLT[:LEV][:AMPL] <NRf>
-            m_qmlbridge->update_Cv(m_channel,shf);
+            emit CH_cvChanged(m_channel,shf);
             m_scpiManager->processCHVoidResponse();
             emit to_CanServer(m_channel,0x0200,m_readparam);
             qCDebug(uart_channel)<<"[handleSettingcmd]:Channel_"<<m_channel<<" Set[0x00] "<<shf;
@@ -341,7 +341,7 @@ void UartChannelManager::handleSettingcmd(quint8 func){
             qCDebug(uart_channel)<<"[handleSettingcmd]:Channel_"<<m_channel<<" Query[0x81] "<<shf;
             return;
         case 0x01: // :SOUR:CURR[:LIM][:VAL] <NRf>
-            m_qmlbridge->update_Cc(m_channel,shf);
+            emit CH_ccChanged(m_channel,shf);
             m_scpiManager->processCHVoidResponse();
             emit to_CanServer(m_channel,0x0201,m_readparam);
             qCDebug(uart_channel)<<"[handleSettingcmd]:Channel_"<<m_channel<<" Set[0x01] "<<shf;
@@ -352,7 +352,7 @@ void UartChannelManager::handleSettingcmd(quint8 func){
             qCDebug(uart_channel)<<"[handleSettingcmd]:Channel_"<<m_channel<<" Query[0x82] "<<shf;
             return;
         case 0x02: // :OUTP:IMP <NRf>
-            m_qmlbridge->update_Imp(m_channel,shf);
+            emit CH_impChanged(m_channel,shf);
             m_scpiManager->processCHVoidResponse();
             emit to_CanServer(m_channel,0x0202,m_readparam);
             qCDebug(uart_channel)<<"[handleSettingcmd]:Channel_"<<m_channel<<" Set[0x02] "<<shf;
@@ -363,7 +363,7 @@ void UartChannelManager::handleSettingcmd(quint8 func){
             qCDebug(uart_channel)<<"[handleSettingcmd]:Channel_"<<m_channel<<" Query[0x83]"<<shf;
             return;
         case 0x03: // :SOUR:VOLT:PROT <NRf>
-            m_qmlbridge->update_Ovp(m_channel,shf);
+            emit CH_ovpChanged(m_channel,shf);
             m_scpiManager->processCHVoidResponse();
             emit to_CanServer(m_channel,0x0203,m_readparam);
             qCDebug(uart_channel)<<"[handleSettingcmd]:Channel_"<<m_channel<<" Set[0x03] "<<shf;
@@ -592,7 +592,7 @@ void UartChannelManager::handleMeasurementcmd(quint8 func){ // new protocol Need
 
     switch (func){
         case 0x80: // :MEAS:VOLT[:DC]?
-            m_qmlbridge->update_Voltage(m_channel,shf);
+            emit CH_VoltageChanged(m_channel,shf);
             if (m_scpiCommand == 0x0480){
                 m_scpiManager->processCHFloatResponse(shf);
                 emit to_CanServer(m_channel,0x0480,m_readparam);
@@ -600,7 +600,7 @@ void UartChannelManager::handleMeasurementcmd(quint8 func){ // new protocol Need
             qCDebug(uart_channel)<<"[handleMeasurementcmd]:Channel_"<<m_channel<<" Query[0x80] "<<shf;
             return;
         case 0x81: // :MEAS:CURR[:DC]?
-            m_qmlbridge->update_CurrentAndUnit(m_channel,shf);
+            emit CH_CurrentAndUnitChanged(m_channel,shf);
             if (m_scpiCommand == 0x0481){
                 m_scpiManager->processCHFloatResponse(shf);
                 emit to_CanServer(m_channel,0x0481,m_readparam);
@@ -830,7 +830,7 @@ void UartChannelManager::handleRegistercmd(quint8 func){
 
     switch (func){
         case 0x80: // :STAT:OPER[:EVEN]?
-            m_qmlbridge->update_Status(m_channel,sht);
+            emit CH_StatusChanged(m_channel,sht);
             if (m_scpiCommand == 0x0580){
                 m_scpiManager->processCHIntResponse(sht);
                 emit to_CanServer(m_channel,0x0580,m_readparam);
@@ -868,19 +868,18 @@ void UartChannelManager::handleRegistercmd(quint8 func){
             qCDebug(uart_channel)<<"[handleRegistercmd]:Channel_"<<m_channel<<" Set[0x03]";
             return;
         case 0x84: // :SYST:SWVersion?
-            m_qmlbridge->update_SoftVer(m_channel,str);
+            emit CH_svChanged(m_channel,str);
             m_scpiManager->processCHStringResponse(str);
             emit to_CanServer(m_channel,0x0584,m_readparam);
             qCDebug(uart_channel)<<"[handleRegistercmd]:Channel_"<<m_channel<<" Query[0x84]"<<str;
             return;
         case 0x85: // :SYST:HWVersion?
-            m_qmlbridge->update_HardVer(m_channel,str);
+            emit CH_hvChanged(m_channel,str);
             m_scpiManager->processCHStringResponse(str);
             emit to_CanServer(m_channel,0x0585,m_readparam);
             qCDebug(uart_channel)<<"[handleRegistercmd]:Channel_"<<m_channel<<" Query[0x85]"<<str;
             return;
         case 0xff: // :SYST:REG?<addr>
-            m_qmlbridge->update_HardVer(m_channel,str);
             m_scpiManager->processCHStringResponse(str);
             qCDebug(uart_channel)<<"[handleRegistercmd]:Channel_"<<m_channel<<" Query[0xff]"<<str;
             return;

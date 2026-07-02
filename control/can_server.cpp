@@ -251,11 +251,11 @@ bool CanServerManager::startServer()
                         if (m_canid == frame.can_id){
                             QByteArray data(reinterpret_cast<const char*>(frame.data), frame.can_dlc);
                             qCDebug(can)<<"[startServer]:Received Data: "<<data.toHex();
-                            if (m_qmlbridge->m_remoteStatus.load()==1){
+                            if (ConfigManager::s_remoteSt.load()==1){
                                 processFrame(data);
                             }
-                            else if (m_qmlbridge->m_remoteStatus.load()==0){
-                                m_qmlbridge->update_remotemodel(1);
+                            else if (ConfigManager::s_remoteSt.load()==0){
+                                ConfigManager::s_remoteSt.store(1);
                                 processFrame(data);
                             }
                             else{

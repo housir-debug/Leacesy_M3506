@@ -5,7 +5,6 @@
 #include <QSocketNotifier>
 #include <QLoggingCategory>
 #include <linux/can/raw.h>
-#include "auxiliary/qml_agency.h"
 #include "auxiliary/config_manager.h"
 
 Q_DECLARE_LOGGING_CATEGORY(can);
@@ -28,7 +27,6 @@ public:
     void change_canid(QString id);
     void sendFrame(quint8 ch,quint16 uart,const QByteArray &param);
 
-    std::shared_ptr<GuiBridge> m_qmlbridge{nullptr};
 
 private:
     void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param);

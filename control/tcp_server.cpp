@@ -67,11 +67,11 @@ bool TcpServerManager::startServer()
                 }, Qt::DirectConnection);
 
                 connect(client, &QTcpSocket::readyRead,this, [this, client](){
-                    if (m_qmlbridge->m_remoteStatus.load()==2){
+                    if (ConfigManager::s_remoteSt.load()==2){
                         processClientData(client);
                     }
-                    else if (m_qmlbridge->m_remoteStatus.load()==0){
-                        m_qmlbridge->update_remotemodel(2);
+                    else if (ConfigManager::s_remoteSt.load()==0){
+                        ConfigManager::s_remoteSt.store(2);
                         processClientData(client);
                     }
                     else{
@@ -331,7 +331,7 @@ void TcpServerManager::handleDeviceRemote(QTcpSocket* client, const quint32 xid,
     if (lid !=0) {
         qCDebug(tcp)<<"[handleDeviceRemote]:DEVICE_REMOTE: "<<client->objectName();
         buildfoundResponse(xid, Vxi11::NO_ERROR);
-        m_qmlbridge->update_remotemodel(2);
+        ConfigManager::s_remoteSt.store(2);
         client->write(m_responsebuffer);
     }
 }
@@ -343,7 +343,7 @@ void TcpServerManager::handleDeviceLocal(QTcpSocket* client, const quint32 xid,c
     if (lid !=0) {
         qCDebug(tcp)<<"[handleDeviceLocal]:DEVICE_LOCAL: "<<client->objectName();
         buildfoundResponse(xid, Vxi11::NO_ERROR);
-        m_qmlbridge->update_remotemodel(0);
+        ConfigManager::s_remoteSt.store(0);
         client->write(m_responsebuffer);
     }
 }

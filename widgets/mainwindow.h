@@ -4,19 +4,58 @@
 #include <QWidget>
 #include <QStandardItemModel>
 #include "digitalcard.h"
+#include "auxiliary/battery_model.h"
+#include "auxiliary/config_manager.h"
 
 namespace Ui {
-class Mainwindow;
+    class Mainwindow;
 }
 
 class Mainwindow : public QWidget
 {
     Q_OBJECT
 
+signals:
+    void to_CANid(QString id);
+    void to_GPIBid(QString id);
+    #define CHANNEL(n) \
+        void to_UartChannel##n(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
+
+    CHANNEL_COUNT
+    #undef CHANNEL
+
+public:
+    void load_BatteryModel();
+    // QJsonArray getAllChannelsData();
+
+
+
+
+    // Screen trigger function
+    QString setChannel_CurrentUnit(int channel);
+    void setChannel_Output(int channel,bool switchs);
+    void setChannel_Setstatus(int channel,int model,const QString& val);
+
+    void setChannel_BatteryOutput(int channel,bool switchs);
+    void setChannel_InitSOC(int channel,const QString& val);
+    void setChannel_Capacity(int channel,const QString& val);
+    void setChannel_Batterymode(int channel,bool staticmode);
+    QString setChannel_BatteryModel(int channel);
+
+    void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param);
+
+    QStringList m_currentModelList;
+    std::shared_ptr<BatteryModelManager> m_modelManager{nullptr};
+
+
 public:
     explicit Mainwindow(QWidget *parent = nullptr);
     ~Mainwindow();
 
+    void update_remotemodel(quint8 reface);
+    void update_Configuration(int model,const QString& val);
+
+    /* channel slot function */
     void update_SoftVer(int ch,const QString &ver);
     void update_HardVer(int ch,const QString &ver);
 
@@ -29,15 +68,18 @@ public:
     void update_Ovp(int ch,float ovp);
     void update_IsOutput(int ch,bool status);
     void update_Imp(int ch,float imp);
+    /* ********************* */
 
-    digitalcard* findCardByChannelName(const QString &name) const;
+private:
+    void addCardsFromList();
 
-    void addCardsFromList(const QList<QString> &channelNames);
 private:
     Ui::Mainwindow *ui;
     QStandardItemModel *m_model;
-    QList<digitalcard*> m_cards;
-    QMap<quint8,QString> m_channel;
+
+    QMap<quint8,QString> m_chSoftver;
+    QMap<quint8,QString> m_chHardver;
+    QMap<quint8,digitalcard*> m_numbercards;
 };
 
 #endif // MAINWINDOW_H

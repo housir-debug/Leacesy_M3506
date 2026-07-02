@@ -3,7 +3,6 @@
 #include <QFile>
 
 Q_LOGGING_CATEGORY(config, "CONFIG:")
-QSettings* ConfigManager::s_settings = nullptr;
 
 std::vector<UartConfig> configs = {
     //{"/dev/ttyS3",    QSerialPort::Baud38400, 0x01}, // debug-Uart
@@ -40,7 +39,7 @@ std::vector<UartConfig> configs = {
     {"/dev/ttyWCH25", QSerialPort::Baud38400, 0x1f},
     {"/dev/ttyWCH26", QSerialPort::Baud38400, 0x20},
     {"/dev/ttyWCH27", QSerialPort::Baud38400, 0x21},   // 33*/
-    {"/dev/ttyS5",    QSerialPort::Baud38400, 0x01},   // test
+    {"/dev/ttyS1",    QSerialPort::Baud38400, 0x01},   // test
 };
 
 // log config
@@ -48,14 +47,14 @@ bool ConfigManager::s_enablelogfile = false;
 QString ConfigManager::s_loglevel = "release";
 
 // channel switch
-bool ConfigManager::s_enableUartMess = true;
-bool ConfigManager::s_enableCanMess = true;
+bool ConfigManager::s_enableUartMess   = true;
+bool ConfigManager::s_enableCanMess    = true;
 // control switch
-bool ConfigManager::s_enableLANServer = true;
-bool ConfigManager::s_enableWEBServer = false;
-bool ConfigManager::s_enableCANServer = true;
+bool ConfigManager::s_enableLANServer  = true;
+bool ConfigManager::s_enableWEBServer  = false;
+bool ConfigManager::s_enableCANServer  = true;
 bool ConfigManager::s_enableUARTServer = true;
-bool ConfigManager::s_enableDisplay = true;
+bool ConfigManager::s_enableDisplay    = true;
 
 // global variable - Internal fixation
 QString ConfigManager::s_firmwareVersion = "1.0.0";
@@ -71,7 +70,9 @@ QString ConfigManager::s_model = "66004";
 QString ConfigManager::s_GPIBid = "0";
 QString ConfigManager::s_CANid = "0";
 
-//---------------------------------------------------------------------------------
+std::atomic<quint8> ConfigManager::s_remoteSt{0};
+
+QSettings* ConfigManager::s_settings = nullptr;
 
 bool ConfigManager::init(const QString &configDir)
 {

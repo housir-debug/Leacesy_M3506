@@ -65,14 +65,14 @@ bool UartServerManager::startServer(const QString &portName,qint32 baudRate)
 
 void UartServerManager::handleReadyRead()
 {
-    if (m_qmlbridge->m_remoteStatus.load()!=3 && m_qmlbridge->m_remoteStatus.load()!=0){
+    if (ConfigManager::s_remoteSt.load()!=3 && ConfigManager::s_remoteSt.load()!=0){
         QByteArray errMsg = QString("Other interfaces of the instrument are currently in operation").toUtf8();
         qCDebug(uart_server)<<"[handleReadyRead]:Currently in an alternative remote mode";
         m_uartServer->write(errMsg);
         return;
     }
-    else if (m_qmlbridge->m_remoteStatus.load()==0){
-        m_qmlbridge->update_remotemodel(3);
+    else if (ConfigManager::s_remoteSt.load()==0){
+        ConfigManager::s_remoteSt.store(3);
     }
 
     // read information

@@ -1,6 +1,5 @@
 #pragma once
 #include "auxiliary/scpi_handle.h"
-#include "auxiliary/qml_agency.h"
 #include "auxiliary/battery_model.h"
 #include <QWebSocketServer>
 #include <QLoggingCategory>
@@ -17,8 +16,6 @@ public:
     ~WebServerManager();
 
     bool startServer();
-
-    std::shared_ptr<GuiBridge> m_qmlbridge;
     std::shared_ptr<ScpiManager> m_scpiManager;
     std::shared_ptr<BatteryModelManager> m_BatteryManager;
 

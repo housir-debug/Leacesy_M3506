@@ -185,7 +185,7 @@ void WebServerManager::setupRoutes()
 
     m_apiRoutes["/api/channels"] = [this](QTcpSocket* client) {
         QJsonObject response;
-        response["channels"] = m_qmlbridge->getAllChannelsData();
+        //response["channels"] = m_qmlbridge->getAllChannelsData();
 
         QByteArray jsonData = QJsonDocument(response).toJson();
         sendHttpResponse(client, jsonData, "application/json");
@@ -212,10 +212,10 @@ void WebServerManager::setupRoutes()
         }
     };
 
-    m_webRoutes["channels_update"] = [this](QWebSocket* socket, const QJsonObject&) {
+    m_webRoutes["channels_update"] = [](QWebSocket* socket, const QJsonObject&) { // - this
         QJsonObject channelData;
         channelData["type"] = "channels_response";
-        channelData["channels"] = m_qmlbridge->getAllChannelsData();
+        //channelData["channels"] = m_qmlbridge->getAllChannelsData();
         socket->sendTextMessage(QJsonDocument(channelData).toJson());
     };
 
@@ -226,7 +226,7 @@ void WebServerManager::setupRoutes()
 
         QJsonObject response;
         if (addModelFromNetwork(modelName,modelData)) {
-            m_qmlbridge->load_BatteryModel();
+            //m_qmlbridge->load_BatteryModel();
             response = getModelsInfo();
             response["type"] = "model_sync";
             socket->sendTextMessage(QJsonDocument(response).toJson());
@@ -242,7 +242,7 @@ void WebServerManager::setupRoutes()
         QString modelName = obj["name"].toString();
 
         if (m_BatteryManager->removeModel(modelName)) {
-            m_qmlbridge->load_BatteryModel();
+            //m_qmlbridge->load_BatteryModel();
             response = getModelsInfo();
             response["type"] = "model_sync";
             socket->sendTextMessage(QJsonDocument(response).toJson());
@@ -340,11 +340,11 @@ void WebServerManager::onWsTextMessageReceived(QWebSocket *socket,const QString 
         QJsonObject obj = doc.object();
         QString type = obj["type"].toString();
         if (m_webRoutes.contains(type)) {
-            if (m_qmlbridge->m_remoteStatus.load()==4){
+            if (ConfigManager::s_remoteSt.load()==4){
                 m_webRoutes[type](socket,obj);
             }
-            else if (m_qmlbridge->m_remoteStatus.load()==0){
-                m_qmlbridge->update_remotemodel(4);
+            else if (ConfigManager::s_remoteSt.load()==0){
+                ConfigManager::s_remoteSt.store(4);
                 m_webRoutes[type](socket,obj);
             }
             else{

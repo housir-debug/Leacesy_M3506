@@ -6,12 +6,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsProxyWidget>
 #include "auxiliary/simple_logger.h"
-#include "auxiliary/config_manager.h"
-#include "auxiliary/battery_model.h"
-#include "auxiliary/scpi_handle.h"
-#include "auxiliary/qml_agency.h"
 #include "channel/uart_channel.h"
-//#include "channel/can_channel.h"
 #include "control/tcp_server.h"
 #include "control/web_server.h"
 #include "control/can_server.h"
@@ -28,9 +23,9 @@ std::vector<CanSign_toUartCh> can_signal = {
     #undef CHANNEL
 };
 
-using QmlSign_toUartCh = void (GuiBridge::*)(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
-std::vector<QmlSign_toUartCh> qml_signal = {
-    #define CHANNEL(n) static_cast<QmlSign_toUartCh>(&GuiBridge::to_UartChannel##n),
+using QWidgetSign_toUartCh = void (Mainwindow::*)(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
+std::vector<QWidgetSign_toUartCh> qml_signal = {
+    #define CHANNEL(n) static_cast<QWidgetSign_toUartCh>(&Mainwindow::to_UartChannel##n),
     CHANNEL_COUNT
     #undef CHANNEL
 };
@@ -46,7 +41,7 @@ std::vector<ScpiSign_toUartCh> scpi_signal = {
 int main(int argc, char *argv[])
 {
     // create APP
-    //QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);  // 自动伸缩 - 会变形
+    //QApplication::setAttribute(Qt::AA_EnableHighDpiScaling); // 自动伸缩控件 - 会变形
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);  // 设置图片采用高分辨率
     QApplication::setApplicationName("Leacesy_Ryan");
     QApplication app(argc, argv);
@@ -71,8 +66,6 @@ int main(int argc, char *argv[])
 
     // screen GUI engine and gui-bridge create
     std::shared_ptr<BatteryModelManager> BatteryModel_share = std::make_shared<BatteryModelManager>(parentPath);
-    std::shared_ptr<GuiBridge> GuiBridge_share = std::make_shared<GuiBridge>();
-    GuiBridge_share->m_modelManager = BatteryModel_share;
 
     /*QGraphicsScene scene;
     QGraphicsView view(&scene);
@@ -83,9 +76,10 @@ int main(int argc, char *argv[])
     //std::unique_ptr<test> testview(new test);
     //testview->show();
     std::unique_ptr<Mainwindow> mainwindow;
+    std::shared_ptr<Mainwindow> GuiBridge_share;
     if (ConfigManager::s_enableDisplay){
-        mainwindow = std::make_unique<Mainwindow>();
-        mainwindow->show();
+        GuiBridge_share= std::make_unique<Mainwindow>();
+        GuiBridge_share->show();
 
         //QGraphicsProxyWidget *proxy = scene.addWidget(mainwindow.get());
         //proxy->setRotation(0);  // rotatee 90
@@ -99,13 +93,12 @@ int main(int argc, char *argv[])
     std::unique_ptr<CanServerManager> canServer;
     if (ConfigManager::s_enableCANServer){
         canServer = std::make_unique<CanServerManager>();
-        canServer->m_qmlbridge = GuiBridge_share;
         if (!canServer->startServer()) {
             qCWarning(application) << "canServer not Normal start!";
             return 1;
         }
 
-        QObject::connect(GuiBridge_share.get(),&GuiBridge::to_CANid,canServer.get(),&CanServerManager::change_canid,Qt::QueuedConnection);
+        QObject::connect(GuiBridge_share.get(),&Mainwindow::to_CANid,canServer.get(),&CanServerManager::change_canid,Qt::QueuedConnection);
     }
 
     // can channel create
@@ -118,7 +111,6 @@ int main(int argc, char *argv[])
         // config form config_manager
         for (const auto& config : configs) {
             auto channel = std::make_unique<UartChannelManager>();
-            channel->m_qmlbridge = GuiBridge_share;
             channel->m_scpiManager = Scpi_share;
 
             if (!channel->initSerialPort(config.port, config.baudRate)) {
@@ -126,13 +118,13 @@ int main(int argc, char *argv[])
                 return 1;
             }
 
-            QObject::connect(GuiBridge_share.get(),qml_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
+            //QObject::connect(GuiBridge_share.get(),qml_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
             QObject::connect(Scpi_share.get(),scpi_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
 
-            if (ConfigManager::s_enableCANServer){
+            /*if (ConfigManager::s_enableCANServer){
                 QObject::connect(canServer.get(),can_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
                 QObject::connect(channel.get(),&UartChannelManager::to_CanServer,canServer.get(),&CanServerManager::sendFrame,Qt::QueuedConnection);
-            }
+            }*/
 
             Channel_list.push_back(std::move(channel)); // move set <channel> can move
         }
@@ -143,7 +135,6 @@ int main(int argc, char *argv[])
     if (ConfigManager::s_enableWEBServer){
         webServer = std::make_unique<WebServerManager>();
         webServer->m_BatteryManager = BatteryModel_share;
-        webServer->m_qmlbridge = GuiBridge_share;
         webServer->m_scpiManager = Scpi_share;
         if (!webServer->startServer()) {
             qCWarning(application) << "WebServerManager not Normal start!";
@@ -154,7 +145,6 @@ int main(int argc, char *argv[])
     std::unique_ptr<TcpServerManager> vxiServer;
     if (ConfigManager::s_enableLANServer){
         vxiServer = std::make_unique<TcpServerManager>();
-        vxiServer->m_qmlbridge = GuiBridge_share;
         vxiServer->m_scpiManager = Scpi_share;
         if (!vxiServer->startServer()) {
             qCWarning(application) << "TcpServer not Normal start!";
@@ -166,7 +156,6 @@ int main(int argc, char *argv[])
     std::unique_ptr<UartServerManager> uartServer;
     if (ConfigManager::s_enableUARTServer){
         uartServer = std::make_unique<UartServerManager>();
-        uartServer->m_qmlbridge = GuiBridge_share;
         uartServer->m_scpiManager = Scpi_share;
         if (!uartServer->startServer("/dev/ttyWCH27",QSerialPort::Baud38400)) {
             qCWarning(application) << "UartServer not Normal start!";

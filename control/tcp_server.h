@@ -2,7 +2,6 @@
 #include <QTcpServer>
 #include <QDataStream>
 #include "auxiliary/scpi_handle.h"
-#include "auxiliary/qml_agency.h"
 
 Q_DECLARE_LOGGING_CATEGORY(tcp)
 
@@ -23,8 +22,6 @@ public:
     ~TcpServerManager();
 
     bool startServer();
-
-    std::shared_ptr<GuiBridge> m_qmlbridge{nullptr};
     std::shared_ptr<ScpiManager> m_scpiManager{nullptr};
 
 private:

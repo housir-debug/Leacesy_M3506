@@ -5,7 +5,6 @@
 #include <QLoggingCategory>
 #include "auxiliary/config_manager.h"
 #include "auxiliary/scpi_handle.h"
-#include "auxiliary/qml_agency.h"
 
 Q_DECLARE_LOGGING_CATEGORY(uart_channel)
 
@@ -22,6 +21,24 @@ class UartChannelManager : public QObject
 signals:
     void to_CanServer(quint8 ch,quint16 uart,const QByteArray &param);
 
+    void CH_svChanged(int ch,const QString &ver);
+    void CH_hvChanged(int ch,const QString &ver);
+
+    void CH_VoltageChanged(int ch,float voltage);
+    void CH_CurrentAndUnitChanged(int ch,float current);
+    void CH_StatusChanged(int ch,quint16 status);
+
+    void CH_cvChanged(int ch,float cv);
+    void CH_ccChanged(int ch,float cc);
+    void CH_ovpChanged(int ch,float ovp);
+    void CH_isOutputChanged(int ch,bool status);
+    void CH_impChanged(int ch,float imp);
+
+    /*
+    void CH_CurrentSOCChanged();
+    void CH_CapacityAHChanged();
+    void CH_BatteryModelChanged();*/
+
 public:
     explicit UartChannelManager(QObject *parent = nullptr);
     ~UartChannelManager();
@@ -30,7 +47,6 @@ public:
     bool initSerialPort(const QString &portName,qint32 baudRate);
 
     std::shared_ptr<ScpiManager> m_scpiManager{nullptr};
-    std::shared_ptr<GuiBridge> m_qmlbridge{nullptr};
 
 private:
     void handleReadyRead();
