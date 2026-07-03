@@ -1,14 +1,13 @@
-#include "digitalcard.h"
-#include "ui_digitalcard.h"
+#include "batterycard.h"
+#include "ui_batterycard.h"
 #include <QMouseEvent>
 #include <QTimer>
 #include <QStyle>
 #include <QtDebug>
 
-
-digitalcard::digitalcard(QWidget *parent) :
+batterycard::batterycard(QWidget *parent) :
     QFrame(parent),
-    ui(new Ui::digitalcard) // objectname
+    ui(new Ui::batterycard)
 {
     ui->setupUi(this);
 
@@ -24,14 +23,14 @@ digitalcard::digitalcard(QWidget *parent) :
     });
 }
 
-digitalcard::~digitalcard()
+batterycard::~batterycard()
 {
     delete ui;
 }
 
 // mouse event procressing
 
-void digitalcard::mousePressEvent(QMouseEvent *event)
+void batterycard::mousePressEvent(QMouseEvent *event)
 {
     m_isPressed = true;
     m_pressPos = event->pos();
@@ -44,7 +43,7 @@ void digitalcard::mousePressEvent(QMouseEvent *event)
     QWidget::mousePressEvent(event);
 }
 
-void digitalcard::mouseReleaseEvent(QMouseEvent *event)
+void batterycard::mouseReleaseEvent(QMouseEvent *event)
 {
     if (m_isPressed){
         m_longPressTimer->stop();
@@ -66,7 +65,7 @@ void digitalcard::mouseReleaseEvent(QMouseEvent *event)
     QWidget::mouseReleaseEvent(event);
 }
 
-void digitalcard::mouseMoveEvent(QMouseEvent *event)
+void batterycard::mouseMoveEvent(QMouseEvent *event)
 {
     if (m_isPressed) {
         QPoint delta = event->pos() - m_pressPos;
@@ -82,7 +81,7 @@ void digitalcard::mouseMoveEvent(QMouseEvent *event)
 
 // property setting API
 
-void digitalcard::setChannelState(bool state)
+void batterycard::setChannelState(bool state)
 {
     setProperty("outputed",state);
     style()->unpolish(this);
@@ -90,60 +89,35 @@ void digitalcard::setChannelState(bool state)
     update();
 }
 
-void digitalcard::setChannelName(const QString &name)
+void batterycard::setChannelName(const QString &name)
 {
     ui->channellabel->setText(name);
 }
 
-void digitalcard::setVoltage(float value)
+void batterycard::setSocValue(quint8 value)
 {
-    QString text = QString::number(value, 'f', 4);
-    ui->voltagelabel->setText(text);
+    ui->socprogressBar->setValue(value);
 }
 
-void digitalcard::setCurrent(float value)
+void batterycard::setVocValue(float value)
 {
-    QString text = QString::number(value, 'f', 4);
-    ui->currentlabel->setText(text);
+    QString text = QString::number(value, 'f', 4) + " V";
+    ui->ocvvaluelabel->setText(text);
 }
 
-void digitalcard::setCurrentUnit(const QString &unit)
+void batterycard::setCapValue(float value)
 {
-    QFont font = ui->currentunitlabel->font(); // get source all property
-    font.setPixelSize(unit.size()==1 ? 36 : 18);
-    ui->currentunitlabel->setFont(font);
-    ui->currentunitlabel->setText(unit);
+    QString text = QString::number(value, 'f', 4) + " Ah";
+    ui->capvaluelabel->setText(text);
 }
 
-void digitalcard::setCVChecked(bool checked)
+void batterycard::setEsrValue(float value)
 {
-    ui->cvcheckbox->setChecked(checked);
+    QString text = QString::number(value, 'f', 4) + " Ω";
+    ui->capvaluelabel->setText(text);
 }
 
-void digitalcard::setCvValue(float value)
+void batterycard::setModelValue(const QString &model)
 {
-    QString text = QString::number(value, 'f', 3) + " V";
-    ui->cvvaluelabel->setText(text);
-}
-
-void digitalcard::setCCChecked(bool checked)
-{
-    ui->cccheckbox->setChecked(checked);
-}
-
-void digitalcard::setCcValue(float value)
-{
-    QString text = QString::number(value, 'f', 3) + " A";
-    ui->ccvaluelabel->setText(text);
-}
-
-void digitalcard::setOVPChecked(bool checked)
-{
-    ui->ovpcheckbox->setChecked(checked);
-}
-
-void digitalcard::setOvpValue(float value)
-{
-    QString text = QString::number(value, 'f', 3) + " V";
-    ui->ovpvaluelabel->setText(text);
+    ui->modelnamelabel->setText(model);
 }

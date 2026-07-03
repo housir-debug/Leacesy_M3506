@@ -119,7 +119,7 @@ void UartChannelManager::sendInitCommand()
     }
 
     if(ConfigManager::s_enableDisplay || ConfigManager::s_enableWEBServer){
-        //m_refreshtimer->start();
+        m_refreshtimer->start();
     }
 }
 

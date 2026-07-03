@@ -41,8 +41,8 @@ std::vector<ScpiSign_toUartCh> scpi_signal = {
 int main(int argc, char *argv[])
 {
     // create APP
-    //QApplication::setAttribute(Qt::AA_EnableHighDpiScaling); // 自动伸缩控件 - 会变形
-    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);  // 设置图片采用高分辨率
+    //QApplication::setAttribute(Qt::AA_EnableHighDpiScaling); // Warning: It will deform.
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     QApplication::setApplicationName("Leacesy_Ryan");
     QApplication app(argc, argv);
 
@@ -67,26 +67,18 @@ int main(int argc, char *argv[])
     // screen GUI engine and gui-bridge create
     std::shared_ptr<BatteryModelManager> BatteryModel_share = std::make_shared<BatteryModelManager>(parentPath);
 
-    /*QGraphicsScene scene;
-    QGraphicsView view(&scene);
-    view.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    view.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    view.setFrameShape(QFrame::NoFrame);*/
+    std::unique_ptr<test> testview(new test);
+    testview->show();
 
-    //std::unique_ptr<test> testview(new test);
-    //testview->show();
+    //QGraphicsScene scene;QGraphicsView view(&scene);
     std::unique_ptr<Mainwindow> mainwindow;
-    std::shared_ptr<Mainwindow> GuiBridge_share;
     if (ConfigManager::s_enableDisplay){
-        GuiBridge_share= std::make_unique<Mainwindow>();
-        GuiBridge_share->show();
+        //mainwindow= std::make_unique<Mainwindow>();
+        //mainwindow->show();
 
-        //QGraphicsProxyWidget *proxy = scene.addWidget(mainwindow.get());
-        //proxy->setRotation(0);  // rotatee 90
-        //view.setFixedSize(1280, 800);  // 物理竖屏尺寸
-        //view.show();
-
-        //GuiBridge_share->load_BatteryModel();
+        /*QGraphicsProxyWidget *proxy = scene.addWidget(mainwindow.get());
+        proxy->setRotation(0);  // rotatee 90
+        view.show();*/
     }
 
     // CAN Server create
@@ -98,7 +90,7 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        QObject::connect(GuiBridge_share.get(),&Mainwindow::to_CANid,canServer.get(),&CanServerManager::change_canid,Qt::QueuedConnection);
+        //QObject::connect(GuiBridge_share.get(),&Mainwindow::to_CANid,canServer.get(),&CanServerManager::change_canid,Qt::QueuedConnection);
     }
 
     // can channel create
@@ -118,13 +110,26 @@ int main(int argc, char *argv[])
                 return 1;
             }
 
-            //QObject::connect(GuiBridge_share.get(),qml_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
+            /* screen view slot function */
+            QObject::connect(mainwindow.get(),qml_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
+            QObject::connect(channel.get(),&UartChannelManager::CH_svChanged,mainwindow.get(),&Mainwindow::update_SoftVer,Qt::QueuedConnection);
+            QObject::connect(channel.get(),&UartChannelManager::CH_hvChanged,mainwindow.get(),&Mainwindow::update_HardVer,Qt::QueuedConnection);
+            QObject::connect(channel.get(),&UartChannelManager::CH_VoltageChanged,mainwindow.get(),&Mainwindow::update_Voltage,Qt::QueuedConnection);
+            QObject::connect(channel.get(),&UartChannelManager::CH_CurrentAndUnitChanged,mainwindow.get(),&Mainwindow::update_CurrentAndUnit,Qt::QueuedConnection);
+            QObject::connect(channel.get(),&UartChannelManager::CH_StatusChanged,mainwindow.get(),&Mainwindow::update_Status,Qt::QueuedConnection);
+            QObject::connect(channel.get(),&UartChannelManager::CH_cvChanged,mainwindow.get(),&Mainwindow::update_Cv,Qt::QueuedConnection);
+            QObject::connect(channel.get(),&UartChannelManager::CH_ccChanged,mainwindow.get(),&Mainwindow::update_Cc,Qt::QueuedConnection);
+            QObject::connect(channel.get(),&UartChannelManager::CH_ovpChanged,mainwindow.get(),&Mainwindow::update_Ovp,Qt::QueuedConnection);
+            QObject::connect(channel.get(),&UartChannelManager::CH_isOutputChanged,mainwindow.get(),&Mainwindow::update_IsOutput,Qt::QueuedConnection);
+            QObject::connect(channel.get(),&UartChannelManager::CH_impChanged,mainwindow.get(),&Mainwindow::update_Imp,Qt::QueuedConnection);
+
+            /* remote api slot function */
             QObject::connect(Scpi_share.get(),scpi_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
 
-            /*if (ConfigManager::s_enableCANServer){
+            if (ConfigManager::s_enableCANServer){
                 QObject::connect(canServer.get(),can_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
                 QObject::connect(channel.get(),&UartChannelManager::to_CanServer,canServer.get(),&CanServerManager::sendFrame,Qt::QueuedConnection);
-            }*/
+            }
 
             Channel_list.push_back(std::move(channel)); // move set <channel> can move
         }

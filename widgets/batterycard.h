@@ -1,34 +1,30 @@
 #pragma once
+
 #include <QFrame>
 
 namespace Ui {
-    class digitalcard; // = UI_digitalcard instead
+    class batterycard; // = UI_digitalcard instead
 }
 
-class digitalcard : public QFrame
+class batterycard : public QFrame
 {
     Q_OBJECT
 
 public:
-    explicit digitalcard(QWidget *parent = nullptr);
-    ~digitalcard();
+    explicit batterycard(QWidget *parent = nullptr);
+    ~batterycard();
 
     void setChannelState(bool state);
     void setChannelName(const QString &name);
 
-    void setVoltage(float value);
-    void setCurrent(float value);
-    void setCurrentUnit(const QString &unit);
-
-    void setCVChecked(bool checked);
-    void setCvValue(float value);
-    void setCCChecked(bool checked);
-    void setCcValue(float value);
-    void setOVPChecked(bool checked);
-    void setOvpValue(float value);
+    void setSocValue(quint8 value);
+    void setVocValue(float value);
+    void setCapValue(float value);
+    void setEsrValue(float value);
+    void setModelValue(const QString &model);
 
 private:
-    Ui::digitalcard *ui;
+    Ui::batterycard *ui;
 
     bool m_isPressed;
     QPoint m_pressPos;
@@ -47,4 +43,3 @@ protected:
     // void enterEvent(QEvent *event) override;
     // void leaveEvent(QEvent *event) override;
 };
-

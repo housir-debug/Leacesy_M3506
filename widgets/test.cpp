@@ -1,6 +1,7 @@
 #include "test.h"
 #include "ui_test.h"
 #include "digitalcard.h"
+#include "batterycard.h"
 #include <QDebug>
 
 test::test(QWidget *parent) :
@@ -9,9 +10,11 @@ test::test(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    digitalcard *card = new digitalcard(this);
+    /*digitalcard *card = new digitalcard(this);
+    card->setContentsMargins(0, 0, 0, 0);*/
+
+    batterycard *card = new batterycard(this);
     card->setContentsMargins(0, 0, 0, 0);
-    card->setChannelName("CH-1");
 
     qDebug() << "objectName:" << card->objectName();
 }

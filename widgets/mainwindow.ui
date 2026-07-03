@@ -221,7 +221,7 @@ border: none;
         <enum>QAbstractItemView::NoDragDrop</enum>
        </property>
        <property name="defaultDropAction">
-        <enum>Qt::IgnoreAction</enum>
+        <enum>Qt::CopyAction</enum>
        </property>
        <property name="selectionMode">
         <enum>QAbstractItemView::NoSelection</enum>
@@ -235,14 +235,20 @@ border: none;
        <property name="horizontalScrollMode">
         <enum>QAbstractItemView::ScrollPerPixel</enum>
        </property>
+       <property name="movement">
+        <enum>QListView::Static</enum>
+       </property>
        <property name="flow">
         <enum>QListView::LeftToRight</enum>
        </property>
+       <property name="isWrapping" stdset="0">
+        <bool>true</bool>
+       </property>
        <property name="resizeMode">
-        <enum>QListView::Adjust</enum>
+        <enum>QListView::Fixed</enum>
        </property>
        <property name="spacing">
-        <number>5</number>
+        <number>6</number>
        </property>
        <property name="gridSize">
         <size>
@@ -250,11 +256,17 @@ border: none;
          <height>-1</height>
         </size>
        </property>
+       <property name="viewMode">
+        <enum>QListView::IconMode</enum>
+       </property>
        <property name="uniformItemSizes">
         <bool>true</bool>
        </property>
+       <property name="selectionRectVisible">
+        <bool>false</bool>
+       </property>
        <property name="itemAlignment">
-        <set>Qt::AlignVCenter</set>
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </widget>

@@ -3,6 +3,8 @@
 #include <QScroller>
 #include <QTimer>
 
+Q_LOGGING_CATEGORY(widget, "WIDGET:")
+
 /*m_SoftVer = ConfigManager::s_firmwareVersion;
 m_HardVer = ConfigManager::s_hardwareVersion;
 
@@ -26,17 +28,28 @@ Mainwindow::Mainwindow(QWidget *parent) :
 
     QScrollerProperties properties;
     // Maximum speed,default 0.5,more small [stop]distance more near
-    properties.setScrollMetric(QScrollerProperties::MaximumVelocity, 0.18);
+    properties.setScrollMetric(QScrollerProperties::MaximumVelocity, 0.81);
     // Sliding start distance,default 0.1,more small [react]more faster
     properties.setScrollMetric(QScrollerProperties::DragStartDistance, 0.0036);
     // Deceleration rate,default 0.15,more small [stop]more slowly
-    properties.setScrollMetric(QScrollerProperties::DecelerationFactor, 0.18);
+    properties.setScrollMetric(QScrollerProperties::DecelerationFactor, 0.81);
     // Speed following,default 0.6,more small [react]more faster
-    properties.setScrollMetric(QScrollerProperties::DragVelocitySmoothingFactor, 0.18);
+    properties.setScrollMetric(QScrollerProperties::DragVelocitySmoothingFactor, 0.81);
 
     scroller->setScrollerProperties(properties);
 
-    // addCardsFromList();
+    // test digital card view
+    /*for (int i = 1; i <= 36; ++i) {
+        digitalcard *card = new digitalcard(this);
+        card->setChannelName(QString("CH-%1").arg(i, 2, 10, QChar('0')));
+
+        QStandardItem *item = new QStandardItem();
+        item->setSizeHint(QSize(206, 310));
+        m_model->appendRow(item);
+
+        QModelIndex index = m_model->indexFromItem(item);
+        ui->digitallistview->setIndexWidget(index, card);
+    }*/
 }
 
 Mainwindow::~Mainwindow()
@@ -96,72 +109,60 @@ void Mainwindow::update_remotemodel(quint8 reface){
     }*/
 }
 
+void Mainwindow::to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param){
+    // All channel send
+    if (channel == 0) {
+        #define CHANNEL(n) emit to_UartChannel##n(cmd, func, param,false);
+        CHANNEL_COUNT
+        #undef CHANNEL
+        return;
+    }
+
+    // Single channel send
+    switch(channel) {
+        #define CHANNEL(n) case n: return emit to_UartChannel##n(cmd, func, param,false);
+        CHANNEL_COUNT
+        #undef CHANNEL
+        default:
+            return;
+    }
+}
+
 // auto add exist channel card
 
 void Mainwindow::update_SoftVer(int ch,const QString &ver){
-    switch(ch) {
-        #define CHANNEL(n) \
-            case n: \
-                m_chSoftver[n] = ver; \
-                return;
+    Q_UNUSED(ver);
+    if (!m_numbercards.contains(ch)) {
+        QString chName = "CH-" + QString::number(ch);
 
-        CHANNEL_COUNT
-        #undef CHANNEL
-        default: return;
+        digitalcard *card = new digitalcard(this);
+        card->setChannelName(chName);
+        m_numbercards[ch] = card;
+
+        QStandardItem *item = new QStandardItem();
+        item->setSizeHint(QSize(206, 310));
+        m_model->appendRow(item);
+
+        QModelIndex index = m_model->indexFromItem(item);
+        ui->digitallistview->setIndexWidget(index, card);
+
+        QObject::connect(card, &digitalcard::clicked, this, [this, ch](bool switchs) {
+            quint8 func = switchs ? 0x01 : 0x00;
+            to_Channel(ch, 0x01, func, "");
+        });
+        //QObject::connect(card,&digitalcard::longPressed,this,[this,channel]{});
     }
 }
 
 void Mainwindow::update_HardVer(int ch,const QString &ver){
-    switch(ch) {
-        #define CHANNEL(n) \
-            case n: \
-                m_chHardver[n] = ver; \
-                return;
-
-        CHANNEL_COUNT
-        #undef CHANNEL
-        default: return;
-    }
-}
-
-void Mainwindow::addCardsFromList()
-{
-    for (auto it = m_chSoftver.cbegin(); it != m_chSoftver.cend(); ++it) {
-        QString ch = "CH-" + QString::number(it.key());
-
-        digitalcard *card = new digitalcard(this);
-        card->setChannelName(ch);
-        m_numbercards[it.key()] = card;
-
-        QStandardItem *item = new QStandardItem();
-        item->setSizeHint(QSize(200, 310));
-        m_model->appendRow(item);
-
-        QModelIndex index = m_model->indexFromItem(item);
-        ui->digitallistview->setIndexWidget(index, card);
-    }
-
-    // test digital card view
-    /*for (int i = 1; i <= 16; ++i) {
-        digitalcard *card = new digitalcard(this);
-        card->setChannelName(QString("CH-%1").arg(i, 2, 10, QChar('0')));
-
-        QStandardItem *item = new QStandardItem();
-        item->setSizeHint(QSize(200, 310));
-        m_model->appendRow(item);
-
-        QModelIndex index = m_model->indexFromItem(item);
-        ui->digitallistview->setIndexWidget(index, card);
-    }*/
+    Q_UNUSED(ch);Q_UNUSED(ver);
 }
 
 // update digital card information
 
 void Mainwindow::update_Voltage(int ch,float voltage){
-    for (auto it = m_numbercards.cbegin(); it != m_numbercards.cend(); ++it) {
-        if (it.key() == ch){
-            it.value()->setVoltage(voltage);
-        }
+    if (m_numbercards.contains(ch)) {
+        m_numbercards[ch]->setVoltage(voltage);
     }
 
     /*switch(ch) {
@@ -193,12 +194,10 @@ void Mainwindow::update_Voltage(int ch,float voltage){
 }
 
 void Mainwindow::update_CurrentAndUnit(int ch,float current){
-    for (auto it = m_numbercards.cbegin(); it != m_numbercards.cend(); ++it) {
-        if (it.key() == ch){
-            QString newUnit = (qAbs(current) < 1e-4) ? "mA" : "A";
-            it.value()->setCurrentUnit(newUnit);
-            it.value()->setCurrent(current);
-        }
+    if (m_numbercards.contains(ch)) {
+        QString newUnit = (qAbs(current) < 1e-4) ? "mA" : "A";
+        m_numbercards[ch]->setCurrentUnit(newUnit);
+        m_numbercards[ch]->setCurrent(current);
     }
 
     /*switch(ch) {
@@ -241,49 +240,39 @@ void Mainwindow::update_CurrentAndUnit(int ch,float current){
 }
 
 void Mainwindow::update_Status(int ch,quint16 status){
-    for (auto it = m_numbercards.cbegin(); it != m_numbercards.cend(); ++it) {
-        if (it.key() == ch){
-            QString binaryStr = QString("%1").arg(status, 16, 2, QLatin1Char('0'));
+    if (m_numbercards.contains(ch)) {
+        QString binaryStr = QString("%1").arg(status, 16, 2, QLatin1Char('0'));
 
-            bool cv  = binaryStr.at(14) == "1";
-            it.value()->setCVChecked(cv);
-            bool cc  = binaryStr.at(13) == "1";
-            it.value()->setCCChecked(cc);
-            bool ovp = binaryStr.at(11) == "1";
-            it.value()->setOVPChecked(ovp);
-        }
+        bool cv  = binaryStr.at(14) == "1";
+        m_numbercards[ch]->setCVChecked(cv);
+        bool cc  = binaryStr.at(13) == "1";
+        m_numbercards[ch]->setCCChecked(cc);
+        bool ovp = binaryStr.at(11) == "1";
+        m_numbercards[ch]->setOVPChecked(ovp);
     }
 }
 
 void Mainwindow::update_Cv(int ch,float cv){
-    for (auto it = m_numbercards.cbegin(); it != m_numbercards.cend(); ++it) {
-        if (it.key() == ch){
-            it.value()->setCvValue(cv);
-        }
+    if (m_numbercards.contains(ch)) {
+        m_numbercards[ch]->setCvValue(cv);
     }
 }
 
 void Mainwindow::update_Cc(int ch,float cc){
-    for (auto it = m_numbercards.cbegin(); it != m_numbercards.cend(); ++it) {
-        if (it.key() == ch){
-            it.value()->setCcValue(cc);
-        }
+    if (m_numbercards.contains(ch)) {
+        m_numbercards[ch]->setCcValue(cc);
     }
 }
 
 void Mainwindow::update_Ovp(int ch,float ovp){
-    for (auto it = m_numbercards.cbegin(); it != m_numbercards.cend(); ++it) {
-        if (it.key() == ch){
-            it.value()->setOvpValue(ovp);
-        }
+    if (m_numbercards.contains(ch)) {
+        m_numbercards[ch]->setOvpValue(ovp);
     }
 }
 
 void Mainwindow::update_IsOutput(int ch,bool status){
-    for (auto it = m_numbercards.cbegin(); it != m_numbercards.cend(); ++it) {
-        if (it.key() == ch){
-            it.value()->setChannelState(status);
-        }
+    if (m_numbercards.contains(ch)) {
+        m_numbercards[ch]->setChannelState(status);
     }
 }
 
@@ -299,6 +288,7 @@ void Mainwindow::update_Imp(int ch,float imp){
 }
 
 // other
+
 
 /*QJsonArray Mainwindow::getAllChannelsData() {
     QJsonArray channels;
@@ -361,11 +351,6 @@ QString Mainwindow::setChannel_CurrentUnit(int channel){
     to_Channel(channel,0x04, 0x0E, Unit_buffer);
 
     return unit;
-}
-
-void Mainwindow::setChannel_Output(int channel,bool switchs){
-    quint8 func = switchs ? 0x01 : 0x00;
-    return to_Channel(channel,0x01, func, "");
 }
 
 void Mainwindow::setChannel_Setstatus(int channel,int model,const QString& val){
@@ -460,21 +445,4 @@ QString Mainwindow::setChannel_BatteryModel(int channel){
     }*/
 }
 
-void Mainwindow::to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param){
-    // All channel send
-    if (channel == 0) {
-        #define CHANNEL(n) emit to_UartChannel##n(cmd, func, param,false);
-        CHANNEL_COUNT
-        #undef CHANNEL
-        return;
-    }
 
-    // Single channel send
-    switch(channel) {
-        #define CHANNEL(n) case n: return emit to_UartChannel##n(cmd, func, param,false);
-        CHANNEL_COUNT
-        #undef CHANNEL
-        default:
-            return;
-    }
-}

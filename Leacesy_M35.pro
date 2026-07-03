@@ -25,6 +25,7 @@ HEADERS += \
     #windows/digitalcardwidget.h \
     #windows/digitalpage.h \
  \    #windows/mainwindow.h
+    widgets/batterycard.h \
     widgets/digitalcard.h \
     widgets/mainwindow.h \
     widgets/test.h
@@ -46,6 +47,7 @@ SOURCES += \
     #windows/digitalcardwidget.cpp \
     #windows/digitalpage.cpp \
  \    #windows/mainwindow.cpp
+    widgets/batterycard.cpp \
     widgets/digitalcard.cpp \
     widgets/mainwindow.cpp \
     widgets/test.cpp
@@ -68,6 +70,7 @@ auxiliary_files.path = /root/$${TARGET}/
 INSTALLS += auxiliary_files
 
 FORMS += \
+    widgets/batterycard.ui \
     widgets/digitalcard.ui \
     widgets/mainwindow.ui \
     widgets/test.ui
