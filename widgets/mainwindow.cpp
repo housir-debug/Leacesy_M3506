@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QScrollBar>
 #include <QScroller>
 #include <QTimer>
 
@@ -23,6 +24,7 @@ Mainwindow::Mainwindow(QWidget *parent) :
     ui->digitallistview->setModel(m_model);
 
     // listview width = screen width
+    /*
     QScroller::grabGesture(ui->digitallistview->viewport(), QScroller::LeftMouseButtonGesture);
     QScroller *scroller = QScroller::scroller(ui->digitallistview->viewport());
 
@@ -37,9 +39,10 @@ Mainwindow::Mainwindow(QWidget *parent) :
     properties.setScrollMetric(QScrollerProperties::DragVelocitySmoothingFactor, 0.81);
 
     scroller->setScrollerProperties(properties);
+    */
 
     // test digital card view
-    /*for (int i = 1; i <= 36; ++i) {
+    for (int i = 1; i <= 36; ++i) {
         digitalcard *card = new digitalcard(this);
         card->setChannelName(QString("CH-%1").arg(i, 2, 10, QChar('0')));
 
@@ -49,7 +52,22 @@ Mainwindow::Mainwindow(QWidget *parent) :
 
         QModelIndex index = m_model->indexFromItem(item);
         ui->digitallistview->setIndexWidget(index, card);
-    }*/
+    }
+}
+
+void Mainwindow::scrollToRow(int row)
+{
+    if (row >= 0 && row <= m_totalRows) {
+        m_currentRow = row;
+        int itemHeight = CARD_HEIGHT + ui->digitallistview->spacing();
+
+        int targetY = row * itemHeight;
+        ui->digitallistview->verticalScrollBar()->setValue(targetY);
+
+        ui->RowIndicator->setText(QString("%1/%2").arg(currentPage + 1).arg(totalPages));
+        ui->prevRowBtn->setEnabled(row > 0);
+        ui->nextRowBtn->setEnabled(row < m_totalRows - 1);
+    }
 }
 
 Mainwindow::~Mainwindow()
@@ -140,7 +158,7 @@ void Mainwindow::update_SoftVer(int ch,const QString &ver){
         m_numbercards[ch] = card;
 
         QStandardItem *item = new QStandardItem();
-        item->setSizeHint(QSize(206, 310));
+        item->setSizeHint(QSize(CARD_WIDTH, CARD_HEIGHT));
         m_model->appendRow(item);
 
         QModelIndex index = m_model->indexFromItem(item);

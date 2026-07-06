@@ -71,6 +71,14 @@ private:
     Ui::Mainwindow *ui;
     QStandardItemModel *m_model;
     QMap<quint8,digitalcard*> m_numbercards;
+
+    const int CARD_WIDTH = 206;
+    const int CARD_HEIGHT = 310;
+
+    int m_currentRow = 0;
+    int m_totalRows = 0;
+
+    void scrollToRow(int row);
 };
 
 #endif // MAINWINDOW_H

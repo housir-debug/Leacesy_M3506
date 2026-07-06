@@ -67,14 +67,14 @@ int main(int argc, char *argv[])
     // screen GUI engine and gui-bridge create
     std::shared_ptr<BatteryModelManager> BatteryModel_share = std::make_shared<BatteryModelManager>(parentPath);
 
-    std::unique_ptr<test> testview(new test);
-    testview->show();
+    //std::unique_ptr<test> testview(new test);
+    //testview->show();
 
     //QGraphicsScene scene;QGraphicsView view(&scene);
     std::unique_ptr<Mainwindow> mainwindow;
     if (ConfigManager::s_enableDisplay){
-        //mainwindow= std::make_unique<Mainwindow>();
-        //mainwindow->show();
+        mainwindow= std::make_unique<Mainwindow>();
+        mainwindow->show();
 
         /*QGraphicsProxyWidget *proxy = scene.addWidget(mainwindow.get());
         proxy->setRotation(0);  // rotatee 90

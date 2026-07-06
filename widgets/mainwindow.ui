@@ -65,7 +65,7 @@ border: none;
   <property name="locale">
    <locale language="Chinese" country="China"/>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,1">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -82,17 +82,10 @@ border: none;
     <number>0</number>
    </property>
    <item>
-    <widget class="QStackedWidget" name="topstackedwidget">
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>16777215</height>
-      </size>
-     </property>
+    <widget class="QFrame" name="frame">
      <property name="font">
       <font>
        <family>WenQuanYi Micro Hei</family>
-       <pointsize>18</pointsize>
       </font>
      </property>
      <property name="cursor">
@@ -100,12 +93,6 @@ border: none;
      </property>
      <property name="contextMenuPolicy">
       <enum>Qt::NoContextMenu</enum>
-     </property>
-     <property name="autoFillBackground">
-      <bool>false</bool>
-     </property>
-     <property name="styleSheet">
-      <string notr="true"/>
      </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
@@ -116,185 +103,1234 @@ border: none;
      <property name="lineWidth">
       <number>0</number>
      </property>
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
-     <widget class="QWidget" name="digitalpage">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0">
+      <property name="spacing">
+       <number>0</number>
       </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
+      <property name="leftMargin">
+       <number>0</number>
       </property>
-      <property name="font">
-       <font>
-        <family>WenQuanYi Micro Hei</family>
-        <pointsize>18</pointsize>
-       </font>
+      <property name="topMargin">
+       <number>0</number>
       </property>
-      <property name="cursor">
-       <cursorShape>BlankCursor</cursorShape>
+      <property name="rightMargin">
+       <number>0</number>
       </property>
-      <property name="contextMenuPolicy">
-       <enum>Qt::NoContextMenu</enum>
+      <property name="bottomMargin">
+       <number>0</number>
       </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">#digitalpage
+      <item>
+       <widget class="QStackedWidget" name="topstackedwidget">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>WenQuanYi Micro Hei</family>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#digitalsettingspushButton {
+    background-color: transparent;
+    border: none;
+}
+#digitalsettingspushButton:hover {
+    color: #FFFFFF;
+}</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <widget class="QWidget" name="digitalpage">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>18</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">#digitalpage
 {
 background-color: transparent;
 }</string>
-      </property>
-      <widget class="QListView" name="digitallistview">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>1280</width>
-         <height>400</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>WenQuanYi Micro Hei</family>
-         <pointsize>18</pointsize>
-        </font>
-       </property>
-       <property name="cursor" stdset="0">
-        <cursorShape>BlankCursor</cursorShape>
-       </property>
-       <property name="mouseTracking">
-        <bool>true</bool>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="contextMenuPolicy">
-        <enum>Qt::NoContextMenu</enum>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">#digitallistview
+         </property>
+         <widget class="QListView" name="digitallistview">
+          <property name="geometry">
+           <rect>
+            <x>-10</x>
+            <y>0</y>
+            <width>1280</width>
+            <height>320</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <family>WenQuanYi Micro Hei</family>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="cursor" stdset="0">
+           <cursorShape>BlankCursor</cursorShape>
+          </property>
+          <property name="mouseTracking">
+           <bool>true</bool>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">#digitallistview
+{
+background-color: transparent;
+border: none;
+}
+</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <property name="verticalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="autoScroll">
+           <bool>false</bool>
+          </property>
+          <property name="autoScrollMargin">
+           <number>18</number>
+          </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="showDropIndicator" stdset="0">
+           <bool>false</bool>
+          </property>
+          <property name="dragEnabled">
+           <bool>false</bool>
+          </property>
+          <property name="dragDropMode">
+           <enum>QAbstractItemView::NoDragDrop</enum>
+          </property>
+          <property name="defaultDropAction">
+           <enum>Qt::CopyAction</enum>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::NoSelection</enum>
+          </property>
+          <property name="textElideMode">
+           <enum>Qt::ElideLeft</enum>
+          </property>
+          <property name="verticalScrollMode">
+           <enum>QAbstractItemView::ScrollPerPixel</enum>
+          </property>
+          <property name="horizontalScrollMode">
+           <enum>QAbstractItemView::ScrollPerPixel</enum>
+          </property>
+          <property name="movement">
+           <enum>QListView::Static</enum>
+          </property>
+          <property name="flow">
+           <enum>QListView::LeftToRight</enum>
+          </property>
+          <property name="isWrapping" stdset="0">
+           <bool>true</bool>
+          </property>
+          <property name="resizeMode">
+           <enum>QListView::Fixed</enum>
+          </property>
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="gridSize">
+           <size>
+            <width>-1</width>
+            <height>-1</height>
+           </size>
+          </property>
+          <property name="viewMode">
+           <enum>QListView::IconMode</enum>
+          </property>
+          <property name="uniformItemSizes">
+           <bool>true</bool>
+          </property>
+          <property name="selectionRectVisible">
+           <bool>false</bool>
+          </property>
+          <property name="itemAlignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+         <widget class="QFrame" name="digitalbottomframe">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>320</y>
+            <width>1280</width>
+            <height>80</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <family>WenQuanYi Micro Hei</family>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>BlankCursor</cursorShape>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">#digitalbottomframe {
+    background-color: #101C30;
+    border-radius: 9px;
+    border: 1px solid rgba(74, 74, 90, 0.4);
+}
+QPushButton{
+    background-color: #1A2A45;
+    border: 1px solid rgba(74, 74, 90, 0.3);
+    border-radius: 9px;
+    font-family: &quot;WenQuanYi Micro Hei&quot;;
+	font-weight: bold;
+    font-size: 18px;
+	color: #C9C9C9;
+    padding: 12px 1px;
+}
+QPushButton:hover {
+    background-color: #243356;
+    border-color: rgba(100, 100, 130, 0.6);
+    color: #E0E0E0;
+}
+QPushButton:pressed {
+    background-color: #0D1525;
+    border-color: rgba(100, 100, 130, 0.8);
+    color: #FFFFFF;
+}</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout" stretch="3,3,5,1,2,1,5,3,3">
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>6</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QPushButton" name="digitalsettingspushButton">
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>Settings</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../qml.qrc">
+               <normaloff>:/web/web/icon/settings.png</normaloff>:/web/web/icon/settings.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="digitalmodepushButton">
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>battery</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../qml.qrc">
+               <normaloff>:/web/web/icon/battery.png</normaloff>:/web/web/icon/battery.png</iconset>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="digitalpushButton1">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::NoFocus</enum>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#digitalpushButton1
+{
+background-color: transparent;
+border:none;
+}
+#digitalpushButton1:hover {
+}
+#digitalpushButton1:pressed {
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="digitalrowsbackpushButton">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#digitalrowsbackpushButton {
+    background-color: transparent;
+    border: 1px solid rgba(74, 74, 90, 0.3);
+}
+#digitalrowsbackpushButton:disabled {
+    background-color: #151D2E;
+    color: #5A5A6E;
+}
+#digitalrowsbackpushButton:hover {
+    background-color: #1A2A45;
+    color: #FFFFFF;
+}
+#digitalrowsbackpushButton:pressed {
+    background-color: #0D1525;
+}</string>
+             </property>
+             <property name="text">
+              <string>&lt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="digitalrowslabelpushButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#digitalrowslabelpushButton
+{
+background-color: transparent;
+border:none;
+}
+#digitalrowslabelpushButton:hover {
+}
+#digitalrowslabelpushButton:pressed {
+}</string>
+             </property>
+             <property name="text">
+              <string>1 x 6</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="digitalrowsnextpushButton">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#digitalrowsnextpushButton {
+    background-color: transparent;
+    border: 1px solid rgba(74, 74, 90, 0.3);
+}
+#digitalrowsnextpushButton:disabled {
+    background-color: #151D2E;
+    color: #5A5A6E;
+}
+#digitalrowsnextpushButton:hover {
+    background-color: #1A2A45;
+    color: #FFFFFF;
+}
+#digitalrowsnextpushButton:pressed {
+    background-color: #0D1525;
+}</string>
+             </property>
+             <property name="text">
+              <string>&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="digitalpushButton2">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::NoFocus</enum>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#digitalpushButton2
+{
+background-color: transparent;
+border:none;
+}
+#digitalpushButton2:hover {
+}
+#digitalpushButton2:pressed {
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="digitalallONpushButton">
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="text">
+              <string>All - ON</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="digitalallunitpushButton">
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="text">
+              <string>All - Auto</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="batterypage">
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">#batterypage
+{
+background-color: transparent;
+}</string>
+         </property>
+         <widget class="QListView" name="batterylistview">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>1280</width>
+            <height>320</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <family>WenQuanYi Micro Hei</family>
+           </font>
+          </property>
+          <property name="cursor" stdset="0">
+           <cursorShape>BlankCursor</cursorShape>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">#batterylistview
 {
 background-color: transparent;
 border: none;
 }</string>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Plain</enum>
-       </property>
-       <property name="lineWidth">
-        <number>0</number>
-       </property>
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="autoScroll">
-        <bool>false</bool>
-       </property>
-       <property name="autoScrollMargin">
-        <number>18</number>
-       </property>
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-       <property name="showDropIndicator" stdset="0">
-        <bool>false</bool>
-       </property>
-       <property name="dragEnabled">
-        <bool>false</bool>
-       </property>
-       <property name="dragDropMode">
-        <enum>QAbstractItemView::NoDragDrop</enum>
-       </property>
-       <property name="defaultDropAction">
-        <enum>Qt::CopyAction</enum>
-       </property>
-       <property name="selectionMode">
-        <enum>QAbstractItemView::NoSelection</enum>
-       </property>
-       <property name="textElideMode">
-        <enum>Qt::ElideLeft</enum>
-       </property>
-       <property name="verticalScrollMode">
-        <enum>QAbstractItemView::ScrollPerPixel</enum>
-       </property>
-       <property name="horizontalScrollMode">
-        <enum>QAbstractItemView::ScrollPerPixel</enum>
-       </property>
-       <property name="movement">
-        <enum>QListView::Static</enum>
-       </property>
-       <property name="flow">
-        <enum>QListView::LeftToRight</enum>
-       </property>
-       <property name="isWrapping" stdset="0">
-        <bool>true</bool>
-       </property>
-       <property name="resizeMode">
-        <enum>QListView::Fixed</enum>
-       </property>
-       <property name="spacing">
-        <number>6</number>
-       </property>
-       <property name="gridSize">
-        <size>
-         <width>-1</width>
-         <height>-1</height>
-        </size>
-       </property>
-       <property name="viewMode">
-        <enum>QListView::IconMode</enum>
-       </property>
-       <property name="uniformItemSizes">
-        <bool>true</bool>
-       </property>
-       <property name="selectionRectVisible">
-        <bool>false</bool>
-       </property>
-       <property name="itemAlignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="batterypage">
-      <property name="styleSheet">
-       <string notr="true">#batterypage
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <property name="verticalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="autoScroll">
+           <bool>false</bool>
+          </property>
+          <property name="autoScrollMargin">
+           <number>18</number>
+          </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="showDropIndicator" stdset="0">
+           <bool>false</bool>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::NoSelection</enum>
+          </property>
+          <property name="textElideMode">
+           <enum>Qt::ElideLeft</enum>
+          </property>
+          <property name="verticalScrollMode">
+           <enum>QAbstractItemView::ScrollPerPixel</enum>
+          </property>
+          <property name="horizontalScrollMode">
+           <enum>QAbstractItemView::ScrollPerPixel</enum>
+          </property>
+          <property name="flow">
+           <enum>QListView::LeftToRight</enum>
+          </property>
+          <property name="isWrapping" stdset="0">
+           <bool>true</bool>
+          </property>
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="viewMode">
+           <enum>QListView::IconMode</enum>
+          </property>
+          <property name="uniformItemSizes">
+           <bool>true</bool>
+          </property>
+          <property name="itemAlignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+         <widget class="QFrame" name="batterybottomframe">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>320</y>
+            <width>1280</width>
+            <height>80</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <family>WenQuanYi Micro Hei</family>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>BlankCursor</cursorShape>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">#batterybottomframe {
+    background-color: #101C30;
+    border-radius: 9px;
+    border: 1px solid rgba(74, 74, 90, 0.4);
+}
+QPushButton{
+    background-color: #1A2A45;
+    border: 1px solid rgba(74, 74, 90, 0.3);
+    border-radius: 9px;
+    font-family: &quot;WenQuanYi Micro Hei&quot;;
+	font-weight: bold;
+    font-size: 18px;
+	color: #C9C9C9;
+    padding: 12px 1px;
+}
+QPushButton:hover {
+    background-color: #243356;
+    border-color: rgba(100, 100, 130, 0.6);
+    color: #E0E0E0;
+}
+QPushButton:pressed {
+    background-color: #0D1525;
+    border-color: rgba(100, 100, 130, 0.8);
+    color: #FFFFFF;
+}</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,3,5,1,2,1,5,3,3">
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>6</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QPushButton" name="batterysettingspushButton">
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>Settings</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../qml.qrc">
+               <normaloff>:/web/web/icon/settings.png</normaloff>:/web/web/icon/settings.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="batterymodepushButton">
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>battery</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../qml.qrc">
+               <normaloff>:/web/web/icon/battery.png</normaloff>:/web/web/icon/battery.png</iconset>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="batterypushButton1">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::NoFocus</enum>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#batterypushButton1
+{
+background-color: transparent;
+border:none;
+}
+#batterypushButton1:hover {
+}
+#batterypushButton1:pressed {
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="batteryrowsbackpushButton">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#batteryrowsbackpushButton {
+    background-color: transparent;
+    border: 1px solid rgba(74, 74, 90, 0.3);
+}
+#batteryrowsbackpushButton:disabled {
+    background-color: #151D2E;
+    color: #5A5A6E;
+}
+#batteryrowsbackpushButton:hover {
+    background-color: #1A2A45;
+    color: #FFFFFF;
+}
+#batteryrowsbackpushButton:pressed {
+    background-color: #0D1525;
+}</string>
+             </property>
+             <property name="text">
+              <string>&lt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="batteryrowslabelpushButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#batteryrowslabelpushButton
+{
+background-color: transparent;
+border:none;
+}
+#batteryrowslabelpushButton:hover {
+}
+#batteryrowslabelpushButton:pressed {
+}</string>
+             </property>
+             <property name="text">
+              <string>1 x 6</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="batteryrowsnextpushButton">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#batteryrowsnextpushButton {
+    background-color: transparent;
+    border: 1px solid rgba(74, 74, 90, 0.3);
+}
+#batteryrowsnextpushButton:disabled {
+    background-color: #151D2E;
+    color: #5A5A6E;
+}
+#batteryrowsnextpushButton:hover {
+    background-color: #1A2A45;
+    color: #FFFFFF;
+}
+#batteryrowsnextpushButton:pressed {
+    background-color: #0D1525;
+}</string>
+             </property>
+             <property name="text">
+              <string>&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="batterypushButton2">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::NoFocus</enum>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#batterypushButton2
+{
+background-color: transparent;
+border:none;
+}
+#batterypushButton2:hover {
+}
+#batterypushButton2:pressed {
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="batteryallONpushButton">
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="text">
+              <string>All - ON</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="batterymodelpushButton">
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="text">
+              <string>All - empty</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="settingspage">
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">#settingspage
 {
 background-color: transparent;
 }</string>
-      </property>
-      <widget class="QLabel" name="label">
-       <property name="geometry">
-        <rect>
-         <x>190</x>
-         <y>280</y>
-         <width>67</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>TextLabel</string>
-       </property>
-      </widget>
-     </widget>
+         </property>
+        </widget>
+        <widget class="QWidget" name="functionpage">
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">#functionpage
+{
+background-color: transparent;
+}</string>
+         </property>
+         <widget class="QFrame" name="functionbottomframe">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>320</y>
+            <width>1280</width>
+            <height>80</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <family>WenQuanYi Micro Hei</family>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>BlankCursor</cursorShape>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">#functionbottomframe {
+    background-color: #101C30;
+    border-radius: 9px;
+    border: 1px solid rgba(74, 74, 90, 0.4);
+}
+QPushButton{
+    background-color: #1A2A45;
+    border: 1px solid rgba(74, 74, 90, 0.3);
+    border-radius: 9px;
+    font-family: &quot;WenQuanYi Micro Hei&quot;;
+	font-weight: bold;
+    font-size: 18px;
+	color: #C9C9C9;
+    padding: 12px 1px;
+}
+QPushButton:hover {
+    background-color: #243356;
+    border-color: rgba(100, 100, 130, 0.6);
+    color: #E0E0E0;
+}
+QPushButton:pressed {
+    background-color: #0D1525;
+    border-color: rgba(100, 100, 130, 0.8);
+    color: #FFFFFF;
+}</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="3,5,1,2,1,5,3">
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>6</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QPushButton" name="functionsettingspushButton">
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>Settings</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../qml.qrc">
+               <normaloff>:/web/web/icon/settings.png</normaloff>:/web/web/icon/settings.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="functionpushButton1">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::NoFocus</enum>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#functionpushButton1
+{
+background-color: transparent;
+border:none;
+}
+#functionpushButton1:hover {
+}
+#functionpushButton1:pressed {
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="functionrowsbackpushButton">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#functionrowsbackpushButton {
+    background-color: transparent;
+    border: 1px solid rgba(74, 74, 90, 0.3);
+}
+#functionrowsbackpushButton:disabled {
+    background-color: #151D2E;
+    color: #5A5A6E;
+}
+#functionrowsbackpushButton:hover {
+    background-color: #1A2A45;
+    color: #FFFFFF;
+}
+#functionrowsbackpushButton:pressed {
+    background-color: #0D1525;
+}</string>
+             </property>
+             <property name="text">
+              <string>&lt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="functionrowslabelpushButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#functionrowslabelpushButton
+{
+background-color: transparent;
+border:none;
+}
+#functionrowslabelpushButton:hover {
+}
+#functionrowslabelpushButton:pressed {
+}</string>
+             </property>
+             <property name="text">
+              <string>goback</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="functionrowsnextpushButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#functionrowsnextpushButton {
+    background-color: transparent;
+    border: 1px solid rgba(74, 74, 90, 0.3);
+}
+#functionrowsnextpushButton:disabled {
+    background-color: #151D2E;
+    color: #5A5A6E;
+}
+#functionrowsnextpushButton:hover {
+    background-color: #1A2A45;
+    color: #FFFFFF;
+}
+#functionrowsnextpushButton:pressed {
+    background-color: #0D1525;
+}</string>
+             </property>
+             <property name="text">
+              <string>&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="functionpushButton2">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::NoFocus</enum>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#functionpushButton2
+{
+background-color: transparent;
+border:none;
+}
+#functionpushButton2:hover {
+}
+#functionpushButton2:pressed {
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="functionallunitpushButton">
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="text">
+              <string>Apply - all</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="emptryframe">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
+     </property>
     </widget>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../qml.qrc"/>
+ </resources>
  <connections/>
 </ui>
