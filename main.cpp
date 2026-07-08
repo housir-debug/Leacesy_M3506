@@ -41,10 +41,11 @@ std::vector<ScpiSign_toUartCh> scpi_signal = {
 int main(int argc, char *argv[])
 {
     // create APP
-    //QApplication::setAttribute(Qt::AA_EnableHighDpiScaling); // Warning: It will deform.
-    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-    QApplication::setApplicationName("Leacesy_Ryan");
     QApplication app(argc, argv);
+    QApplication::setApplicationName("Leacesy_Ryan");
+    QApplication::setOverrideCursor(Qt::BlankCursor);
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    // QApplication::setAttribute(Qt::AA_EnableHighDpiScaling); // Warning: It will deform.
 
     // get App parentpath
     QString appPath = QApplication::applicationDirPath();
@@ -64,16 +65,16 @@ int main(int argc, char *argv[])
     loggermanage(ConfigManager::s_loglevel , parentPath);
     QObject::connect(&app, &QApplication::aboutToQuit, &shutdownLogger);
 
-    // screen GUI engine and gui-bridge create
-    std::shared_ptr<BatteryModelManager> BatteryModel_share = std::make_shared<BatteryModelManager>(parentPath);
-
     //std::unique_ptr<test> testview(new test);
     //testview->show();
 
+    // screen GUI engine and gui-bridge create
+    std::shared_ptr<BatteryModelManager> BatteryModel_share = std::make_shared<BatteryModelManager>(parentPath);
     //QGraphicsScene scene;QGraphicsView view(&scene);
     std::unique_ptr<Mainwindow> mainwindow;
     if (ConfigManager::s_enableDisplay){
         mainwindow= std::make_unique<Mainwindow>();
+        mainwindow->m_modelManager = BatteryModel_share;
         mainwindow->show();
 
         /*QGraphicsProxyWidget *proxy = scene.addWidget(mainwindow.get());

@@ -146,7 +146,118 @@ color: #C9C9C9;
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout" columnstretch="2,3">
+    <layout class="QGridLayout" name="gridLayout" rowstretch="1,1,1" columnstretch="2,3">
+     <property name="spacing">
+      <number>6</number>
+     </property>
+     <item row="2" column="1">
+      <widget class="QFrame" name="capframe">
+       <property name="font">
+        <font>
+         <family>WenQuanYi Micro Hei</family>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>BlankCursor</cursorShape>
+       </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::NoContextMenu</enum>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">#capframe
+{
+border: 1px solid #3A3A3A;
+border-radius: 9px;
+}</string>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="lineWidth">
+        <number>0</number>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="leftMargin">
+         <number>9</number>
+        </property>
+        <property name="topMargin">
+         <number>6</number>
+        </property>
+        <property name="rightMargin">
+         <number>9</number>
+        </property>
+        <property name="bottomMargin">
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="caplabel">
+          <property name="font">
+           <font>
+            <family>WenQuanYi Micro Hei</family>
+            <pointsize>-1</pointsize>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>BlankCursor</cursorShape>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">#caplabel
+{
+font-family: &quot;WenQuanYi Micro Hei&quot;;
+font-size: 12px;
+color: #C9C9C9;
+}</string>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <property name="text">
+           <string>CAP</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="capvaluelabel">
+          <property name="font">
+           <font>
+            <family>WenQuanYi Micro Hei</family>
+            <pointsize>-1</pointsize>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>BlankCursor</cursorShape>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">#capvaluelabel
+{
+font-family: &quot;WenQuanYi Micro Hei&quot;;
+font-size: 18px;
+ color: #D0D0D0;
+}</string>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <property name="text">
+           <string>002.40 Ah</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
      <item row="0" column="0" rowspan="3">
       <widget class="QProgressBar" name="socprogressBar">
        <property name="sizePolicy">
@@ -307,114 +418,6 @@ font-size: 18px;
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QFrame" name="capframe">
-       <property name="font">
-        <font>
-         <family>WenQuanYi Micro Hei</family>
-        </font>
-       </property>
-       <property name="cursor">
-        <cursorShape>BlankCursor</cursorShape>
-       </property>
-       <property name="contextMenuPolicy">
-        <enum>Qt::NoContextMenu</enum>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">#capframe
-{
-border: 1px solid #3A3A3A;
-border-radius: 9px;
-}</string>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Plain</enum>
-       </property>
-       <property name="lineWidth">
-        <number>0</number>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <property name="leftMargin">
-         <number>9</number>
-        </property>
-        <property name="topMargin">
-         <number>6</number>
-        </property>
-        <property name="rightMargin">
-         <number>9</number>
-        </property>
-        <property name="bottomMargin">
-         <number>6</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="caplabel">
-          <property name="font">
-           <font>
-            <family>WenQuanYi Micro Hei</family>
-            <pointsize>-1</pointsize>
-           </font>
-          </property>
-          <property name="cursor">
-           <cursorShape>BlankCursor</cursorShape>
-          </property>
-          <property name="contextMenuPolicy">
-           <enum>Qt::NoContextMenu</enum>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">#caplabel
-{
-font-family: &quot;WenQuanYi Micro Hei&quot;;
-font-size: 12px;
-color: #C9C9C9;
-}</string>
-          </property>
-          <property name="lineWidth">
-           <number>0</number>
-          </property>
-          <property name="text">
-           <string>CAP</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="capvaluelabel">
-          <property name="font">
-           <font>
-            <family>WenQuanYi Micro Hei</family>
-            <pointsize>-1</pointsize>
-           </font>
-          </property>
-          <property name="cursor">
-           <cursorShape>BlankCursor</cursorShape>
-          </property>
-          <property name="contextMenuPolicy">
-           <enum>Qt::NoContextMenu</enum>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">#capvaluelabel
-{
-font-family: &quot;WenQuanYi Micro Hei&quot;;
-font-size: 18px;
- color: #D0D0D0;
-}</string>
-          </property>
-          <property name="lineWidth">
-           <number>0</number>
-          </property>
-          <property name="text">
-           <string>0.0000 Ah</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item row="2" column="1">
       <widget class="QFrame" name="esrframe">
        <property name="font">
         <font>

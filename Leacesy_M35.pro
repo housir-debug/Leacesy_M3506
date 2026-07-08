@@ -28,6 +28,7 @@ HEADERS += \
     widgets/batterycard.h \
     widgets/digitalcard.h \
     widgets/mainwindow.h \
+    widgets/numberkeypad.h \
     widgets/test.h
 
 
@@ -50,6 +51,7 @@ SOURCES += \
     widgets/batterycard.cpp \
     widgets/digitalcard.cpp \
     widgets/mainwindow.cpp \
+    widgets/numberkeypad.cpp \
     widgets/test.cpp
 
 
@@ -73,4 +75,5 @@ FORMS += \
     widgets/batterycard.ui \
     widgets/digitalcard.ui \
     widgets/mainwindow.ui \
+    widgets/numberkeypad.ui \
     widgets/test.ui

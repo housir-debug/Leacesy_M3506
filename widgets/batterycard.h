@@ -1,6 +1,7 @@
 #pragma once
-
 #include <QFrame>
+#include <QElapsedTimer>
+#include "auxiliary/battery_model.h"
 
 namespace Ui {
     class batterycard; // = UI_digitalcard instead
@@ -17,14 +18,27 @@ public:
     void setChannelState(bool state);
     void setChannelName(const QString &name);
 
-    void setSocValue(quint8 value);
-    void setVocValue(float value);
+    void setSocValue(float value);
+    void setOcvValue(float value);
     void setCapValue(float value);
     void setEsrValue(float value);
     void setModelValue(const QString &model);
+    void setModel(const QSharedPointer<BatteryModel> &model);
+
+    void updateSocValue(float current);
+    void startupdateValue();
+
+    float getcurrentOCV();
+    float getcurrentESR();
+    bool getcurrentisOver();
 
 private:
     Ui::batterycard *ui;
+    float m_capacityAH{2.4f};
+    float m_progressSOC{0.0f};
+    QElapsedTimer m_integralTimer;
+    //QString m_batteryModel{"empty"};
+    QSharedPointer<BatteryModel> m_activeModel;
 
     bool m_isPressed;
     QPoint m_pressPos;

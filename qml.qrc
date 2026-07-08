@@ -16,5 +16,6 @@
         <file>web/js/header.js</file>
         <file>web/icon/settings.png</file>
         <file>web/icon/battery.png</file>
+        <file>web/icon/promotion.png</file>
     </qresource>
 </RCC>
