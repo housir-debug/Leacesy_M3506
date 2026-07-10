@@ -26,10 +26,12 @@ HEADERS += \
     #windows/digitalpage.h \
  \    #windows/mainwindow.h
     widgets/batterycard.h \
+    widgets/chstatusview.h \
     widgets/digitalcard.h \
     widgets/mainwindow.h \
     widgets/numberkeypad.h \
-    widgets/test.h
+    widgets/test.h \
+    widgets/versionview.h
 
 
 SOURCES += \
@@ -49,10 +51,12 @@ SOURCES += \
     #windows/digitalpage.cpp \
  \    #windows/mainwindow.cpp
     widgets/batterycard.cpp \
+    widgets/chstatusview.cpp \
     widgets/digitalcard.cpp \
     widgets/mainwindow.cpp \
     widgets/numberkeypad.cpp \
-    widgets/test.cpp
+    widgets/test.cpp \
+    widgets/versionview.cpp
 
 
 RESOURCES += qml.qrc
@@ -73,7 +77,9 @@ INSTALLS += auxiliary_files
 
 FORMS += \
     widgets/batterycard.ui \
+    widgets/chstatusview.ui \
     widgets/digitalcard.ui \
     widgets/mainwindow.ui \
     widgets/numberkeypad.ui \
-    widgets/test.ui
+    widgets/test.ui \
+    widgets/versionview.ui

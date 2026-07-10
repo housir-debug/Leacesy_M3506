@@ -698,6 +698,7 @@ void UartChannelManager::handleMeasurementcmd(quint8 func){ // new protocol Need
             qCDebug(uart_channel)<<"[handleMeasurementcmd]:Channel_"<<m_channel<<" Query[] "<<sh;
             return;
         case 0x0E: // :SENS:CURR[:DC]:RANG[:UPP] <NRf>
+            emit CH_RangeChanged(m_channel,sh);
             m_scpiManager->processCHVoidResponse();
             qCDebug(uart_channel)<<"[handleMeasurementcmd]:Channel_"<<m_channel<<" Set[] "<<sh;
             return;

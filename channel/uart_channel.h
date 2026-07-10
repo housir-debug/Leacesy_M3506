@@ -26,6 +26,7 @@ signals:
 
     void CH_VoltageChanged(int ch,float voltage);
     void CH_CurrentAndUnitChanged(int ch,float current);
+    void CH_RangeChanged(int ch,quint8 range);
     void CH_StatusChanged(int ch,quint16 status);
 
     void CH_cvChanged(int ch,float cv);

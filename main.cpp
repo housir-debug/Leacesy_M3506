@@ -117,6 +117,7 @@ int main(int argc, char *argv[])
             QObject::connect(channel.get(),&UartChannelManager::CH_hvChanged,mainwindow.get(),&Mainwindow::update_HardVer,Qt::QueuedConnection);
             QObject::connect(channel.get(),&UartChannelManager::CH_VoltageChanged,mainwindow.get(),&Mainwindow::update_Voltage,Qt::QueuedConnection);
             QObject::connect(channel.get(),&UartChannelManager::CH_CurrentAndUnitChanged,mainwindow.get(),&Mainwindow::update_CurrentAndUnit,Qt::QueuedConnection);
+            QObject::connect(channel.get(),&UartChannelManager::CH_RangeChanged,mainwindow.get(),&Mainwindow::update_Range,Qt::QueuedConnection);
             QObject::connect(channel.get(),&UartChannelManager::CH_StatusChanged,mainwindow.get(),&Mainwindow::update_Status,Qt::QueuedConnection);
             QObject::connect(channel.get(),&UartChannelManager::CH_cvChanged,mainwindow.get(),&Mainwindow::update_Cv,Qt::QueuedConnection);
             QObject::connect(channel.get(),&UartChannelManager::CH_ccChanged,mainwindow.get(),&Mainwindow::update_Cc,Qt::QueuedConnection);

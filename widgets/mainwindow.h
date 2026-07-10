@@ -6,6 +6,9 @@
 #include <QStandardItemModel>
 #include "digitalcard.h"
 #include "batterycard.h"
+#include "versionview.h"
+#include "chstatusview.h"
+#include "numberkeypad.h"
 #include "auxiliary/battery_model.h"
 #include "auxiliary/config_manager.h"
 
@@ -32,7 +35,7 @@ signals:
 public:
 
     // QJsonArray getAllChannelsData();
-    void setChannel_Setstatus(int channel,int model,const QString& val);
+    //void setChannel_Setstatus(int channel,int model,const QString& val);
 
     void update_remotemodel(quint8 reface);
     void update_Configuration(int model,const QString& val);
@@ -48,19 +51,18 @@ public:
     void update_SoftVer(int ch,const QString &ver);
     void update_HardVer(int ch,const QString &ver);
 
+    void update_IsOutput(int ch,bool status);
     void update_Voltage(int ch,float voltage);
     void update_CurrentAndUnit(int ch,float current);
+    void update_Range(int ch,quint8 range);
     void update_Status(int ch,quint16 status);
     void update_Cv(int ch,float cv);
     void update_Cc(int ch,float cc);
     void update_Ovp(int ch,float ovp);
-    void update_IsOutput(int ch,bool status);
     void update_Imp(int ch,float imp);
 
 private slots:
     void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param);
-    QString set_unit(int channel);
-    QString set_Model(int channel);
 
     // channel card switchs
     void on_digitalsettingspushButton_clicked();
@@ -84,8 +86,26 @@ private slots:
     void on_functionrowsbackpushButton_clicked();
     void on_functionallapplypushButton_clicked();
 
+    void on_cvradioButton_clicked();
+    void on_ccradioButton_clicked();
+    void on_ovpradioButton_clicked();
+    void on_functionunitpushButton_clicked();
+
+    void on_socradioButton_clicked();
+    void on_capradioButton_clicked();
+    void on_functionmodelpushButton_clicked();
+
 private:
     Ui::Mainwindow *ui;
+    versionview* m_vercard;
+    chstatusview* m_chstatuscard;
+    numberkeypad* m_funcnmbkeycard;
+    digitalcard* m_funcdigitalcard;
+    batterycard* m_funcbatterycard;
+
+    //QMap<quint8,bool> m_ChOutmode;
+    QMap<quint8,QString> m_ChsoftVer;
+    QMap<quint8,QString> m_ChhardVer;
 
     QStandardItemModel *m_digitalModel;
     QMap<quint8,digitalcard*> m_digitalcards;
@@ -96,6 +116,7 @@ private:
     const int CARD_WIDTH = 211;
     const int CARD_HEIGHT = 316;
 
+    quint8 m_functioncsetmode{0};
     quint8 m_functioncCh{0};
     quint8 m_initalpage{0};
 };

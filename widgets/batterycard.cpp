@@ -19,7 +19,7 @@ batterycard::batterycard(QWidget *parent) :
     connect(m_longPressTimer, &QTimer::timeout, this, [this]{
         if (m_isPressed && !m_longPressTriggered) {
             m_longPressTriggered = true;
-            emit longPressed();
+            emit longPressed(m_channel);
         }
     });
 }
@@ -52,9 +52,8 @@ void batterycard::mouseReleaseEvent(QMouseEvent *event)
         if (!m_longPressTriggered) {
             QPoint delta = event->pos() - m_pressPos;
             if (delta.manhattanLength() < 18) {
-                qDebug()<<"触发打印";
                 bool status = property("outputed").toBool();
-                emit clicked(!status);
+                emit clicked(m_channel,!status);
             }
         }
     }
@@ -81,6 +80,22 @@ void batterycard::mouseMoveEvent(QMouseEvent *event)
 }
 
 // property setting API
+
+bool batterycard::getChstatus() const
+{
+    return property("outputed").toBool();
+}
+
+quint8 batterycard::getChmodel() const
+{
+    return m_modelindex;
+}
+
+
+void batterycard::setChannel(quint8 ch)
+{
+    m_channel = ch;
+}
 
 void batterycard::setChannelState(bool state)
 {
@@ -117,7 +132,7 @@ void batterycard::setCapValue(float value)
 void batterycard::setEsrValue(float value)
 {
     QString text = QString::number(value, 'f', 4) + " Ω";
-    ui->capvaluelabel->setText(text);
+    ui->esrvaluelabel->setText(text);
 }
 
 void batterycard::setModelValue(const QString &model)
@@ -125,8 +140,9 @@ void batterycard::setModelValue(const QString &model)
     ui->modelnamelabel->setText(model);
 }
 
-void batterycard::setModel(const QSharedPointer<BatteryModel> &model)
+void batterycard::setModel(quint8 index,const QSharedPointer<BatteryModel> &model)
 {
+    m_modelindex = index;
     m_activeModel = model;
 }
 
@@ -158,15 +174,27 @@ void batterycard::startupdateValue()
 
 float batterycard::getcurrentOCV(){
     int currentSOC = ui->socprogressBar->value();
-    return m_activeModel->getOCV(currentSOC);
+    if (!m_activeModel.isNull()){
+        return m_activeModel->getOCV(currentSOC);
+    }else{
+        return 0.0f;
+    }
 }
 
 float batterycard::getcurrentESR(){
     int currentSOC = ui->socprogressBar->value();
-    return m_activeModel->getESR(currentSOC);
+    if (!m_activeModel.isNull()){
+        return m_activeModel->getESR(currentSOC);
+    }else{
+        return 0.0f;
+    }
 }
 
 bool batterycard::getcurrentisOver(){
     int currentSOC = ui->socprogressBar->value();
-    return m_activeModel->isOver(currentSOC);
+    if (!m_activeModel.isNull()){
+        return m_activeModel->isOver(currentSOC);
+    }else{
+        return false;
+    }
 }

@@ -6,10 +6,7 @@
 
 Q_LOGGING_CATEGORY(widget, "WIDGET:")
 
-/*m_SoftVer = ConfigManager::s_firmwareVersion;
-m_HardVer = ConfigManager::s_hardwareVersion;
-
-m_IPaddress = ConfigManager::s_IP;
+/*m_IPaddress = ConfigManager::s_IP;
 m_SM = ConfigManager::s_SM;
 m_GPIBid = ConfigManager::s_GPIBid;
 m_CANid = ConfigManager::s_CANid;*/
@@ -19,6 +16,62 @@ Mainwindow::Mainwindow(QWidget *parent) :
     ui(new Ui::Mainwindow)
 {
     ui->setupUi(this);
+
+    QRect verrect = ui->functionversionframe->geometry();
+    m_vercard = new versionview(ui->functionversionframe->parentWidget());
+    m_vercard->setGeometry(verrect);
+    delete ui->functionversionframe;
+
+    QRect chstatusrect = ui->functionchstatusframe->geometry();
+    m_chstatuscard = new chstatusview(ui->functionchstatusframe->parentWidget());
+    m_chstatuscard->setGeometry(chstatusrect);
+    delete ui->functionchstatusframe;
+
+    QRect numberrect = ui->functionkeyframe->geometry();
+    m_funcnmbkeycard = new numberkeypad(ui->functionkeyframe->parentWidget());
+    m_funcnmbkeycard->setGeometry(numberrect);
+    delete ui->functionkeyframe;
+    QObject::connect(m_funcnmbkeycard, &numberkeypad::valueEntered, this, [this](const QString &value) {
+        if (!value.isEmpty()){
+            float val = value.toFloat();
+
+            if (m_initalpage == 0){
+                // model: 0 - CV ; 1 - CC ; 3 - OVP;
+                QByteArray buffer(reinterpret_cast<const char*>(&val), sizeof(float));
+                std::reverse(buffer.begin(), buffer.end()); // big-endian order
+
+                return to_Channel(m_functioncCh,0x02, m_functioncsetmode, buffer);
+            }else{
+                if (m_functioncsetmode == 0){
+                    ui->socvaluelabel->setText(value);
+                    m_funcbatterycard->setSocValue(val);
+                    m_batterycards[m_functioncCh]->setSocValue(val);
+                }else{
+                    ui->capvaluelabel->setText(value);
+                    m_funcbatterycard->setCapValue(val);
+                    m_batterycards[m_functioncCh]->setCapValue(val);
+                }
+            }
+        }
+    });
+
+    QRect digitalcardrect = ui->functiondigitalframe->geometry();
+    m_funcdigitalcard = new digitalcard(ui->functiondigitalframe->parentWidget());
+    m_funcdigitalcard->setGeometry(digitalcardrect);
+    delete ui->functiondigitalframe;
+    QObject::connect(m_funcdigitalcard, &digitalcard::clicked, this, [this](quint8 ch,bool switchs) {
+        quint8 func = switchs ? 0x01 : 0x00;
+        to_Channel(ch, 0x01, func, "");
+    });
+
+    QRect batterycardrect = ui->functionbatteryframe->geometry();
+    m_funcbatterycard = new batterycard(ui->functionbatteryframe->parentWidget());
+    m_funcbatterycard->setGeometry(batterycardrect);
+    delete ui->functionbatteryframe;
+    QObject::connect(m_funcbatterycard,&batterycard::clicked, this, [this](quint8 ch,bool switchs) {
+        quint8 func = switchs ? 0x01 : 0x00;
+        to_Channel(ch, 0x01, func, "");
+    });
 
     m_digitalModel = new QStandardItemModel(this);
     ui->digitallistview->setModel(m_digitalModel);
@@ -45,48 +98,168 @@ Mainwindow::Mainwindow(QWidget *parent) :
 
     // test digital card view
     for (int i = 1; i <= 36; ++i) {
+        QString chname = QString("CH-%1").arg(i, 2, 10, QChar('0'));
+
         // digitalcard
         digitalcard *digitcard = new digitalcard(this);
-        digitcard->setChannelName(QString("CH-%1").arg(i, 2, 10, QChar('0')));
-        m_digitalcards[i] = digitcard;
+        digitcard->setChannelName(chname);
+        digitcard->setChannel(i);
 
         QStandardItem *digititem = new QStandardItem();
         digititem->setSizeHint(QSize(CARD_WIDTH, CARD_HEIGHT));
         m_digitalModel->appendRow(digititem);
+        m_digitalcards[i] = digitcard;
 
         QModelIndex digitindex = m_digitalModel->indexFromItem(digititem);
         ui->digitallistview->setIndexWidget(digitindex, digitcard);
 
-        QObject::connect(digitcard, &digitalcard::clicked, this, [this, i](bool switchs) {
+        QObject::connect(digitcard, &digitalcard::clicked, this, [this](quint8 ch,bool switchs) {
             quint8 func = switchs ? 0x01 : 0x00;
-            to_Channel(i, 0x01, func, "");
+            to_Channel(ch, 0x01, func, "");
         });
-        QObject::connect(digitcard,&digitalcard::longPressed,this,[this,i]{
-            m_functioncCh = i;
+        QObject::connect(digitcard,&digitalcard::longPressed,this,[this,chname](quint8 ch){
             m_initalpage = 0;
+            m_functioncCh = ch;
+
+            m_vercard->setChannelName(chname);
+            m_vercard->setChSWVersion(m_ChsoftVer[ch]);
+            m_vercard->setChHWVersion(m_ChhardVer[ch]);
+
+            m_funcdigitalcard->setChannelName(chname);
+            m_funcdigitalcard->setChannel(ch);
+
+            ui->cvvaluelabel->setText("");
+            ui->ccvaluelabel->setText("");
+            ui->ovpvaluelabel->setText("");
+
+            ui->cvradioButton->setChecked(true);
             ui->topstackedwidget->setCurrentIndex(3);  // functionpage
+            ui->functionstackedWidget->setCurrentIndex(0); // function - digital
         });
 
         // batterycard
         batterycard *battercard = new batterycard(this);
-        battercard->setChannelName(QString("CH-%1").arg(i, 2, 10, QChar('0')));
-        m_batterycards[i] = battercard;
+        battercard->setChannelName(chname);
+        battercard->setChannel(i);
 
         QStandardItem *batteritem = new QStandardItem();
         batteritem->setSizeHint(QSize(CARD_WIDTH, CARD_HEIGHT));
         m_batteryModel->appendRow(batteritem);
+        m_batterycards[i] = battercard;
 
         QModelIndex batterindex = m_batteryModel->indexFromItem(batteritem);
         ui->batterylistview->setIndexWidget(batterindex, battercard);
 
-        QObject::connect(battercard, &batterycard::clicked, this, [this, i](bool switchs) {
+        QObject::connect(battercard, &batterycard::clicked, this,  [this](quint8 ch,bool switchs) {
             quint8 func = switchs ? 0x01 : 0x00;
-            to_Channel(i, 0x01, func, "");
+            to_Channel(ch, 0x01, func, "");
         });
-        QObject::connect(battercard,&batterycard::longPressed,this,[this,i]{
-            m_functioncCh = i;
+        QObject::connect(battercard,&batterycard::longPressed,this,[this,chname](quint8 ch){
             m_initalpage = 1;
+            m_functioncCh = ch;
+
+            m_vercard->setChannelName(chname);
+            m_vercard->setChSWVersion(m_ChsoftVer[ch]);
+            m_vercard->setChHWVersion(m_ChhardVer[ch]);
+
+            m_funcbatterycard->setChannelName(chname);
+            m_funcbatterycard->setChannel(ch);
+
+            ui->socvaluelabel->setText("");
+            ui->capvaluelabel->setText("");
+
+            ui->socradioButton->setChecked(true);
             ui->topstackedwidget->setCurrentIndex(3);  // functionpage
+            ui->functionstackedWidget->setCurrentIndex(1); // function - battery
+        });
+    }
+}
+
+// auto add exist channel card
+
+void Mainwindow::update_SoftVer(int ch,const QString &ver){
+    m_ChsoftVer[ch] = ver;
+
+    if (!m_digitalcards.contains(ch)) {
+        QString chname = QString("CH-%1").arg(ch, 2, 10, QChar('0'));
+
+        digitalcard *card = new digitalcard(this);
+        card->setChannelName(chname);
+        card->setChannel(ch);
+
+        QStandardItem *item = new QStandardItem();
+        item->setSizeHint(QSize(CARD_WIDTH, CARD_HEIGHT));
+        m_digitalModel->appendRow(item);
+        m_digitalcards[ch] = card;
+
+        QModelIndex index = m_digitalModel->indexFromItem(item);
+        ui->digitallistview->setIndexWidget(index, card);
+
+        QObject::connect(card, &digitalcard::clicked, this, [this](quint8 ch,bool switchs) {
+            quint8 func = switchs ? 0x01 : 0x00;
+            to_Channel(ch, 0x01, func, "");
+        });
+        QObject::connect(card,&digitalcard::longPressed,this,[this,chname](quint8 ch){
+            m_initalpage = 0;
+            m_functioncCh = ch;
+
+            m_vercard->setChannelName(chname);
+            m_vercard->setChSWVersion(m_ChsoftVer[ch]);
+            m_vercard->setChHWVersion(m_ChhardVer[ch]);
+
+            m_funcdigitalcard->setChannelName(chname);
+            m_funcdigitalcard->setChannel(ch);
+
+            ui->cvvaluelabel->setText("");
+            ui->ccvaluelabel->setText("");
+            ui->ovpvaluelabel->setText("");
+
+            ui->cvradioButton->setChecked(true);
+            ui->topstackedwidget->setCurrentIndex(3);  // functionpage
+            ui->functionstackedWidget->setCurrentIndex(0); // function - digital
+        });
+    }
+}
+
+void Mainwindow::update_HardVer(int ch,const QString &ver){
+    m_ChhardVer[ch] = ver;
+
+    if (!m_batterycards.contains(ch)) {
+        QString chname = QString("CH-%1").arg(ch, 2, 10, QChar('0'));
+
+        batterycard *card = new batterycard(this);
+        card->setChannelName(chname);
+        card->setChannel(ch);
+
+        QStandardItem *item = new QStandardItem();
+        item->setSizeHint(QSize(CARD_WIDTH, CARD_HEIGHT));
+        m_batteryModel->appendRow(item);
+        m_batterycards[ch] = card;
+
+        QModelIndex index = m_batteryModel->indexFromItem(item);
+        ui->batterylistview->setIndexWidget(index, card);
+
+        QObject::connect(card, &batterycard::clicked, this, [this](quint8 ch,bool switchs) {
+            quint8 func = switchs ? 0x01 : 0x00;
+            to_Channel(ch, 0x01, func, "");
+        });
+        QObject::connect(card,&batterycard::longPressed,this,[this,chname](quint8 ch){
+            m_initalpage = 1;
+            m_functioncCh = ch;
+
+            m_vercard->setChannelName(chname);
+            m_vercard->setChSWVersion(m_ChsoftVer[ch]);
+            m_vercard->setChHWVersion(m_ChhardVer[ch]);
+
+            m_funcbatterycard->setChannelName(chname);
+            m_funcbatterycard->setChannel(ch);
+
+            ui->socvaluelabel->setText("");
+            ui->capvaluelabel->setText("");
+
+            ui->socradioButton->setChecked(true);
+            ui->topstackedwidget->setCurrentIndex(3);  // functionpage
+            ui->functionstackedWidget->setCurrentIndex(1); // function - battery
         });
     }
 }
@@ -102,64 +275,10 @@ void Mainwindow::load_BatteryModel(){
 
                     for (auto it = m_batterycards.cbegin(); it != m_batterycards.cend(); ++it) {
                         it.value()->setModelValue(batteryModel);
-                        it.value()->setModel(m_modelManager->getModel(batteryModel));
+                        it.value()->setModel(0,m_modelManager->getModel(batteryModel));
                     }
                 }
             }
-        });
-    }
-}
-
-// auto add exist channel card
-
-void Mainwindow::update_SoftVer(int ch,const QString &ver){
-    Q_UNUSED(ver);
-    if (!m_digitalcards.contains(ch)) {
-        digitalcard *card = new digitalcard(this);
-        card->setChannelName(QString("CH-%1").arg(ch, 2, 10, QChar('0')));
-        m_digitalcards[ch] = card;
-
-        QStandardItem *item = new QStandardItem();
-        item->setSizeHint(QSize(CARD_WIDTH, CARD_HEIGHT));
-        m_digitalModel->appendRow(item);
-
-        QModelIndex index = m_digitalModel->indexFromItem(item);
-        ui->digitallistview->setIndexWidget(index, card);
-
-        QObject::connect(card, &digitalcard::clicked, this, [this, ch](bool switchs) {
-            quint8 func = switchs ? 0x01 : 0x00;
-            to_Channel(ch, 0x01, func, "");
-        });
-        QObject::connect(card,&digitalcard::longPressed,this,[this,ch]{
-            m_functioncCh = ch;
-            m_initalpage = 0;
-            ui->topstackedwidget->setCurrentIndex(3);  // functionpage
-        });
-    }
-}
-
-void Mainwindow::update_HardVer(int ch,const QString &ver){
-    Q_UNUSED(ver);
-    if (!m_batterycards.contains(ch)) {
-        batterycard *card = new batterycard(this);
-        card->setChannelName(QString("CH-%1").arg(ch, 2, 10, QChar('0')));
-        m_batterycards[ch] = card;
-
-        QStandardItem *item = new QStandardItem();
-        item->setSizeHint(QSize(CARD_WIDTH, CARD_HEIGHT));
-        m_batteryModel->appendRow(item);
-
-        QModelIndex index = m_batteryModel->indexFromItem(item);
-        ui->batterylistview->setIndexWidget(index, card);
-
-        QObject::connect(card, &batterycard::clicked, this, [this, ch](bool switchs) {
-            quint8 func = switchs ? 0x01 : 0x00;
-            to_Channel(ch, 0x01, func, "");
-        });
-        QObject::connect(card,&batterycard::longPressed,this,[this,ch]{
-            m_functioncCh = ch;
-            m_initalpage = 1;
-            ui->topstackedwidget->setCurrentIndex(3);  // functionpage
         });
     }
 }
@@ -181,12 +300,33 @@ Mainwindow::~Mainwindow()
 
 // update digital card information
 
-void Mainwindow::update_Voltage(int ch,float voltage){
+void Mainwindow::update_IsOutput(int ch,bool status){
     if (m_digitalcards.contains(ch)) {
-        m_digitalcards[ch]->setVoltage(voltage);
+        m_digitalcards[ch]->setChannelState(status && m_initalpage == 0);
     }
 
-    if (m_batterycards.contains(ch) && m_initalpage == 1){
+    if (m_batterycards.contains(ch)){
+        m_batterycards[ch]->setChannelState(status && m_initalpage == 1);
+        m_batterycards[ch]->startupdateValue();
+    }
+
+    if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh){
+        m_funcdigitalcard->setChannelState(status && m_initalpage == 0);
+        m_funcbatterycard->setChannelState(status && m_initalpage == 1);
+        m_funcbatterycard->startupdateValue();
+    }
+}
+
+void Mainwindow::update_Voltage(int ch,float voltage){
+    if (m_digitalcards.contains(ch) && m_initalpage == 0) {
+        m_digitalcards[ch]->setVoltage(voltage);
+
+        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh){
+            m_funcdigitalcard->setVoltage(voltage);
+        }
+    }
+
+    if (m_batterycards.contains(ch) && m_batterycards[ch]->getChstatus()){
         float newocv = m_batterycards[ch]->getcurrentOCV();
         QByteArray ocvbuffer(reinterpret_cast<const char*>(&newocv), sizeof(float));
         std::reverse(ocvbuffer.begin(), ocvbuffer.end());
@@ -200,14 +340,38 @@ void Mainwindow::update_Voltage(int ch,float voltage){
 }
 
 void Mainwindow::update_CurrentAndUnit(int ch,float current){
-    if (m_digitalcards.contains(ch)) {
+    if (m_digitalcards.contains(ch) && m_initalpage == 0) {
         QString newUnit = (qAbs(current) < 1e-4) ? "mA" : "A";
-        m_digitalcards[ch]->setCurrentUnit(newUnit);
         m_digitalcards[ch]->setCurrent(current);
+        m_digitalcards[ch]->setCurrentUnit(newUnit);
+
+        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh){
+            m_funcdigitalcard->setCurrent(current);
+            m_funcdigitalcard->setCurrentUnit(newUnit);
+        }
     }
 
-    if (m_batterycards.contains(ch) && m_initalpage == 1){
+    if (m_batterycards.contains(ch) && m_batterycards[ch]->getChstatus()){
         m_batterycards[ch]->updateSocValue(current);
+    }
+}
+
+void Mainwindow::update_Range(int ch,quint8 range)
+{
+    if (m_digitalcards.contains(ch) && m_initalpage == 0) {
+        quint8 unitCode;QString unit;
+        switch (range) {
+            case 0x01:  unitCode = 0;unit = "mA";   break;
+            case 0x10:  unitCode = 1;unit = "Auto"; break;
+            case 0x00:  unitCode = 2;unit = "A";    break;
+            default:    unitCode = 0;unit = "A";    break;
+        }
+        m_digitalcards[ch]->setChannelRange(unitCode);
+
+        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh){
+            m_funcdigitalcard->setChannelRange(unitCode);
+            ui->functionunitpushButton->setText(unit);
+        }
     }
 }
 
@@ -216,11 +380,24 @@ void Mainwindow::update_Status(int ch,quint16 status){
         QString binaryStr = QString("%1").arg(status, 16, 2, QLatin1Char('0'));
 
         bool cv  = binaryStr.at(14) == "1";
-        m_digitalcards[ch]->setCVChecked(cv);
         bool cc  = binaryStr.at(13) == "1";
-        m_digitalcards[ch]->setCCChecked(cc);
         bool ovp = binaryStr.at(11) == "1";
-        m_digitalcards[ch]->setOVPChecked(ovp);
+
+        if (m_initalpage == 0){
+            m_digitalcards[ch]->setCVChecked(cv);
+            m_digitalcards[ch]->setCCChecked(cc);
+            m_digitalcards[ch]->setOVPChecked(ovp);
+        }
+
+        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh){
+            m_chstatuscard->setChtatus(binaryStr);
+
+            if (m_initalpage == 0){
+                m_funcdigitalcard->setCVChecked(cv);
+                m_funcdigitalcard->setCCChecked(cc);
+                m_funcdigitalcard->setOVPChecked(ovp);
+            }
+        }
     }
 }
 
@@ -232,34 +409,52 @@ void Mainwindow::update_Cv(int ch,float cv){
     if (m_batterycards.contains(ch)){
         m_batterycards[ch]->setOcvValue(cv);
     }
+
+    if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh){
+        if (m_initalpage == 0){
+            m_funcdigitalcard->setCvValue(cv);
+
+            QString text = QString::number(cv, 'f', 3);
+            ui->cvvaluelabel->setText(text);
+        }else{
+            m_funcbatterycard->setOcvValue(cv);
+        }
+    }
 }
 
 void Mainwindow::update_Cc(int ch,float cc){
     if (m_digitalcards.contains(ch)) {
         m_digitalcards[ch]->setCcValue(cc);
+
+        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh && m_initalpage == 0){
+            m_funcdigitalcard->setCcValue(cc);
+
+            QString text = QString::number(cc, 'f', 3);
+            ui->ccvaluelabel->setText(text);
+        }
     }
 }
 
 void Mainwindow::update_Ovp(int ch,float ovp){
     if (m_digitalcards.contains(ch)) {
         m_digitalcards[ch]->setOvpValue(ovp);
-    }
-}
 
-void Mainwindow::update_IsOutput(int ch,bool status){
-    if (m_digitalcards.contains(ch)) {
-        m_digitalcards[ch]->setChannelState(status);
-    }
+        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh && m_initalpage == 0){
+            m_funcdigitalcard->setOvpValue(ovp);
 
-    if (m_batterycards.contains(ch)){
-        m_batterycards[ch]->setChannelState(status);
-        m_batterycards[ch]->startupdateValue();
+            QString text = QString::number(ovp, 'f', 3);
+            ui->ovpvaluelabel->setText(text);
+        }
     }
 }
 
 void Mainwindow::update_Imp(int ch,float imp){
     if (m_batterycards.contains(ch)){
         m_batterycards[ch]->setEsrValue(imp);
+
+        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh && m_initalpage == 1){
+            m_funcbatterycard->setEsrValue(imp);
+        }
     }
 }
 
@@ -335,15 +530,6 @@ void Mainwindow::update_remotemodel(quint8 reface){
     return channels;
 }*/
 
-void Mainwindow::setChannel_Setstatus(int channel,int model,const QString& val){
-    // model: 0 - CV ; 1 - CC ; 3 - OVP;
-    float value = val.toFloat();
-    QByteArray buffer(reinterpret_cast<const char*>(&value), sizeof(float));
-    std::reverse(buffer.begin(), buffer.end()); // big-endian order
-
-    return to_Channel(channel,0x02, model, buffer);
-}
-
 // *********************************************
 
 // Auxiliary function
@@ -365,52 +551,6 @@ void Mainwindow::to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray&
         default:
             return;
     }
-}
-
-QString Mainwindow::set_unit(int channel)
-{
-    quint8 unitCode; QString unit;
-
-    static int step = 0;
-    switch (step) {
-    case 0:  unitCode = 0x01;unit = "mA";   break;
-    case 1:  unitCode = 0x10;unit = "Auto"; break;
-    case 2:  unitCode = 0x00;unit = "A";    break;
-    default: unitCode = 0x00;unit = "A";    break;
-    }
-    step = (step + 1) % 3;
-
-    QByteArray Unit_buffer;
-    Unit_buffer.append(char(unitCode));
-    to_Channel(channel,0x04, 0x0E, Unit_buffer);
-
-    return unit;
-}
-
-QString Mainwindow::set_Model(int channel)
-{
-    static int currentIndex = 0;
-
-    if (!m_currentModelList.isEmpty()) {
-        currentIndex = (currentIndex + 1) % m_currentModelList.size();
-        QString batteryModel = m_currentModelList[currentIndex];
-
-        if (channel == 0) {
-            for (auto it = m_batterycards.cbegin(); it != m_batterycards.cend(); ++it) {
-                it.value()->setModelValue(batteryModel);
-                it.value()->setModel(m_modelManager->getModel(batteryModel));
-            }
-        }else{
-            if (m_batterycards.contains(channel)){
-                m_batterycards[channel]->setModelValue(batteryModel);
-                m_batterycards[channel]->setModel(m_modelManager->getModel(batteryModel));
-            }
-        }
-
-        return batteryModel;
-    }
-
-    return "empty";
 }
 
 // channel card switchs
@@ -520,7 +660,22 @@ void Mainwindow::on_digitalallONpushButton_clicked()
 
 void Mainwindow::on_digitalallunitpushButton_clicked()
 {
-    QString newunit = "All - " + set_unit(0);
+    quint8 unitCode; QString unit;
+
+    static quint8 step = 0;
+    switch (step) {
+    case 0:  unitCode = 0x01;unit = "mA";   break;
+    case 1:  unitCode = 0x10;unit = "Auto"; break;
+    case 2:  unitCode = 0x00;unit = "A";    break;
+    default: unitCode = 0x00;unit = "A";    break;
+    }
+    step = (step + 1) % 3;
+
+    QByteArray Unit_buffer;
+    Unit_buffer.append(char(unitCode));
+    to_Channel(0,0x04, 0x0E, Unit_buffer);
+
+    QString newunit = "All - " + unit;
     ui->digitalallunitpushButton->setText(newunit);
 }
 
@@ -533,8 +688,20 @@ void Mainwindow::on_batteryallONpushButton_clicked()
 
 void Mainwindow::on_batteryallmodelpushButton_clicked()
 {
-    QString modelname = "All - " + set_Model(0);
-    ui->batteryallmodelpushButton->setText(modelname);
+    static quint8 currentIndex = 0;
+
+    if (!m_currentModelList.isEmpty()) {
+        currentIndex = (currentIndex + 1) % m_currentModelList.size();
+        QString batteryModel = m_currentModelList[currentIndex];
+
+        for (auto it = m_batterycards.cbegin(); it != m_batterycards.cend(); ++it) {
+            it.value()->setModelValue(batteryModel);
+            it.value()->setModel(currentIndex,m_modelManager->getModel(batteryModel));
+        }
+
+        QString modelname = "All - " + batteryModel;
+        ui->batteryallmodelpushButton->setText(modelname);
+    }
 }
 
 // function page switchs
@@ -551,10 +718,97 @@ void Mainwindow::on_functionrowsbackpushButton_clicked()
 
 void Mainwindow::on_functionallapplypushButton_clicked()
 {
-    // Apply all 逻辑：遍历所有通道应用设置
-    /*for (auto it = m_numbercards.cbegin(); it != m_numbercards.cend(); ++it) {
-        int ch = it.key();
-        // 发送命令到每个通道
-        to_Channel(ch, 0x04, 0x0E, QByteArray(1, 0x10));  // 切换到 Auto 单位
-    }*/
+    if (m_initalpage == 0){
+        // model: 0 - CV ; 1 - CC ; 3 - OVP;
+        if (ui->cvvaluelabel->text() != ""){
+            float val = ui->cvvaluelabel->text().toFloat();
+            QByteArray buffer(reinterpret_cast<const char*>(&val), sizeof(float));
+            std::reverse(buffer.begin(), buffer.end()); // big-endian order
+            to_Channel(0,0x02, 0, buffer);
+        }
+        if (ui->ccvaluelabel->text() != ""){
+            float val = ui->ccvaluelabel->text().toFloat();
+            QByteArray buffer(reinterpret_cast<const char*>(&val), sizeof(float));
+            std::reverse(buffer.begin(), buffer.end()); // big-endian order
+            to_Channel(0,0x02, 1, buffer);
+        }
+        if (ui->ovpvaluelabel->text() != ""){
+            float val = ui->ovpvaluelabel->text().toFloat();
+            QByteArray buffer(reinterpret_cast<const char*>(&val), sizeof(float));
+            std::reverse(buffer.begin(), buffer.end()); // big-endian order
+            to_Channel(0,0x02, 3, buffer);
+        }
+    }else{
+        if (ui->socvaluelabel->text() != ""){
+            float val = ui->socvaluelabel->text().toFloat();
+            for (auto it = m_batterycards.cbegin(); it != m_batterycards.cend(); ++it) {
+                it.value()->setSocValue(val);
+            }
+        }
+        if (ui->capvaluelabel->text() != ""){
+            float val = ui->capvaluelabel->text().toFloat();
+            for (auto it = m_batterycards.cbegin(); it != m_batterycards.cend(); ++it) {
+                it.value()->setCapValue(val);
+            }
+        }
+    }
+}
+
+void Mainwindow::on_cvradioButton_clicked()
+{
+    m_functioncsetmode = 0;
+}
+
+void Mainwindow::on_ccradioButton_clicked()
+{
+    m_functioncsetmode = 1;
+}
+
+void Mainwindow::on_ovpradioButton_clicked()
+{
+    m_functioncsetmode = 3;
+}
+
+void Mainwindow::on_functionunitpushButton_clicked()
+{
+    quint8 step = m_digitalcards[m_functioncCh]->getChRange();
+    step = (step + 1) % 3;
+    quint8 unitCode;
+
+    switch (step) {
+        case 0:  unitCode = 0x01;break;
+        case 1:  unitCode = 0x10;break;
+        case 2:  unitCode = 0x00;break;
+        default: unitCode = 0x00;break;
+    }
+
+    QByteArray Unit_buffer;
+    Unit_buffer.append(char(unitCode));
+    to_Channel(m_functioncCh,0x04, 0x0E, Unit_buffer);
+}
+
+void Mainwindow::on_socradioButton_clicked()
+{
+    m_functioncsetmode = 0;
+}
+
+void Mainwindow::on_capradioButton_clicked()
+{
+    m_functioncsetmode = 1;
+}
+
+void Mainwindow::on_functionmodelpushButton_clicked()
+{
+    if (m_batterycards.contains(m_functioncCh)){
+        quint8 currentIndex = m_batterycards[m_functioncCh]->getChmodel();
+
+        if (!m_currentModelList.isEmpty()) {
+            currentIndex = (currentIndex + 1) % m_currentModelList.size();
+            QString batteryModel = m_currentModelList[currentIndex];
+
+            ui->batteryallmodelpushButton->setText(batteryModel);
+            m_batterycards[m_functioncCh]->setModelValue(batteryModel);
+            m_batterycards[m_functioncCh]->setModel(currentIndex,m_modelManager->getModel(batteryModel));
+        }
+    }
 }

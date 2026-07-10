@@ -65,10 +65,7 @@ border: none;
   <property name="locale">
    <locale language="Chinese" country="China"/>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,1">
-   <property name="spacing">
-    <number>0</number>
-   </property>
+  <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -81,7 +78,7 @@ border: none;
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item>
+   <item row="0" column="0">
     <widget class="QFrame" name="frame">
      <property name="font">
       <font>
@@ -657,7 +654,7 @@ background-color: transparent;
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1280</width>
+            <width>1281</width>
             <height>320</height>
            </rect>
           </property>
@@ -701,13 +698,19 @@ border: none;
            <bool>false</bool>
           </property>
           <property name="autoScrollMargin">
-           <number>18</number>
+           <number>0</number>
           </property>
           <property name="editTriggers">
            <set>QAbstractItemView::NoEditTriggers</set>
           </property>
           <property name="showDropIndicator" stdset="0">
            <bool>false</bool>
+          </property>
+          <property name="dragDropMode">
+           <enum>QAbstractItemView::DragDrop</enum>
+          </property>
+          <property name="defaultDropAction">
+           <enum>Qt::MoveAction</enum>
           </property>
           <property name="selectionMode">
            <enum>QAbstractItemView::NoSelection</enum>
@@ -728,13 +731,16 @@ border: none;
            <bool>true</bool>
           </property>
           <property name="spacing">
-           <number>6</number>
+           <number>2</number>
           </property>
           <property name="viewMode">
            <enum>QListView::IconMode</enum>
           </property>
           <property name="uniformItemSizes">
            <bool>true</bool>
+          </property>
+          <property name="selectionRectVisible">
+           <bool>false</bool>
           </property>
           <property name="itemAlignment">
            <set>Qt::AlignCenter</set>
@@ -1368,13 +1374,1008 @@ border:none;
            </item>
           </layout>
          </widget>
+         <widget class="QFrame" name="functionkeyframe">
+          <property name="geometry">
+           <rect>
+            <x>1070</x>
+            <y>0</y>
+            <width>211</width>
+            <height>316</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <family>WenQuanYi Micro Hei</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>BlankCursor</cursorShape>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(92, 53, 102);</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+         </widget>
+         <widget class="QFrame" name="functionversionframe">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>211</width>
+            <height>316</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <family>WenQuanYi Micro Hei</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>BlankCursor</cursorShape>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(136, 138, 133);</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+         </widget>
+         <widget class="QFrame" name="functionchstatusframe">
+          <property name="geometry">
+           <rect>
+            <x>215</x>
+            <y>0</y>
+            <width>422</width>
+            <height>316</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <family>WenQuanYi Micro Hei</family>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>BlankCursor</cursorShape>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(143, 89, 2);</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+         </widget>
+         <widget class="QStackedWidget" name="functionstackedWidget">
+          <property name="geometry">
+           <rect>
+            <x>640</x>
+            <y>0</y>
+            <width>427</width>
+            <height>316</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <family>WenQuanYi Micro Hei</family>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>BlankCursor</cursorShape>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="functiondigitalpage">
+           <property name="font">
+            <font>
+             <family>WenQuanYi Micro Hei</family>
+            </font>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <widget class="QFrame" name="functiondigitalframe">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>211</width>
+              <height>316</height>
+             </rect>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(32, 74, 135);</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <property name="lineWidth">
+             <number>0</number>
+            </property>
+           </widget>
+           <widget class="QFrame" name="functiondigitalsetframe">
+            <property name="geometry">
+             <rect>
+              <x>215</x>
+              <y>0</y>
+              <width>211</width>
+              <height>316</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>WenQuanYi Micro Hei</family>
+             </font>
+            </property>
+            <property name="cursor">
+             <cursorShape>BlankCursor</cursorShape>
+            </property>
+            <property name="contextMenuPolicy">
+             <enum>Qt::NoContextMenu</enum>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">#functiondigitalsetframe {
+    background-color: #101C30;
+    border-radius: 18px;
+    border: 3px solid rgba(63, 63, 90, 0.81);
+}
+QRadioButton {
+    color: #808090;
+    font-size: 18px;
+    font-weight: bold;
+    spacing: 9px;
+}
+QRadioButton::indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 11px;
+    border: 2px solid #3A3A50;
+    background-color: #151D2E;
+}
+QRadioButton:checked {
+    color: #60C8B0;
+}
+QRadioButton:indicator::checked{
+	background-color: #2A8A7A;
+}
+QLabel {
+    color: #C9C9C9;
+    font-size: 16px;
+    border: none;
+}
+#cvvaluelabel, #ccvaluelabel, #ovpvaluelabel {
+    color: #D0D0D0;
+    font-size: 18px;
+    background-color: #151D2E;
+    border: 1px solid #2A2A3E;
+    border-radius: 9px;
+    padding: 6px;
+}</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <property name="lineWidth">
+             <number>0</number>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_3" rowstretch="4,1,3,1,3,1,3" columnstretch="2,5,1">
+             <property name="topMargin">
+              <number>6</number>
+             </property>
+             <property name="bottomMargin">
+              <number>6</number>
+             </property>
+             <item row="0" column="0" colspan="3">
+              <widget class="QRadioButton" name="cvradioButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="mouseTracking">
+                <bool>false</bool>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="text">
+                <string>CV</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+               <property name="autoExclusive">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="cvlabel">
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string>Set: </string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLabel" name="cvvaluelabel">
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QLabel" name="cvunitlabel">
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string>V</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0" colspan="3">
+              <widget class="QRadioButton" name="ccradioButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="mouseTracking">
+                <bool>false</bool>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="text">
+                <string>CC</string>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="cclabel">
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string>Set: </string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QLabel" name="ccvaluelabel">
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QLabel" name="ccunitlabel">
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string>A</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0" colspan="3">
+              <widget class="QRadioButton" name="ovpradioButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="mouseTracking">
+                <bool>false</bool>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="text">
+                <string>OVP</string>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="ovplabel">
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string>Set: </string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QLabel" name="ovpvaluelabel">
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="2">
+              <widget class="QLabel" name="ovpunitlabel">
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string>V</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0" colspan="3">
+              <widget class="QPushButton" name="functionunitpushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">#functionunitpushButton {
+    background-color: #1A2A45;
+    color: #C9C9C9;
+    border: 3px solid rgba(74, 74, 90, 0.3);
+    border-radius: 9px;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 8px;
+}
+#functionunitpushButton:hover {
+    background-color: #243356;
+    border-color: rgba(100, 100, 130, 0.6);
+    color: #E0E0E0;
+}
+#functionunitpushButton:pressed {
+    background-color: #0D1525;
+    color: #FFFFFF;
+}</string>
+               </property>
+               <property name="text">
+                <string>A</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+          <widget class="QWidget" name="functionbatterypage">
+           <property name="font">
+            <font>
+             <family>WenQuanYi Micro Hei</family>
+            </font>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <widget class="QFrame" name="functionbatteryframe">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>211</width>
+              <height>316</height>
+             </rect>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(78, 154, 6);</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <property name="lineWidth">
+             <number>0</number>
+            </property>
+           </widget>
+           <widget class="QFrame" name="functionbatterysetframe">
+            <property name="geometry">
+             <rect>
+              <x>215</x>
+              <y>0</y>
+              <width>211</width>
+              <height>316</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>WenQuanYi Micro Hei</family>
+             </font>
+            </property>
+            <property name="cursor">
+             <cursorShape>BlankCursor</cursorShape>
+            </property>
+            <property name="contextMenuPolicy">
+             <enum>Qt::NoContextMenu</enum>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">#functionbatterysetframe {
+    background-color: #101C30;
+    border-radius: 18px;
+    border: 3px solid rgba(63, 63, 90, 0.81);
+}
+QRadioButton {
+    color: #808090;
+    font-size: 18px;
+    font-weight: bold;
+    spacing: 9px;
+}
+QRadioButton::indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 11px;
+    border: 2px solid #3A3A50;
+    background-color: #151D2E;
+}
+QRadioButton:checked {
+    color: #60C8B0;
+}
+QRadioButton:indicator::checked{
+	background-color: #2A8A7A;
+}
+QLabel {
+    color: #C9C9C9;
+    font-size: 16px;
+    border: none;
+}
+#socvaluelabel, #capvaluelabel{
+    color: #D0D0D0;
+    font-size: 18px;
+    background-color: #151D2E;
+    border: 1px solid #2A2A3E;
+    border-radius: 9px;
+    padding: 6px;
+}</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <property name="lineWidth">
+             <number>0</number>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_2" rowstretch="3,1,3,1,3" columnstretch="2,5,1">
+             <item row="0" column="0" colspan="3">
+              <widget class="QRadioButton" name="socradioButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="mouseTracking">
+                <bool>false</bool>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="text">
+                <string>Init - SOC</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+               <property name="autoExclusive">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="soclabel">
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string>Set: </string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLabel" name="socvaluelabel">
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QLabel" name="socunitlabel">
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string>%</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0" colspan="3">
+              <widget class="QRadioButton" name="capradioButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="mouseTracking">
+                <bool>false</bool>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="text">
+                <string>Init - CAP</string>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="caplabel">
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string>Set: </string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QLabel" name="capvaluelabel">
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QLabel" name="capunitlabel">
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string>Ah</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0" colspan="3">
+              <widget class="QPushButton" name="functionmodelpushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>WenQuanYi Micro Hei</family>
+                 <pointsize>-1</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="cursor">
+                <cursorShape>BlankCursor</cursorShape>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">#functionmodelpushButton {
+    background-color: #1A2A45;
+    color: #C9C9C9;
+    border: 3px solid rgba(74, 74, 90, 0.3);
+    border-radius: 9px;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 8px;
+}
+#functionmodelpushButton:hover {
+    background-color: #243356;
+    border-color: rgba(100, 100, 130, 0.6);
+    color: #E0E0E0;
+}
+#functionmodelpushButton:pressed {
+    background-color: #0D1525;
+    color: #FFFFFF;
+}</string>
+               </property>
+               <property name="text">
+                <string>emtry</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </widget>
         </widget>
        </widget>
       </item>
      </layout>
     </widget>
    </item>
-   <item>
+   <item row="1" column="0">
     <widget class="QFrame" name="emptryframe">
      <property name="enabled">
       <bool>true</bool>

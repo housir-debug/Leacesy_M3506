@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>versionview</class>
+ <widget class="QFrame" name="versionview">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>200</width>
+    <height>310</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>200</width>
+    <height>310</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>240</width>
+    <height>372</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>WenQuanYi Micro Hei</family>
+    <pointsize>12</pointsize>
+   </font>
+  </property>
+  <property name="cursor">
+   <cursorShape>BlankCursor</cursorShape>
+  </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::NoContextMenu</enum>
+  </property>
+  <property name="windowTitle">
+   <string>Frame</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">#versionview {
+	background-color: #101C30;
+    border-radius: 18px;
+	border: 3px solid rgba(63, 63, 90, 0.81);
+}</string>
+  </property>
+  <property name="locale">
+   <locale language="Chinese" country="China"/>
+  </property>
+  <property name="lineWidth">
+   <number>0</number>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,3,1,3">
+   <property name="topMargin">
+    <number>18</number>
+   </property>
+   <property name="bottomMargin">
+    <number>18</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="channellabel">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="font">
+      <font>
+       <family>WenQuanYi Micro Hei</family>
+       <pointsize>-1</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="cursor">
+      <cursorShape>BlankCursor</cursorShape>
+     </property>
+     <property name="contextMenuPolicy">
+      <enum>Qt::NoContextMenu</enum>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">#channellabel
+{
+color: #C9C9C9; 
+font-size: 18px; 
+font-weight: bold; 
+border: none;
+}</string>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
+     </property>
+     <property name="text">
+      <string>CH-01</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="channelframe">
+     <property name="font">
+      <font>
+       <family>WenQuanYi Micro Hei</family>
+      </font>
+     </property>
+     <property name="cursor">
+      <cursorShape>BlankCursor</cursorShape>
+     </property>
+     <property name="contextMenuPolicy">
+      <enum>Qt::NoContextMenu</enum>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">#channelframe {
+    border-radius: 9px;
+	border: 3px solid rgba(63, 63, 90, 0.81);
+}</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
+     </property>
+     <layout class="QGridLayout" name="gridLayout" rowstretch="1,1" columnstretch="1,3" rowminimumheight="0,0">
+      <property name="leftMargin">
+       <number>18</number>
+      </property>
+      <property name="topMargin">
+       <number>9</number>
+      </property>
+      <property name="rightMargin">
+       <number>18</number>
+      </property>
+      <property name="bottomMargin">
+       <number>9</number>
+      </property>
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="channelswlabel">
+        <property name="font">
+         <font>
+          <family>WenQuanYi Micro Hei</family>
+          <pointsize>-1</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#channelswlabel
+{
+color: #808090; 
+font-size: 12px; 
+border: none;
+}</string>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string>SW: --</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="chswvaluelabel">
+        <property name="font">
+         <font>
+          <family>WenQuanYi Micro Hei</family>
+          <pointsize>-1</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#chswvaluelabel
+{
+color: #808090; 
+font-size: 18px; 
+border: none;
+}</string>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string>0.0.0.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="channelhwlabel">
+        <property name="font">
+         <font>
+          <family>WenQuanYi Micro Hei</family>
+          <pointsize>-1</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#channelhwlabel
+{
+color: #808090; 
+font-size: 12px; 
+border: none;
+}</string>
+        </property>
+        <property name="text">
+         <string>HW: --</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="chhwvaluelabel">
+        <property name="font">
+         <font>
+          <family>WenQuanYi Micro Hei</family>
+          <pointsize>-1</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#chhwvaluelabel
+{
+color: #808090; 
+font-size: 18px; 
+border: none;
+}</string>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string>0.0.0.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="devicelabel">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="font">
+      <font>
+       <family>WenQuanYi Micro Hei</family>
+       <pointsize>-1</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="cursor">
+      <cursorShape>BlankCursor</cursorShape>
+     </property>
+     <property name="contextMenuPolicy">
+      <enum>Qt::NoContextMenu</enum>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">#devicelabel
+{
+color: #C9C9C9; 
+font-size: 18px; 
+font-weight: bold; 
+border: none;
+}</string>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
+     </property>
+     <property name="text">
+      <string>Device</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="deviceframe">
+     <property name="font">
+      <font>
+       <family>WenQuanYi Micro Hei</family>
+      </font>
+     </property>
+     <property name="cursor">
+      <cursorShape>BlankCursor</cursorShape>
+     </property>
+     <property name="contextMenuPolicy">
+      <enum>Qt::NoContextMenu</enum>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">#deviceframe {
+    border-radius: 9px;
+	border: 3px solid rgba(63, 63, 90, 0.81);
+}</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2" rowstretch="1,1" columnstretch="1,3">
+      <property name="leftMargin">
+       <number>18</number>
+      </property>
+      <property name="rightMargin">
+       <number>18</number>
+      </property>
+      <property name="bottomMargin">
+       <number>9</number>
+      </property>
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="deviceswlabel">
+        <property name="font">
+         <font>
+          <family>WenQuanYi Micro Hei</family>
+          <pointsize>-1</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#deviceswlabel
+{
+color: #808090; 
+font-size: 12px; 
+border: none;
+}</string>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string>SW: --</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="deswvaluelabel">
+        <property name="font">
+         <font>
+          <family>WenQuanYi Micro Hei</family>
+          <pointsize>-1</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#deswvaluelabel
+{
+color: #808090; 
+font-size: 18px; 
+border: none;
+}</string>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string>0.0.0.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="devicehwlabel">
+        <property name="font">
+         <font>
+          <family>WenQuanYi Micro Hei</family>
+          <pointsize>-1</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#devicehwlabel
+{
+color: #808090; 
+font-size: 12px; 
+border: none;
+}</string>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string>HW: --</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="dehwvaluelabel">
+        <property name="font">
+         <font>
+          <family>WenQuanYi Micro Hei</family>
+          <pointsize>-1</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#dehwvaluelabel
+{
+color: #808090; 
+font-size: 18px; 
+border: none;
+}</string>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string>0.0.0.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

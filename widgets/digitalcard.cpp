@@ -3,8 +3,6 @@
 #include <QMouseEvent>
 #include <QTimer>
 #include <QStyle>
-#include <QtDebug>
-
 
 digitalcard::digitalcard(QWidget *parent) :
     QFrame(parent),
@@ -19,7 +17,7 @@ digitalcard::digitalcard(QWidget *parent) :
     connect(m_longPressTimer, &QTimer::timeout, this, [this]{
         if (m_isPressed && !m_longPressTriggered) {
             m_longPressTriggered = true;
-            emit longPressed();
+            emit longPressed(m_channel);
         }
     });
 }
@@ -52,9 +50,8 @@ void digitalcard::mouseReleaseEvent(QMouseEvent *event)
         if (!m_longPressTriggered) {
             QPoint delta = event->pos() - m_pressPos;
             if (delta.manhattanLength() < 18) {
-                qDebug()<<"触发打印";
                 bool status = property("outputed").toBool();
-                emit clicked(!status);
+                emit clicked(m_channel,!status);
             }
         }
     }
@@ -81,6 +78,22 @@ void digitalcard::mouseMoveEvent(QMouseEvent *event)
 }
 
 // property setting API
+
+bool digitalcard::getChstatus() const
+{
+    return property("outputed").toBool();
+}
+
+quint8 digitalcard::getChRange() const
+{
+    return m_range;
+}
+
+
+void digitalcard::setChannel(quint8 ch)
+{
+    m_channel = ch;
+}
 
 void digitalcard::setChannelState(bool state)
 {
@@ -109,10 +122,19 @@ void digitalcard::setCurrent(float value)
 
 void digitalcard::setCurrentUnit(const QString &unit)
 {
-    QFont font = ui->currentunitlabel->font(); // get source all property
-    font.setPixelSize(unit.size()==1 ? 36 : 18);
-    ui->currentunitlabel->setFont(font);
+    bool state = unit.size()==2;
+    ui->currentunitlabel->setProperty("mA",state);
     ui->currentunitlabel->setText(unit);
+
+    ui->currentunitlabel->style()->unpolish(ui->currentunitlabel);
+    ui->currentunitlabel->style()->polish(ui->currentunitlabel);
+    ui->currentunitlabel->update();
+}
+
+void digitalcard::setChannelRange(quint8 range)
+{
+    // 0 -0x01-mA; 1 -0x10-Auto; 2 -0x00-A
+    m_range = range;
 }
 
 void digitalcard::setCVChecked(bool checked)

@@ -15,6 +15,10 @@ public:
     explicit batterycard(QWidget *parent = nullptr);
     ~batterycard();
 
+    bool getChstatus() const;
+    quint8 getChmodel() const;
+
+    void setChannel(quint8 ch);
     void setChannelState(bool state);
     void setChannelName(const QString &name);
 
@@ -23,7 +27,7 @@ public:
     void setCapValue(float value);
     void setEsrValue(float value);
     void setModelValue(const QString &model);
-    void setModel(const QSharedPointer<BatteryModel> &model);
+    void setModel(quint8 index,const QSharedPointer<BatteryModel> &model);
 
     void updateSocValue(float current);
     void startupdateValue();
@@ -34,6 +38,9 @@ public:
 
 private:
     Ui::batterycard *ui;
+    quint8 m_channel{0};
+    quint8 m_modelindex{0};
+
     float m_capacityAH{2.4f};
     float m_progressSOC{0.0f};
     QElapsedTimer m_integralTimer;
@@ -47,8 +54,8 @@ private:
     bool m_longPressTriggered;
 
 signals:
-    void clicked(bool status);
-    void longPressed();
+    void clicked(quint8 ch,bool status);
+    void longPressed(quint8 ch);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;

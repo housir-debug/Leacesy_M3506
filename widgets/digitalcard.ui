@@ -274,6 +274,10 @@ font-family: &quot;WenQuanYi Micro Hei&quot;;
 font-weight: bold;
 font-size: 36px;
 color: #DF1D32;
+}
+#currentunitlabel[mA=true]
+{
+font-size: 18px;
 }</string>
         </property>
         <property name="lineWidth">
@@ -284,6 +288,9 @@ color: #DF1D32;
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
+        </property>
+        <property name="mA" stdset="0">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -466,124 +473,6 @@ color: #C9C9C9;
        </property>
       </widget>
      </item>
-     <item row="2" column="2">
-      <widget class="QCheckBox" name="ovpcheckbox">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="cursor">
-        <cursorShape>BlankCursor</cursorShape>
-       </property>
-       <property name="mouseTracking">
-        <bool>false</bool>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="contextMenuPolicy">
-        <enum>Qt::NoContextMenu</enum>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::RightToLeft</enum>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">#ovpcheckbox::indicator{
-	width:12px;
-	height:12px;
- 	background-color: transparent;
-    border: 3px solid #4A4A5A;
-    border-radius: 9px;
-}
-
-#ovpcheckbox::indicator:checked {
-    background-color:  #E5C27D;;
-}</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QCheckBox" name="cvcheckbox">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="font">
-        <font>
-         <family>WenQuanYi Micro Hei</family>
-         <pointsize>18</pointsize>
-        </font>
-       </property>
-       <property name="cursor">
-        <cursorShape>BlankCursor</cursorShape>
-       </property>
-       <property name="mouseTracking">
-        <bool>false</bool>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="contextMenuPolicy">
-        <enum>Qt::NoContextMenu</enum>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::RightToLeft</enum>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">#cvcheckbox::indicator{
-	width:12px;
-	height:12px;
- 	background-color: transparent;
-    border: 3px solid #4A4A5A;
-    border-radius: 9px;
-}
-
-#cvcheckbox::indicator:checked {
-    background-color:  #0DAF65;;
-}</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>18</width>
-         <height>18</height>
-        </size>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
-       <property name="tristate">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
      <item row="2" column="0">
       <widget class="QLabel" name="ovplabel">
        <property name="enabled">
@@ -656,59 +545,6 @@ color: #C9C9C9;
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="2">
-      <widget class="QCheckBox" name="cccheckbox">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="cursor">
-        <cursorShape>BlankCursor</cursorShape>
-       </property>
-       <property name="mouseTracking">
-        <bool>false</bool>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="contextMenuPolicy">
-        <enum>Qt::NoContextMenu</enum>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::RightToLeft</enum>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">#cccheckbox::indicator{
-	width:12px;
-	height:12px;
- 	background-color: transparent;
-    border: 3px solid #4A4A5A;
-    border-radius: 9px;
-}
-
-#cccheckbox::indicator:checked {
-    background-color:  #DF1D32;;
-}</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>18</width>
-         <height>18</height>
-        </size>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -787,6 +623,183 @@ color: #DF1D32;
         <string>CC  </string>
        </property>
        <property name="scaledContents">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QRadioButton" name="cvcheckbox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <family>WenQuanYi Micro Hei</family>
+         <pointsize>18</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>BlankCursor</cursorShape>
+       </property>
+       <property name="mouseTracking">
+        <bool>false</bool>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::NoContextMenu</enum>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">#cvcheckbox::indicator{
+	width:12px;
+	height:12px;
+ 	background-color: transparent;
+    border: 3px solid #4A4A5A;
+    border-radius: 9px;
+}
+
+#cvcheckbox::indicator:checked {
+    background-color:  #0DAF65;;
+}</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>18</width>
+         <height>18</height>
+        </size>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QRadioButton" name="cccheckbox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="cursor">
+        <cursorShape>BlankCursor</cursorShape>
+       </property>
+       <property name="mouseTracking">
+        <bool>false</bool>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::NoContextMenu</enum>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">#cccheckbox::indicator{
+	width:12px;
+	height:12px;
+ 	background-color: transparent;
+    border: 3px solid #4A4A5A;
+    border-radius: 9px;
+}
+
+#cccheckbox::indicator:checked {
+    background-color:  #DF1D32;;
+}</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>18</width>
+         <height>18</height>
+        </size>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QRadioButton" name="ovpcheckbox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="cursor">
+        <cursorShape>BlankCursor</cursorShape>
+       </property>
+       <property name="mouseTracking">
+        <bool>false</bool>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::NoContextMenu</enum>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">#ovpcheckbox::indicator{
+	width:12px;
+	height:12px;
+ 	background-color: transparent;
+    border: 3px solid #4A4A5A;
+    border-radius: 9px;
+}
+
+#ovpcheckbox::indicator:checked {
+    background-color:  #E5C27D;;
+}</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+       <property name="autoExclusive">
         <bool>false</bool>
        </property>
       </widget>
