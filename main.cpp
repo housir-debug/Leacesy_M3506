@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        //QObject::connect(GuiBridge_share.get(),&Mainwindow::to_CANid,canServer.get(),&CanServerManager::change_canid,Qt::QueuedConnection);
+        QObject::connect(canServer.get(),&CanServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
     }
 
     // can channel create
@@ -147,6 +147,8 @@ int main(int argc, char *argv[])
             qCWarning(application) << "WebServerManager not Normal start!";
             return 1;
         }
+
+        QObject::connect(webServer.get(),&WebServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
     }
 
     std::unique_ptr<TcpServerManager> vxiServer;
@@ -157,6 +159,8 @@ int main(int argc, char *argv[])
             qCWarning(application) << "TcpServer not Normal start!";
             return 1;
         }
+
+        QObject::connect(vxiServer.get(),&TcpServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
     }
 
     // UART Server create
@@ -168,6 +172,8 @@ int main(int argc, char *argv[])
             qCWarning(application) << "UartServer not Normal start!";
             return 1;
         }
+
+        QObject::connect(uartServer.get(),&UartServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
     }
 
     // GPIB server create

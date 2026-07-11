@@ -9,6 +9,7 @@
 #include "versionview.h"
 #include "chstatusview.h"
 #include "numberkeypad.h"
+#include "remoteoverlay.h"
 #include "auxiliary/battery_model.h"
 #include "auxiliary/config_manager.h"
 
@@ -102,6 +103,7 @@ private:
     numberkeypad* m_funcnmbkeycard;
     digitalcard* m_funcdigitalcard;
     batterycard* m_funcbatterycard;
+    remoteoverlay *m_remoteOverlay;
 
     //QMap<quint8,bool> m_ChOutmode;
     QMap<quint8,QString> m_ChsoftVer;

@@ -17,6 +17,9 @@ class TcpServerManager : public QObject
 {
     Q_OBJECT
 
+signals:
+    void isRemote(quint8 reface);
+
 public:
     explicit TcpServerManager(QObject *parent = nullptr);
     ~TcpServerManager();

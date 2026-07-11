@@ -72,7 +72,7 @@ void UartServerManager::handleReadyRead()
         return;
     }
     else if (ConfigManager::s_remoteSt.load()==0){
-        ConfigManager::s_remoteSt.store(3);
+        emit isRemote(3);
     }
 
     // read information

@@ -30,6 +30,7 @@ HEADERS += \
     widgets/digitalcard.h \
     widgets/mainwindow.h \
     widgets/numberkeypad.h \
+    widgets/remoteoverlay.h \
     widgets/test.h \
     widgets/versionview.h
 
@@ -55,6 +56,7 @@ SOURCES += \
     widgets/digitalcard.cpp \
     widgets/mainwindow.cpp \
     widgets/numberkeypad.cpp \
+    widgets/remoteoverlay.cpp \
     widgets/test.cpp \
     widgets/versionview.cpp
 
@@ -81,5 +83,6 @@ FORMS += \
     widgets/digitalcard.ui \
     widgets/mainwindow.ui \
     widgets/numberkeypad.ui \
+    widgets/remoteoverlay.ui \
     widgets/test.ui \
     widgets/versionview.ui

@@ -158,7 +158,7 @@ border: none;
          <number>0</number>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="digitalpage">
          <property name="minimumSize">
@@ -1084,6 +1084,241 @@ border:none;
 background-color: transparent;
 }</string>
          </property>
+         <widget class="QFrame" name="settingbottomframe">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>320</y>
+            <width>1280</width>
+            <height>80</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <family>WenQuanYi Micro Hei</family>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>BlankCursor</cursorShape>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">#settingbottomframe {
+    background-color: #101C30;
+    border-radius: 9px;
+    border: 1px solid rgba(74, 74, 90, 0.4);
+}
+QPushButton{
+    background-color: #1A2A45;
+    border: 1px solid rgba(74, 74, 90, 0.3);
+    border-radius: 9px;
+    font-family: &quot;WenQuanYi Micro Hei&quot;;
+	font-weight: bold;
+    font-size: 18px;
+	color: #C9C9C9;
+    padding: 12px 1px;
+}
+QPushButton:hover {
+    background-color: #243356;
+    border-color: rgba(100, 100, 130, 0.6);
+    color: #E0E0E0;
+}
+QPushButton:pressed {
+    background-color: #0D1525;
+    border-color: rgba(100, 100, 130, 0.8);
+    color: #FFFFFF;
+}</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="5,1,2,1,5">
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>6</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QPushButton" name="settingpushButton1">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::NoFocus</enum>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#settingpushButton1
+{
+background-color: transparent;
+border:none;
+}
+#settingpushButton1:hover {
+}
+#settingpushButton1:pressed {
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="settingrowsbackpushButton">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::NoFocus</enum>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#settingrowsbackpushButton {
+    background-color: transparent;
+    border: 1px solid rgba(74, 74, 90, 0.3);
+}
+#settingrowsbackpushButton:disabled {
+    background-color: #151D2E;
+    color: #3A3A4E;
+	border: 1px solid rgba(40, 40, 55, 0.2);
+}
+#settingrowsbackpushButton:hover {
+    background-color: #1A2A45;
+    color: #FFFFFF;
+}
+#settingrowsbackpushButton:pressed {
+    background-color: #0D1525;
+}</string>
+             </property>
+             <property name="text">
+              <string>&lt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="settingrowslabelpushButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::NoFocus</enum>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#settingrowslabelpushButton
+{
+background-color: transparent;
+border:none;
+}
+#settingrowslabelpushButton:hover {
+}
+#settingrowslabelpushButton:pressed {
+}</string>
+             </property>
+             <property name="text">
+              <string>goback</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="settingrowsnextpushButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::NoFocus</enum>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#settingrowsnextpushButton {
+    background-color: transparent;
+    border: 1px solid rgba(74, 74, 90, 0.3);
+}
+#settingrowsnextpushButton:disabled {
+    background-color: #151D2E;
+    color: #3A3A4E;
+	border: 1px solid rgba(40, 40, 55, 0.2);
+}
+#settingrowsnextpushButton:hover {
+    background-color: #1A2A45;
+    color: #FFFFFF;
+}
+#settingrowsnextpushButton:pressed {
+    background-color: #0D1525;
+}</string>
+             </property>
+             <property name="text">
+              <string>&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="settingpushButton2">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="cursor">
+              <cursorShape>BlankCursor</cursorShape>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::NoFocus</enum>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#settingpushButton2
+{
+background-color: transparent;
+border:none;
+}
+#settingpushButton2:hover {
+}
+#settingpushButton2:pressed {
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </widget>
         <widget class="QWidget" name="functionpage">
          <property name="font">

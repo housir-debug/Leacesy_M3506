@@ -8,7 +8,7 @@ class UartServerManager : public QObject
     Q_OBJECT
 
 signals:
-    void isRemote_Changed();
+    void isRemote(quint8 reface);
 
 public:
     explicit UartServerManager(QObject *parent = nullptr);

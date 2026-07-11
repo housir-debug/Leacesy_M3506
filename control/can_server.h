@@ -14,6 +14,7 @@ class CanServerManager : public QObject
     Q_OBJECT
 
 signals:
+    void isRemote(quint8 reface);
     #define CHANNEL(n) void to_UartChannel##n(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
 
     CHANNEL_COUNT

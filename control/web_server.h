@@ -5,12 +5,15 @@
 #include <QLoggingCategory>
 #include <QTcpServer>
 
-
 Q_DECLARE_LOGGING_CATEGORY(web)
 
 class WebServerManager : public QObject
 {
     Q_OBJECT
+
+signals:
+    void isRemote(quint8 reface);
+
 public:
     explicit WebServerManager(QObject *parent = nullptr);
     ~WebServerManager();

@@ -255,8 +255,8 @@ bool CanServerManager::startServer()
                                 processFrame(data);
                             }
                             else if (ConfigManager::s_remoteSt.load()==0){
-                                ConfigManager::s_remoteSt.store(1);
                                 processFrame(data);
+                                emit isRemote(1);
                             }
                             else{
                                 quint8 channel = static_cast<quint8>(data[0]);

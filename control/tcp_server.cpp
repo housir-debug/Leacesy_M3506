@@ -71,7 +71,7 @@ bool TcpServerManager::startServer()
                         processClientData(client);
                     }
                     else if (ConfigManager::s_remoteSt.load()==0){
-                        ConfigManager::s_remoteSt.store(2);
+                        emit isRemote(2);
                         processClientData(client);
                     }
                     else{
@@ -331,8 +331,8 @@ void TcpServerManager::handleDeviceRemote(QTcpSocket* client, const quint32 xid,
     if (lid !=0) {
         qCDebug(tcp)<<"[handleDeviceRemote]:DEVICE_REMOTE: "<<client->objectName();
         buildfoundResponse(xid, Vxi11::NO_ERROR);
-        ConfigManager::s_remoteSt.store(2);
         client->write(m_responsebuffer);
+        emit isRemote(2);
     }
 }
 
@@ -343,8 +343,8 @@ void TcpServerManager::handleDeviceLocal(QTcpSocket* client, const quint32 xid,c
     if (lid !=0) {
         qCDebug(tcp)<<"[handleDeviceLocal]:DEVICE_LOCAL: "<<client->objectName();
         buildfoundResponse(xid, Vxi11::NO_ERROR);
-        ConfigManager::s_remoteSt.store(0);
         client->write(m_responsebuffer);
+        emit isRemote(0);
     }
 }
 

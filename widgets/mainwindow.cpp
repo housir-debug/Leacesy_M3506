@@ -73,6 +73,12 @@ Mainwindow::Mainwindow(QWidget *parent) :
         to_Channel(ch, 0x01, func, "");
     });
 
+    m_remoteOverlay = new remoteoverlay(this);
+    connect(m_remoteOverlay, &remoteoverlay::exitRemote, this, []() {
+       // m_remoteOverlay->hide();
+        ConfigManager::s_remoteSt.store(0);
+    });
+
     m_digitalModel = new QStandardItemModel(this);
     ui->digitallistview->setModel(m_digitalModel);
     m_batteryModel = new QStandardItemModel(this);
@@ -125,6 +131,8 @@ Mainwindow::Mainwindow(QWidget *parent) :
             m_vercard->setChSWVersion(m_ChsoftVer[ch]);
             m_vercard->setChHWVersion(m_ChhardVer[ch]);
 
+            bool chstatus = m_digitalcards[ch]->getChstatus();
+            m_funcdigitalcard->setChannelState(chstatus);
             m_funcdigitalcard->setChannelName(chname);
             m_funcdigitalcard->setChannel(ch);
 
@@ -162,6 +170,8 @@ Mainwindow::Mainwindow(QWidget *parent) :
             m_vercard->setChSWVersion(m_ChsoftVer[ch]);
             m_vercard->setChHWVersion(m_ChhardVer[ch]);
 
+            bool chstatus = m_batterycards[ch]->getChstatus();
+            m_funcbatterycard->setChannelState(chstatus);
             m_funcbatterycard->setChannelName(chname);
             m_funcbatterycard->setChannel(ch);
 
@@ -207,6 +217,8 @@ void Mainwindow::update_SoftVer(int ch,const QString &ver){
             m_vercard->setChSWVersion(m_ChsoftVer[ch]);
             m_vercard->setChHWVersion(m_ChhardVer[ch]);
 
+            bool chstatus = m_digitalcards[ch]->getChstatus();
+            m_funcdigitalcard->setChannelState(chstatus);
             m_funcdigitalcard->setChannelName(chname);
             m_funcdigitalcard->setChannel(ch);
 
@@ -251,6 +263,8 @@ void Mainwindow::update_HardVer(int ch,const QString &ver){
             m_vercard->setChSWVersion(m_ChsoftVer[ch]);
             m_vercard->setChHWVersion(m_ChhardVer[ch]);
 
+            bool chstatus = m_batterycards[ch]->getChstatus();
+            m_funcbatterycard->setChannelState(chstatus);
             m_funcbatterycard->setChannelName(chname);
             m_funcbatterycard->setChannel(ch);
 
@@ -458,6 +472,18 @@ void Mainwindow::update_Imp(int ch,float imp){
     }
 }
 
+void Mainwindow::update_remotemodel(quint8 reface){
+    if (ConfigManager::s_remoteSt.load() != reface){
+        ConfigManager::s_remoteSt.store(reface);
+
+        if (reface == 0){
+            m_remoteOverlay->hide();
+        }else{
+            m_remoteOverlay->show();
+        }
+    }
+}
+
 // ************************************other
 
 void Mainwindow::update_Configuration(int model,const QString& val){
@@ -498,14 +524,7 @@ void Mainwindow::update_Configuration(int model,const QString& val){
     }
 }
 
-void Mainwindow::update_remotemodel(quint8 reface){
-    Q_UNUSED(reface);
-    /*for (auto it = m_numbercards.cbegin(); it != m_numbercards.cend(); ++it) {
-        if (it.key() == ch){
-            it.value()->setChannelState(status);
-        }
-    }*/
-}
+
 
 /*QJsonArray Mainwindow::getAllChannelsData() {
     QJsonArray channels;

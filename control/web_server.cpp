@@ -344,8 +344,8 @@ void WebServerManager::onWsTextMessageReceived(QWebSocket *socket,const QString 
                 m_webRoutes[type](socket,obj);
             }
             else if (ConfigManager::s_remoteSt.load()==0){
-                ConfigManager::s_remoteSt.store(4);
                 m_webRoutes[type](socket,obj);
+                emit isRemote(4);
             }
             else{
                 QJsonObject response;
