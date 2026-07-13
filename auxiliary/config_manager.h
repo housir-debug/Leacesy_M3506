@@ -25,15 +25,19 @@ extern std::vector<UartConfig> configs;
 
 class ConfigManager {
 public:
-    static bool refresh_interfaces(const QString& ip, const QString& netmask);
+    static bool setinterfaces(bool isstatic,const QString& ip, const QString& netmask,const QString& gateway);
     static bool getNetworkConfig();
 
     static std::atomic<quint8> s_remoteSt;
     static QString s_firmwareVersion;
     static QString s_hardwareVersion;
     static QString s_manufacturer;
+
     static QString s_IP;
     static QString s_SM;
+    static QString s_MAC;
+    static QString s_Gateway;
+    static bool s_isDHCP;
 
     static QString s_serialNumber;
     static QString s_GPIBid;
@@ -62,4 +66,7 @@ private:
     ConfigManager() = delete;       // Prohibition of construction
     ~ConfigManager() = delete;      // Prohibit destruction
     Q_DISABLE_COPY(ConfigManager)   // Prohibition of copying
+
+    static QString getGateway(const QString& interfaceName);
+    static bool getnetworkmode(const QString& interfaceName);
 };

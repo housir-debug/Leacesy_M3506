@@ -39,7 +39,6 @@ public:
     //void setChannel_Setstatus(int channel,int model,const QString& val);
 
     void update_remotemodel(quint8 reface);
-    void update_Configuration(int model,const QString& val);
 
 public:
     explicit Mainwindow(QWidget *parent = nullptr);
@@ -96,6 +95,18 @@ private slots:
     void on_capradioButton_clicked();
     void on_functionmodelpushButton_clicked();
 
+    // setting page switchs
+    void on_dhcpradioButton_clicked();
+    void on_setstaticradioButton_clicked();
+
+    void on_ipradioButton_clicked();
+    void on_maskradioButton_clicked();
+    void on_gateradioButton_clicked();
+    void on_canidradioButton_clicked();
+    void on_gpibidradioButton_clicked();
+
+    void on_settingrowsbackpushButton_clicked();
+
 private:
     Ui::Mainwindow *ui;
     versionview* m_vercard;
@@ -103,9 +114,9 @@ private:
     numberkeypad* m_funcnmbkeycard;
     digitalcard* m_funcdigitalcard;
     batterycard* m_funcbatterycard;
+    numberkeypad* m_setnmbkeycard;
     remoteoverlay *m_remoteOverlay;
 
-    //QMap<quint8,bool> m_ChOutmode;
     QMap<quint8,QString> m_ChsoftVer;
     QMap<quint8,QString> m_ChhardVer;
 
@@ -121,6 +132,8 @@ private:
     quint8 m_functioncsetmode{0};
     quint8 m_functioncCh{0};
     quint8 m_initalpage{0};
+
+    quint8 m_setmode{0};
 };
 
 #endif // MAINWINDOW_H

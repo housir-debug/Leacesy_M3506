@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
         }
 
         QObject::connect(canServer.get(),&CanServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+        QObject::connect(mainwindow.get(),&Mainwindow::to_CANid,canServer.get(),&CanServerManager::change_canid,Qt::QueuedConnection);
     }
 
     // can channel create
@@ -113,6 +114,7 @@ int main(int argc, char *argv[])
 
             /* screen view slot function */
             QObject::connect(mainwindow.get(),qml_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
+
             QObject::connect(channel.get(),&UartChannelManager::CH_svChanged,mainwindow.get(),&Mainwindow::update_SoftVer,Qt::QueuedConnection);
             QObject::connect(channel.get(),&UartChannelManager::CH_hvChanged,mainwindow.get(),&Mainwindow::update_HardVer,Qt::QueuedConnection);
             QObject::connect(channel.get(),&UartChannelManager::CH_VoltageChanged,mainwindow.get(),&Mainwindow::update_Voltage,Qt::QueuedConnection);

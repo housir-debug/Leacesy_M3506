@@ -73,6 +73,49 @@ Mainwindow::Mainwindow(QWidget *parent) :
         to_Channel(ch, 0x01, func, "");
     });
 
+    QRect setnumberrect = ui->settingkeyframe->geometry();
+    m_setnmbkeycard = new numberkeypad(ui->settingkeyframe->parentWidget());
+    m_setnmbkeycard->setGeometry(setnumberrect);
+    delete ui->settingkeyframe;
+    QObject::connect(m_setnmbkeycard, &numberkeypad::valueEntered, this, [this](const QString &value) {
+        if (!value.isEmpty()){
+            switch(m_setmode){
+                case 0:{// IP
+                    ConfigManager::setinterfaces(true,value,ConfigManager::s_SM,ConfigManager::s_Gateway);
+                    ui->ipvaluelabel->setText(value);
+
+                    ConfigManager::getNetworkConfig();
+                    ui->iplabel->setText(ConfigManager::s_IP);
+                    return;
+                }
+                case 1:{// SM
+                    ConfigManager::setinterfaces(true,ConfigManager::s_IP,value,ConfigManager::s_Gateway);
+                    ui->maskvaluelabel->setText(value);
+
+                    ConfigManager::getNetworkConfig();
+                    ui->masklabel->setText(ConfigManager::s_SM);
+                    return;
+                }
+                case 2:{// gateway
+                    ConfigManager::setinterfaces(true,ConfigManager::s_IP,ConfigManager::s_SM,value);
+                    ui->gatevaluelabel->setText(value);
+
+                    ConfigManager::getNetworkConfig();
+                    ui->gatelabel->setText(ConfigManager::s_Gateway);
+                    return;
+                }
+                case 3:{// canid
+                    emit to_CANid(value);
+                    ConfigManager::setConfigValue("Device/CANID",value);
+                    ui->canidvaluelabel->setText(value);
+                    ConfigManager::s_CANid = value;
+                    ui->canidlabel->setText(value);
+                    return;
+                }
+            }
+        }
+    });
+
     m_remoteOverlay = new remoteoverlay(this);
     connect(m_remoteOverlay, &remoteoverlay::exitRemote, this, []() {
        // m_remoteOverlay->hide();
@@ -486,46 +529,6 @@ void Mainwindow::update_remotemodel(quint8 reface){
 
 // ************************************other
 
-void Mainwindow::update_Configuration(int model,const QString& val){
-    switch(model){
-        case 0:{
-            // IP
-            /*if(ConfigManager::refresh_interfaces(val,m_SM)){
-                m_IPaddress = val;
-                emit ipAdress_Changed();
-                ConfigManager::s_IP = val;
-            }
-            return;
-        }
-        case 1:{
-            // SM
-            if(ConfigManager::refresh_interfaces(m_IPaddress,val)){
-                m_SM = val;
-                emit sm_Changed();
-                ConfigManager::s_SM = val;
-            }*/
-            return;
-        }
-        case 2:{
-            // GPIB
-            //m_GPIBid = val;
-            //emit gpibId_Changed();
-            //ConfigManager::setConfigValue("Device/GPIBID",val);
-            //emit to_GPIBid(val);
-            return;
-        }
-        case 3:{
-            // can
-            emit to_CANid(val);
-            ConfigManager::s_CANid = val;
-            ConfigManager::setConfigValue("Device/CANID",val);
-            return;
-        }
-    }
-}
-
-
-
 /*QJsonArray Mainwindow::getAllChannelsData() {
     QJsonArray channels;
     #define CHANNEL(n) \
@@ -576,12 +579,70 @@ void Mainwindow::to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray&
 
 void Mainwindow::on_digitalsettingspushButton_clicked()
 {
+    m_initalpage = 0;
     ui->topstackedwidget->setCurrentIndex(2);  // settingspage
+
+    ConfigManager::getNetworkConfig();
+    if (ConfigManager::s_isDHCP){
+        ui->dhcpradioButton->setChecked(true);
+
+        ui->ipradioButton->setEnabled(false);
+        ui->maskradioButton->setEnabled(false);
+        ui->gateradioButton->setEnabled(false);
+
+        ui->canidradioButton->setChecked(true);
+        m_setmode = 3;
+    }else{
+        ui->setstaticradioButton->setChecked(true);
+
+        ui->ipradioButton->setEnabled(true);
+        ui->maskradioButton->setEnabled(true);
+        ui->gateradioButton->setEnabled(true);
+
+        ui->ipradioButton->setChecked(true);
+        m_setmode = 0;
+    }
+
+    ui->iplabel->setText(ConfigManager::s_IP);
+    ui->masklabel->setText(ConfigManager::s_SM);
+    ui->gatelabel->setText(ConfigManager::s_Gateway);
+    ui->maclabel->setText(ConfigManager::s_MAC);
+    ui->ipvaluelabel->setText("");
+    ui->maskvaluelabel->setText("");
+    ui->gatevaluelabel->setText("");
+
+    ui->canidlabel->setText(ConfigManager::s_CANid);
+    ui->gpibidlabel->setText(ConfigManager::s_GPIBid);
+    ui->snlabel->setText(ConfigManager::s_serialNumber);
+    ui->canidvaluelabel->setText("");
+    ui->gpibvaluelabel->setText("");
 }
 
 void Mainwindow::on_batterysettingspushButton_clicked()
 {
+    m_initalpage = 1;
     ui->topstackedwidget->setCurrentIndex(2);  // settingspage
+
+    ConfigManager::getNetworkConfig();
+    if (ConfigManager::s_isDHCP){
+        ui->dhcpradioButton->setChecked(true);
+    }else{
+        ui->setstaticradioButton->setChecked(true);
+    }
+
+    ui->iplabel->setText(ConfigManager::s_IP);
+    ui->masklabel->setText(ConfigManager::s_SM);
+    ui->gatelabel->setText(ConfigManager::s_Gateway);
+    ui->maclabel->setText(ConfigManager::s_MAC);
+    ui->ipvaluelabel->setText("");
+    ui->maskvaluelabel->setText("");
+    ui->gatevaluelabel->setText("");
+
+    ui->canidlabel->setText(ConfigManager::s_CANid);
+    ui->gpibidlabel->setText(ConfigManager::s_GPIBid);
+    ui->snlabel->setText(ConfigManager::s_serialNumber);
+    ui->canidvaluelabel->setText("");
+    ui->gpibvaluelabel->setText("");
 }
 
 
@@ -830,4 +891,71 @@ void Mainwindow::on_functionmodelpushButton_clicked()
             m_batterycards[m_functioncCh]->setModel(currentIndex,m_modelManager->getModel(batteryModel));
         }
     }
+}
+
+// setting page switchs
+
+void Mainwindow::on_dhcpradioButton_clicked()
+{
+    ConfigManager::setinterfaces(false,"","","");
+
+    ui->ipradioButton->setEnabled(false);
+    ui->maskradioButton->setEnabled(false);
+    ui->gateradioButton->setEnabled(false);
+
+    ui->canidradioButton->setChecked(true);
+    m_setmode = 3;
+
+    ConfigManager::getNetworkConfig();
+    ui->iplabel->setText(ConfigManager::s_IP);
+    ui->masklabel->setText(ConfigManager::s_SM);
+    ui->gatelabel->setText(ConfigManager::s_Gateway);
+}
+
+void Mainwindow::on_setstaticradioButton_clicked()
+{
+    ui->ipradioButton->setEnabled(true);
+    ui->maskradioButton->setEnabled(true);
+    ui->gateradioButton->setEnabled(true);
+
+    ui->ipradioButton->setChecked(true);
+    m_setmode = 0;
+}
+
+void Mainwindow::on_ipradioButton_clicked()
+{
+    m_setmode = 0;
+    ui->ipradioButton->setChecked(true);
+    m_setnmbkeycard->setValue(ConfigManager::s_IP);
+}
+
+void Mainwindow::on_maskradioButton_clicked()
+{
+    m_setmode = 1;
+    ui->maskradioButton->setChecked(true);
+    m_setnmbkeycard->setValue(ConfigManager::s_SM);
+}
+
+void Mainwindow::on_gateradioButton_clicked()
+{
+    m_setmode = 2;
+    ui->gateradioButton->setChecked(true);
+    m_setnmbkeycard->setValue(ConfigManager::s_Gateway);
+}
+
+void Mainwindow::on_canidradioButton_clicked()
+{
+    m_setmode = 3;
+    ui->canidradioButton->setChecked(true);
+}
+
+void Mainwindow::on_gpibidradioButton_clicked()
+{
+    m_setmode = 4;
+    ui->gpibidradioButton->setChecked(true);
+}
+
+void Mainwindow::on_settingrowsbackpushButton_clicked()
+{
+    ui->topstackedwidget->setCurrentIndex(m_initalpage);
 }
