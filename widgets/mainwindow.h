@@ -34,11 +34,8 @@ signals:
     #undef CHANNEL
 
 public:
-
     // QJsonArray getAllChannelsData();
     //void setChannel_Setstatus(int channel,int model,const QString& val);
-
-    void update_remotemodel(quint8 reface);
 
 public:
     explicit Mainwindow(QWidget *parent = nullptr);
@@ -60,6 +57,7 @@ public:
     void update_Cc(int ch,float cc);
     void update_Ovp(int ch,float ovp);
     void update_Imp(int ch,float imp);
+    void update_remotemodel(quint8 reface);
 
 private slots:
     void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param);

@@ -626,8 +626,22 @@ void Mainwindow::on_batterysettingspushButton_clicked()
     ConfigManager::getNetworkConfig();
     if (ConfigManager::s_isDHCP){
         ui->dhcpradioButton->setChecked(true);
+
+        ui->ipradioButton->setEnabled(false);
+        ui->maskradioButton->setEnabled(false);
+        ui->gateradioButton->setEnabled(false);
+
+        ui->canidradioButton->setChecked(true);
+        m_setmode = 3;
     }else{
         ui->setstaticradioButton->setChecked(true);
+
+        ui->ipradioButton->setEnabled(true);
+        ui->maskradioButton->setEnabled(true);
+        ui->gateradioButton->setEnabled(true);
+
+        ui->ipradioButton->setChecked(true);
+        m_setmode = 0;
     }
 
     ui->iplabel->setText(ConfigManager::s_IP);

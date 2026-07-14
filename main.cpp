@@ -40,46 +40,46 @@ std::vector<ScpiSign_toUartCh> scpi_signal = {
 
 int main(int argc, char *argv[])
 {
-    // create APP
     QApplication app(argc, argv);
     QApplication::setApplicationName("Leacesy_Ryan");
     QApplication::setOverrideCursor(Qt::BlankCursor);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-    // QApplication::setAttribute(Qt::AA_EnableHighDpiScaling); // Warning: It will deform.
+    // QApplication::setAttribute(Qt::AA_EnableHighDpiScaling); -* Warning: It will deform.
 
-    // get App parentpath
-    QString appPath = QApplication::applicationDirPath();
-    QDir appDir(appPath);
-    if (!appDir.cdUp()){
-        qCWarning(application) << "app parentPath not exist!";
-        return 1;   // error
+    // load config
+    const QString configPath = QDir(QApplication::applicationDirPath()).filePath("..");
+    if (!QDir(configPath).exists() || !ConfigManager::init(configPath)) {
+        qCWarning(application) << "Application initialization failed!";
+        return 1;
     }
 
-    // config log Setting And global variable
-    QString parentPath = appDir.absolutePath();
-    if (!ConfigManager::init(parentPath)) {
-        qCWarning(application) << "app get global config not exist!";
-        return 1;   // error
-    }
-
-    loggermanage(ConfigManager::s_loglevel , parentPath);
+    // setting log config
+    loggermanage(ConfigManager::s_loglevel, configPath);
     QObject::connect(&app, &QApplication::aboutToQuit, &shutdownLogger);
 
-    //std::unique_ptr<test> testview(new test);
-    //testview->show();
+    std::shared_ptr<BatteryModelManager> BatteryModel_share = std::make_shared<BatteryModelManager>(configPath);
 
     // screen GUI engine and gui-bridge create
-    std::shared_ptr<BatteryModelManager> BatteryModel_share = std::make_shared<BatteryModelManager>(parentPath);
-    //QGraphicsScene scene;QGraphicsView view(&scene);
+    QGraphicsScene scene;
+    QGraphicsView view(&scene);
+    std::unique_ptr<test> testview;
     std::unique_ptr<Mainwindow> mainwindow;
     if (ConfigManager::s_enableDisplay){
-        mainwindow= std::make_unique<Mainwindow>();
+        mainwindow = std::make_unique<Mainwindow>();
         mainwindow->m_modelManager = BatteryModel_share;
         mainwindow->show();
 
-        /*QGraphicsProxyWidget *proxy = scene.addWidget(mainwindow.get());
-        proxy->setRotation(0);  // rotatee 90
+        /*scene.addWidget(mainwindow.get());
+        QSize mainWinSize = mainwindow->size();
+        view.setSceneRect(0, 0, mainWinSize.height(), mainWinSize.width());
+        view.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        view.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        //view.fitInView(view.sceneRect(), Qt::KeepAspectRatio);
+        view.rotate(90);
         view.show();*/
+
+        //testview = std::make_unique<test>();
+        //testview->show();
     }
 
     // CAN Server create
