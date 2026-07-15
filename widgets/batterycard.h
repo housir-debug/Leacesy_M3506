@@ -20,7 +20,6 @@ public:
 
     void setChannel(quint8 ch);
     void setChannelState(bool state);
-    void setChannelName(const QString &name);
 
     void setSocValue(float value);
     void setOcvValue(float value);

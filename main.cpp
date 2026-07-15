@@ -78,6 +78,7 @@ int main(int argc, char *argv[])
         view.rotate(90);
         view.show();*/
 
+        mainwindow->update_cardtest();
         //testview = std::make_unique<test>();
         //testview->show();
     }
@@ -136,6 +137,7 @@ int main(int argc, char *argv[])
             }
 
             Channel_list.push_back(std::move(channel)); // move set <channel> can move
+            mainwindow->update_showcard();
         }
     }
 

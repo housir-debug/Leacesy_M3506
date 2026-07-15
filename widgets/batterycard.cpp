@@ -94,6 +94,8 @@ quint8 batterycard::getChmodel() const
 
 void batterycard::setChannel(quint8 ch)
 {
+    QString name = QString("CH-%1").arg(ch, 2, 10, QChar('0'));
+    ui->channellabel->setText(name);
     m_channel = ch;
 }
 
@@ -103,11 +105,6 @@ void batterycard::setChannelState(bool state)
     style()->unpolish(this);
     style()->polish(this);
     update();
-}
-
-void batterycard::setChannelName(const QString &name)
-{
-    ui->channellabel->setText(name);
 }
 
 void batterycard::setSocValue(float value)

@@ -92,6 +92,8 @@ quint8 digitalcard::getChRange() const
 
 void digitalcard::setChannel(quint8 ch)
 {
+    QString name = QString("CH-%1").arg(ch, 2, 10, QChar('0'));
+    ui->channellabel->setText(name);
     m_channel = ch;
 }
 
@@ -103,10 +105,12 @@ void digitalcard::setChannelState(bool state)
     update();
 }
 
-void digitalcard::setChannelName(const QString &name)
+void digitalcard::setChannelRange(quint8 range)
 {
-    ui->channellabel->setText(name);
+    // 0 -0x01-mA; 1 -0x10-Auto; 2 -0x00-A
+    m_range = range;
 }
+
 
 void digitalcard::setVoltage(float value)
 {
@@ -131,11 +135,6 @@ void digitalcard::setCurrentUnit(const QString &unit)
     ui->currentunitlabel->update();
 }
 
-void digitalcard::setChannelRange(quint8 range)
-{
-    // 0 -0x01-mA; 1 -0x10-Auto; 2 -0x00-A
-    m_range = range;
-}
 
 void digitalcard::setCVChecked(bool checked)
 {
