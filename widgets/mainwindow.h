@@ -20,9 +20,6 @@ class Mainwindow : public QWidget
 {
     Q_OBJECT
 
-public:
-    //QJsonArray getAllChannelsData();
-
 signals:
     void to_CANid(QString id);
     void to_GPIBid(QString id);
@@ -37,6 +34,7 @@ public:
     explicit Mainwindow(QWidget *parent = nullptr);
     ~Mainwindow();
 
+    QJsonArray getAllChannelsData();
     void load_BatteryModel();
     bool update_cardtest();
     bool update_showcard();

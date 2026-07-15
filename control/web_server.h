@@ -1,6 +1,7 @@
 #pragma once
 #include "auxiliary/scpi_handle.h"
 #include "auxiliary/battery_model.h"
+#include "mainwindow.h"
 #include <QWebSocketServer>
 #include <QLoggingCategory>
 #include <QTcpServer>
@@ -19,6 +20,7 @@ public:
     ~WebServerManager();
 
     bool startServer();
+    Mainwindow* m_qmlbridge;
     std::shared_ptr<ScpiManager> m_scpiManager;
     std::shared_ptr<BatteryModelManager> m_BatteryManager;
 

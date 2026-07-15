@@ -53,13 +53,12 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // setting log config
+    // setting log config and batterymodel create
     loggermanage(ConfigManager::s_loglevel, configPath);
     QObject::connect(&app, &QApplication::aboutToQuit, &shutdownLogger);
-
     std::shared_ptr<BatteryModelManager> BatteryModel_share = std::make_shared<BatteryModelManager>(configPath);
 
-    // screen GUI engine and gui-bridge create
+    // screen show
     QGraphicsScene scene;
     QGraphicsView view(&scene);
     std::unique_ptr<test> testview;
@@ -67,18 +66,18 @@ int main(int argc, char *argv[])
     if (ConfigManager::s_enableDisplay){
         mainwindow = std::make_unique<Mainwindow>();
         mainwindow->m_modelManager = BatteryModel_share;
-        mainwindow->show();
+        //mainwindow->show();
 
-        /*scene.addWidget(mainwindow.get());
-        QSize mainWinSize = mainwindow->size();
-        view.setSceneRect(0, 0, mainWinSize.height(), mainWinSize.width());
+        scene.addWidget(mainwindow.get());
+        //view.fitInView(view.sceneRect(), Qt::KeepAspectRatio);
         view.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         view.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        //view.fitInView(view.sceneRect(), Qt::KeepAspectRatio);
-        view.rotate(90);
-        view.show();*/
+        view.setFrameShape(QFrame::NoFrame);
+        view.rotate(0);
+        view.show();
 
         mainwindow->update_cardtest();
+
         //testview = std::make_unique<test>();
         //testview->show();
     }
@@ -92,8 +91,8 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        QObject::connect(canServer.get(),&CanServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
         QObject::connect(mainwindow.get(),&Mainwindow::to_CANid,canServer.get(),&CanServerManager::change_canid,Qt::QueuedConnection);
+        QObject::connect(canServer.get(),&CanServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
     }
 
     // can channel create
@@ -113,9 +112,6 @@ int main(int argc, char *argv[])
                 return 1;
             }
 
-            /* screen view slot function */
-            QObject::connect(mainwindow.get(),qml_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
-
             QObject::connect(channel.get(),&UartChannelManager::CH_svChanged,mainwindow.get(),&Mainwindow::update_SoftVer,Qt::QueuedConnection);
             QObject::connect(channel.get(),&UartChannelManager::CH_hvChanged,mainwindow.get(),&Mainwindow::update_HardVer,Qt::QueuedConnection);
             QObject::connect(channel.get(),&UartChannelManager::CH_VoltageChanged,mainwindow.get(),&Mainwindow::update_Voltage,Qt::QueuedConnection);
@@ -128,6 +124,8 @@ int main(int argc, char *argv[])
             QObject::connect(channel.get(),&UartChannelManager::CH_isOutputChanged,mainwindow.get(),&Mainwindow::update_IsOutput,Qt::QueuedConnection);
             QObject::connect(channel.get(),&UartChannelManager::CH_impChanged,mainwindow.get(),&Mainwindow::update_Imp,Qt::QueuedConnection);
 
+            /* screen view slot function */
+            QObject::connect(mainwindow.get(),qml_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
             /* remote api slot function */
             QObject::connect(Scpi_share.get(),scpi_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
 
@@ -137,8 +135,9 @@ int main(int argc, char *argv[])
             }
 
             Channel_list.push_back(std::move(channel)); // move set <channel> can move
-            mainwindow->update_showcard();
         }
+
+        mainwindow->update_showcard();
     }
 
     // LAN Server create
@@ -146,6 +145,7 @@ int main(int argc, char *argv[])
     if (ConfigManager::s_enableWEBServer){
         webServer = std::make_unique<WebServerManager>();
         webServer->m_BatteryManager = BatteryModel_share;
+        webServer->m_qmlbridge = mainwindow.get();
         webServer->m_scpiManager = Scpi_share;
         if (!webServer->startServer()) {
             qCWarning(application) << "WebServerManager not Normal start!";

@@ -86,7 +86,52 @@ bool digitalcard::getChstatus() const
 
 quint8 digitalcard::getChRange() const
 {
-    return m_range;
+    return m_range.load();
+}
+
+float digitalcard::getChVoltage() const
+{
+    return m_voltage.load();
+}
+
+float digitalcard::getChCurrent() const
+{
+    return m_current.load();
+}
+
+QString digitalcard::getChunit() const
+{
+    return ui->currentunitlabel->text();
+}
+
+float digitalcard::getChCvValue() const
+{
+    return m_cv.load();
+}
+
+bool digitalcard::getChCVChecked() const
+{
+    return ui->cvcheckbox->isChecked();
+}
+
+float digitalcard::getChCcValue() const
+{
+    return m_cc.load();
+}
+
+bool digitalcard::getChCCChecked() const
+{
+    return ui->cccheckbox->isChecked();
+}
+
+float digitalcard::getChOvpValue() const
+{
+    return m_ovp.load();
+}
+
+bool digitalcard::getChOVPChecked() const
+{
+    return ui->ovpcheckbox->isChecked();
 }
 
 
@@ -94,7 +139,7 @@ void digitalcard::setChannel(quint8 ch)
 {
     QString name = QString("CH-%1").arg(ch, 2, 10, QChar('0'));
     ui->channellabel->setText(name);
-    m_channel = ch;
+    m_channel.store(ch);
 }
 
 void digitalcard::setChannelState(bool state)
@@ -108,7 +153,7 @@ void digitalcard::setChannelState(bool state)
 void digitalcard::setChannelRange(quint8 range)
 {
     // 0 -0x01-mA; 1 -0x10-Auto; 2 -0x00-A
-    m_range = range;
+    m_range.store(range);
 }
 
 
@@ -116,12 +161,14 @@ void digitalcard::setVoltage(float value)
 {
     QString text = QString::number(value, 'f', 4);
     ui->voltagelabel->setText(text);
+    m_voltage.store(value);
 }
 
 void digitalcard::setCurrent(float value)
 {
     QString text = QString::number(value, 'f', 4);
     ui->currentlabel->setText(text);
+    m_current.store(value);
 }
 
 void digitalcard::setCurrentUnit(const QString &unit)
@@ -145,6 +192,7 @@ void digitalcard::setCvValue(float value)
 {
     QString text = QString::number(value, 'f', 3) + " V";
     ui->cvvaluelabel->setText(text);
+    m_cv.store(value);
 }
 
 void digitalcard::setCCChecked(bool checked)
@@ -156,6 +204,7 @@ void digitalcard::setCcValue(float value)
 {
     QString text = QString::number(value, 'f', 3) + " A";
     ui->ccvaluelabel->setText(text);
+    m_cc.store(value);
 }
 
 void digitalcard::setOVPChecked(bool checked)
@@ -167,4 +216,5 @@ void digitalcard::setOvpValue(float value)
 {
     QString text = QString::number(value, 'f', 3) + " V";
     ui->ovpvaluelabel->setText(text);
+    m_ovp.store(value);
 }

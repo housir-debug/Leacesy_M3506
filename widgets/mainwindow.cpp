@@ -1,31 +1,56 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QTimer>
+#include <QtCore>
 
 Q_LOGGING_CATEGORY(widget, "WIDGET:")
 
-/*QJsonArray Mainwindow::getAllChannelsData() {
+QJsonArray Mainwindow::getAllChannelsData() {
     QJsonArray channels;
     #define CHANNEL(n) \
         do { \
-            if (mCH##n##_sv != "0.0.0.0") { \
+            if (m_digitalcards.contains(n)) { \
                 QJsonObject channel; \
                 channel["channel"] = n; \
-                channel["isOutput"] = mCH##n##_isOutput.load(); \
-                channel["voltage"] = mCH##n##_Voltage.load(); \
-                channel["current"] = mCH##n##_Current.load(); \
-                channel["current_unit"] = mCH##n##_CurrentUnit; \
-                channel["cvSetpoint"] = mCH##n##_cv.load(); \
-                channel["ccSetpoint"] = mCH##n##_cc.load(); \
-                channel["ovSetpoint"] = mCH##n##_ovp.load(); \
-                channel["status"] = mCH##n##_Status; \
+                channel["isOutput"] = m_digitalcards[n]->getChstatus(); \
+                channel["voltage"] = m_digitalcards[n]->getChVoltage(); \
+                channel["current"] = m_digitalcards[n]->getChCurrent(); \
+                channel["current_unit"] = m_digitalcards[n]->getChunit(); \
+                channel["cvSetpoint"] = m_digitalcards[n]->getChCvValue(); \
+                channel["cvstatus"] = m_digitalcards[n]->getChCVChecked(); \
+                channel["ccSetpoint"] = m_digitalcards[n]->getChCcValue(); \
+                channel["ccstatus"] = m_digitalcards[n]->getChCCChecked(); \
+                channel["ovSetpoint"] = m_digitalcards[n]->getChOvpValue(); \
+                channel["ovpstatus"] = m_digitalcards[n]->getChOVPChecked(); \
                 channels.append(channel); \
         }} while(0);
 
     CHANNEL_COUNT
     #undef CHANNEL
     return channels;
-}*/
+}
+
+void Mainwindow::load_BatteryModel(){
+    if (m_modelManager) {
+        QTimer::singleShot(0, this, [this]() {
+            if (m_modelManager->loadAllModels()) {
+                m_currentModelList = m_modelManager->getAvailableModels();
+
+                if (!m_currentModelList.isEmpty()) {
+                    QString batteryModel = m_currentModelList[0];
+
+                    for (auto it = m_batterycards.cbegin(); it != m_batterycards.cend(); ++it) {
+                        if (!it.value()->getChstatus()){
+                            it.value()->setModelValue(batteryModel);
+                            it.value()->setModel(0,m_modelManager->getModel(batteryModel));
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
 
 Mainwindow::Mainwindow(QWidget *parent) :
     QWidget(parent),
@@ -162,24 +187,6 @@ Mainwindow::~Mainwindow()
     delete ui;
 }
 
-void Mainwindow::load_BatteryModel(){
-    if (m_modelManager) {
-        QTimer::singleShot(0, this, [this]() {
-            if (m_modelManager->loadAllModels()) {
-                m_currentModelList = m_modelManager->getAvailableModels();
-
-                if (!m_currentModelList.isEmpty()) {
-                    QString batteryModel = m_currentModelList[0];
-
-                    for (auto it = m_batterycards.cbegin(); it != m_batterycards.cend(); ++it) {
-                        it.value()->setModelValue(batteryModel);
-                        it.value()->setModel(0,m_modelManager->getModel(batteryModel));
-                    }
-                }
-            }
-        });
-    }
-}
 
 // auto add exist channel card
 

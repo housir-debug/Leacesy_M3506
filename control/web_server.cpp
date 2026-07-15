@@ -185,7 +185,7 @@ void WebServerManager::setupRoutes()
 
     m_apiRoutes["/api/channels"] = [this](QTcpSocket* client) {
         QJsonObject response;
-        //response["channels"] = m_qmlbridge->getAllChannelsData();
+        response["channels"] = m_qmlbridge->getAllChannelsData();
 
         QByteArray jsonData = QJsonDocument(response).toJson();
         sendHttpResponse(client, jsonData, "application/json");
@@ -212,10 +212,10 @@ void WebServerManager::setupRoutes()
         }
     };
 
-    m_webRoutes["channels_update"] = [](QWebSocket* socket, const QJsonObject&) { // - this
+    m_webRoutes["channels_update"] = [this](QWebSocket* socket, const QJsonObject&) {
         QJsonObject channelData;
         channelData["type"] = "channels_response";
-        //channelData["channels"] = m_qmlbridge->getAllChannelsData();
+        channelData["channels"] = m_qmlbridge->getAllChannelsData();
         socket->sendTextMessage(QJsonDocument(channelData).toJson());
     };
 
@@ -226,7 +226,7 @@ void WebServerManager::setupRoutes()
 
         QJsonObject response;
         if (addModelFromNetwork(modelName,modelData)) {
-            //m_qmlbridge->load_BatteryModel();
+            m_qmlbridge->load_BatteryModel();
             response = getModelsInfo();
             response["type"] = "model_sync";
             socket->sendTextMessage(QJsonDocument(response).toJson());
@@ -242,7 +242,7 @@ void WebServerManager::setupRoutes()
         QString modelName = obj["name"].toString();
 
         if (m_BatteryManager->removeModel(modelName)) {
-            //m_qmlbridge->load_BatteryModel();
+            m_qmlbridge->load_BatteryModel();
             response = getModelsInfo();
             response["type"] = "model_sync";
             socket->sendTextMessage(QJsonDocument(response).toJson());

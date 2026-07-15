@@ -41,13 +41,6 @@ class ChannelMonitor {
         
         sortedChannels.forEach(([id, ch]) => {
             //this.updateHistory(id, ch.voltage, ch.current);
-            // 防止 current_unit 或 status 字段异常导致的错误，添加默认值和长度检查
-            const isUnitNormal = ch.current_unit && (ch.current_unit === "mA" || ch.current_unit === "A");
-            const unit = isUnitNormal ? ch.current_unit : "A";
-            const isStatusNormal = ch.status && ch.status.length === 16;
-            const cvMode = isStatusNormal ? ch.status.charAt(14) === "1" : false;
-            const ccMode = isStatusNormal ? ch.status.charAt(13) === "1" : false;
-            const ovpMode = isStatusNormal ? ch.status.charAt(11) === "1" : false;
 
             html += `
                 <div class="channel-detailed-card ${ch.isOutput ? 'enabled' : 'disabled'}"
@@ -65,27 +58,27 @@ class ChannelMonitor {
                             <span class="measurement-value voltage">${ch.voltage.toFixed(4)} V</span>
                         </div>
                         <div class="measurement-row">
-                            <span class="measurement-value current">${ch.current.toFixed(4)} ${unit}</span>
+                            <span class="measurement-value current">${ch.current.toFixed(4)} ${ch.current_unit}</span>
                         </div>
                     </div>
 
                     <div class="setpoints-grid">
-                        <div class="setpoint-row ${cvMode ? 'active' : ''}">
+                        <div class="setpoint-row ${ch.cvstatus ? 'active' : ''}">
                             <span class="setpoint-label">CV</span>
                             <span class="setpoint-value">${ch.cvSetpoint.toFixed(3)} V</span>
-                            <span class="mode-indicator ${cvMode ? 'active' : ''}"></span>
+                            <span class="mode-indicator ${ch.cvstatus ? 'active' : ''}"></span>
                         </div>
                         
-                        <div class="setpoint-row ${ccMode ? 'active' : ''}">
+                        <div class="setpoint-row ${ch.ccstatus ? 'active' : ''}">
                             <span class="setpoint-label">CC</span>
                             <span class="setpoint-value">${ch.ccSetpoint.toFixed(3)} A</span>
-                            <span class="mode-indicator ${ccMode ? 'active' : ''}"></span>
+                            <span class="mode-indicator ${ch.ccstatus ? 'active' : ''}"></span>
                         </div>
                         
-                        <div class="setpoint-row ${ovpMode ? 'active' : ''}">
+                        <div class="setpoint-row ${ch.ovpstatus ? 'active' : ''}">
                             <span class="setpoint-label">OV</span>
                             <span class="setpoint-value">${ch.ovSetpoint.toFixed(3)} V</span>
-                            <span class="mode-indicator ${ovpMode ? 'active' : ''}"></span>
+                            <span class="mode-indicator ${ch.ovpstatus ? 'active' : ''}"></span>
                         </div>
                     </div>
                 </div>
