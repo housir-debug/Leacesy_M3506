@@ -123,34 +123,28 @@ Mainwindow::Mainwindow(QWidget *parent) :
             switch(m_setmode){
                 case 0:{// IP
                     ConfigManager::setinterfaces(true,value,ConfigManager::s_SM,ConfigManager::s_Gateway);
-                    ui->ipvaluelabel->setText(value);
-
-                    ConfigManager::getNetworkConfig();
                     ui->iplabel->setText(ConfigManager::s_IP);
+                    ui->ipvaluelabel->setText(value);
                     return;
                 }
                 case 1:{// SM
                     ConfigManager::setinterfaces(true,ConfigManager::s_IP,value,ConfigManager::s_Gateway);
-                    ui->maskvaluelabel->setText(value);
-
-                    ConfigManager::getNetworkConfig();
                     ui->masklabel->setText(ConfigManager::s_SM);
+                    ui->maskvaluelabel->setText(value);
                     return;
                 }
                 case 2:{// gateway
                     ConfigManager::setinterfaces(true,ConfigManager::s_IP,ConfigManager::s_SM,value);
-                    ui->gatevaluelabel->setText(value);
-
-                    ConfigManager::getNetworkConfig();
                     ui->gatelabel->setText(ConfigManager::s_Gateway);
+                    ui->gatevaluelabel->setText(value);
                     return;
                 }
                 case 3:{// canid
-                    emit to_CANid(value);
                     ConfigManager::setConfigValue("Device/CANID",value);
                     ui->canidvaluelabel->setText(value);
                     ConfigManager::s_CANid = value;
                     ui->canidlabel->setText(value);
+                    emit to_CANid(value);
                     return;
                 }
                 default:return;
@@ -590,7 +584,6 @@ void Mainwindow::refresh_settingpage()
 {
     ui->topstackedwidget->setCurrentIndex(2);  // settingspage
 
-    ConfigManager::getNetworkConfig();
     if (ConfigManager::s_isDHCP){
         ui->dhcpradioButton->setChecked(true);
 
@@ -871,7 +864,6 @@ void Mainwindow::on_dhcpradioButton_clicked()
     m_setmode = 3;
 
     ConfigManager::setinterfaces(false,"","","");
-    ConfigManager::getNetworkConfig();
     ui->iplabel->setText(ConfigManager::s_IP);
     ui->masklabel->setText(ConfigManager::s_SM);
     ui->gatelabel->setText(ConfigManager::s_Gateway);

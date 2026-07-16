@@ -1,7 +1,7 @@
 #include "simple_logger.h"
 #include "auxiliary/config_manager.h"
-#include <QMutex>
 #include <QDateTime>
+#include <QMutex>
 #include <QDir>
 
 Q_LOGGING_CATEGORY(log, "LOG:")
@@ -105,56 +105,42 @@ void loggermanage(const QString &loglevel,const QString &parentPath) {
     else {qCDebug(log) << "[loggermanage]:No configured print rules.";}
     QLoggingCategory::setFilterRules(rules);
 
-    if (!ConfigManager::s_enablelogfile){return;}
-    qCDebug(log) << "[loggermanage]:Enable log file monitoring.";
+    if (ConfigManager::s_enablelogfile){
+        // Enable log files
+        qInstallMessageHandler(nullptr);
+        auto& data = getLoggerData();
 
-    // Enable log files
-    auto& data = getLoggerData();
-    if (data.stream && data.file) {
-        data.stream->flush();
-        delete data.stream;
-        data.stream = nullptr;
+        QString fullPath = parentPath + "/logs";
+        QDir dir(fullPath);
+        if (dir.exists() || dir.mkpath(".")) {
+            QString logFilePath = QDir(fullPath).filePath("run.log");
 
-        if (data.file->isOpen()) {data.file->close();}
-        delete data.file;
-        data.file = nullptr;
-    }
+            data.file = new QFile(logFilePath);
+            if (data.file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+                data.stream = new QTextStream(data.file);
+                data.stream->setCodec("UTF-8");
 
-    // Reset default loader
-    qInstallMessageHandler(nullptr);
-    QString fullPath = parentPath + "/logs";
-    QDir dir(fullPath);
-    if (dir.exists() || dir.mkpath(".")) {
-        QString logFilePath = QDir(fullPath).filePath("run.log");
+                *data.stream << "=================================================================\n";
+                *data.stream << "                    Application Log - reStarted                  \n";
+                *data.stream << "=================================================================\n";
 
-        data.file = new QFile(logFilePath); // add file
-        if (data.file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
-            data.stream = new QTextStream(data.file);   // add stream
-            data.stream->setCodec("UTF-8");
+                qInstallMessageHandler(embeddedMessageHandler);
+                return;
+            }
 
-            *data.stream << "========================================\n";
-            *data.stream << "Application Log - Started at: "<< QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss") << "\n";
-            *data.stream << "========================================\n";
-
-            //registration processing function
-            qInstallMessageHandler(embeddedMessageHandler);
-            qCDebug(log) << "[loggermanage]:File logging:" << logFilePath;
-            return;
+            delete data.file;
+            data.file = nullptr;
         }
 
-        delete data.file;
-        data.file = nullptr;
+        qCWarning(log) << "[loggermanage]:Failed to create log directory or Failed to open log file!";
     }
-
-    qCWarning(log) << "[loggermanage]:Failed to create log directory or Failed to open log file!";
 }
 
 void shutdownLogger() {
     qInstallMessageHandler(nullptr);
-
     auto& data = getLoggerData();
-    QMutexLocker locker(&data.mutex);
 
+    QMutexLocker locker(&data.mutex);
     if (data.stream && data.file) {
         data.stream->flush();
         delete data.stream;

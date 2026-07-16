@@ -44,20 +44,22 @@ const scpi_choice_def_t ScpiManager::m_CmdparaChoices[] = {
 };
 
 const scpi_command_t ScpiManager::m_scpiCommands[] = {
+     /* IEEE Mandated Commands (SCPI std V1999.0 4.1.1) */
     { "*CLS",      SCPI_CoreCls,    0 },//清除所有状态数据结构（寄存器、错误队列）
     { "*ESE",      SCPI_CoreEse,    0 },//设置标准事件状态启用寄存器
-    { "*OPC",      SCPI_CoreOpc,    0 },//设置OPC位
-    { "*RST",      SCPI_CoreRst,    0 },//复位设备到已知状态
-    { "*SRE",      SCPI_CoreSre,    0 },//设置服务请求启用寄存器
-    { "*WAI",      SCPI_CoreWai,    0 },//等待操作完成
     { "*ESE?",     SCPI_CoreEseQ,   0 },//读取标准事件状态启用寄存器
     { "*ESR?",     SCPI_CoreEsrQ,   0 },//读取标准事件状态寄存器（读取后自动清零）
     { "*IDN?",     SCPI_CoreIdnQ,   0 },
+    { "*OPC",      SCPI_CoreOpc,    0 },//设置OPC位
     { "*OPC?",     SCPI_CoreOpcQ,   0 },//操作完成时设置OPC位
+    { "*RST",      SCPI_CoreRst,    0 },//复位设备到已知状态
+    { "*SRE",      SCPI_CoreSre,    0 },//设置服务请求启用寄存器
     { "*SRE?",     SCPI_CoreSreQ,   0 },//读取服务请求启用寄存器
     { "*STB?",     SCPI_CoreStbQ,   0 },//读取状态字节寄存器
     { "*TST?",     SCPI_CoreTstQ,   0 },//自测试查询
+    { "*WAI",      SCPI_CoreWai,    0 },//等待操作完成
 
+    /* Required SCPI commands (SCPI std V1999.0 4.2.1) */
     { ":READ?",                                       ScpiManager::SCPI_ReadQ,                0 },
     // --- Output -------------------------------------------------------------------------------
     { ":OUTPut#",                                     ScpiManager::SCPI_OutputState,          0 },

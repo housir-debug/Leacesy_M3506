@@ -1,6 +1,6 @@
 #include "config_manager.h"
-#include <QNetworkInterface>
 #include <QBigEndianStorageType>
+#include <QNetworkInterface>
 #include <QFile>
 
 Q_LOGGING_CATEGORY(config, "CONFIG:")
@@ -44,9 +44,8 @@ std::vector<UartConfig> configs = {
 };
 
 // log config
-bool ConfigManager::s_enablelogfile = false;
 QString ConfigManager::s_loglevel = "release";
-
+bool ConfigManager::s_enablelogfile = false;
 // channel switch
 bool ConfigManager::s_enableUartMess   = true;
 bool ConfigManager::s_enableCanMess    = true;
@@ -57,10 +56,17 @@ bool ConfigManager::s_enableCANServer  = true;
 bool ConfigManager::s_enableUARTServer = true;
 bool ConfigManager::s_enableDisplay    = true;
 
+std::atomic<quint8> ConfigManager::s_remoteSt{0};
+QSettings* ConfigManager::s_settings = nullptr;
+
 // global variable - Internal fixation
 QString ConfigManager::s_firmwareVersion = "1.0.0";
 QString ConfigManager::s_hardwareVersion = "1.0.0";
+
 QString ConfigManager::s_manufacturer = "Leacesy";
+QString ConfigManager::s_serialNumber = "SN-66004";
+QString ConfigManager::s_model = "66004";
+
 // global variable - System reading
 QString ConfigManager::s_IP = "";
 QString ConfigManager::s_SM = "";
@@ -68,15 +74,8 @@ QString ConfigManager::s_MAC = "";
 QString ConfigManager::s_Gateway = "";
 bool ConfigManager::s_isDHCP = false;
 
-// global variable - config reading
-QString ConfigManager::s_serialNumber = "SN-12306";
-QString ConfigManager::s_model = "66004";
 QString ConfigManager::s_GPIBid = "0";
 QString ConfigManager::s_CANid = "0";
-
-std::atomic<quint8> ConfigManager::s_remoteSt{0};
-
-QSettings* ConfigManager::s_settings = nullptr;
 
 bool ConfigManager::init(const QString &configDir)
 {
@@ -89,19 +88,18 @@ bool ConfigManager::init(const QString &configDir)
             s_loglevel = s_settings->value("Logger/logLevel").toString();
             s_enablelogfile = s_settings->value("Logger/EnablelogFile").toBool();
 
-            // channel switch
             s_enableUartMess = s_settings->value("Channel/EnableUartMess").toBool();
             s_enableCanMess = s_settings->value("Channel/EnableCanMess").toBool();
-            // control switch
+
             s_enableLANServer = s_settings->value("Control/EnableLANServer").toBool();
             s_enableWEBServer = s_settings->value("Control/EnableWEBServer").toBool();
             s_enableCANServer = s_settings->value("Control/EnableCANServer").toBool();
             s_enableUARTServer = s_settings->value("Control/EnableUARTServer").toBool();
             s_enableDisplay = s_settings->value("Control/EnableDisplay").toBool();
 
-            // global variable
             s_serialNumber = s_settings->value("Device/SerialNumber").toString();
             s_model = s_settings->value("Device/Model").toString();
+
             s_GPIBid = s_settings->value("Device/GPIBID").toString();
             s_CANid = s_settings->value("Device/CANID").toString();
 
@@ -110,22 +108,8 @@ bool ConfigManager::init(const QString &configDir)
 
         qCWarning(config) << "[init]:Cannot open config file for writing";
     }
-    return false;
-}
 
-bool ConfigManager::setConfigValue(const QString &key, const QVariant &value)
-{
-    if (s_settings) {
-        QVariant oldValue = s_settings->value(key);
-        if (oldValue != value && !value.isNull()) {
-            // Automatically written at the end
-            s_settings->setValue(key, value);
-            // s_settings->sync(); // Write immediately to the file
-            return true;
-        }
-
-        qCWarning(config) << "[setConfigValue]:config new value invalue.";
-    }
+    // getNetworkConfig have print information
     return false;
 }
 
@@ -133,85 +117,50 @@ bool ConfigManager::getNetworkConfig() {
     const auto interfaces = QNetworkInterface::allInterfaces();
     for (const QNetworkInterface& iface : qAsConst(interfaces)) {
         if (iface.name() == "eth0") {
-            s_Gateway = getGateway("eth0");
-            s_isDHCP = getnetworkmode("eth0");
-            s_MAC = iface.hardwareAddress();
-            const auto entries = iface.addressEntries();
+            QFile file("/etc/network/interfaces");
+            if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                int readcount = 0;
+                QTextStream in(&file);
+                QString line = in.readLine(); // get frist rows of headline
 
-            for (const QNetworkAddressEntry& entry : qAsConst(entries)) {
-                if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
-                    s_IP = entry.ip().toString();
-                    s_SM = entry.netmask().toString();
-                    return true;
+                while (!in.atEnd()) {
+                    line = in.readLine().trimmed(); // Remove first and end spaces
+
+                    if (line.startsWith("iface " + iface.name())) {
+                        readcount += 1;
+                        if (line.contains("dhcp", Qt::CaseInsensitive)) {
+                            s_isDHCP = true;
+                        }else{
+                            s_isDHCP = false;
+                        }
+                    }
+
+                    if (line.startsWith("gateway ")) {
+                        readcount += 1;
+                        s_Gateway = line.mid(8).trimmed();
+                    }
+
+                    if (readcount >= 2){break;}
                 }
-            }
 
-            qCWarning(config) << "[getNetworkConfig]:reading IP&SM failed!";
-        }
-    }
-    return false;
-}
-
-QString ConfigManager::getGateway(const QString& interfaceName) {
-    QFile file("/proc/net/route");
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream in(&file);
-        QString line = in.readLine(); // get frist rows of headline
-
-        while (!in.atEnd()) {
-            line = in.readLine();
-            QStringList parts = line.split('\t', Qt::SkipEmptyParts);
-
-            if (parts.size() > 3) {
-                QString iface = parts[0];
-                QString destination = parts[1];
-
-                // default route : destination - 00000000
-                if (iface == interfaceName && destination == "00000000") {
-                    bool ok;
-                    QString gatewayHex = parts[2];
-                    quint32 gw = gatewayHex.toUInt(&ok, 16);
-
-                    if (ok) {
-                        quint32 networkOrder = qFromBigEndian<quint32>(gw);
-                        QHostAddress addr(networkOrder); // to Big-endian order
-                        return addr.toString();
+                s_MAC = iface.hardwareAddress();
+                const auto entries = iface.addressEntries();
+                for (const QNetworkAddressEntry& entry : qAsConst(entries)) {
+                    if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
+                        s_IP = entry.ip().toString();
+                        s_SM = entry.netmask().toString();
+                        return true;
                     }
                 }
             }
-        }
 
-        qCWarning(config) << "[getGateway]failed to read gateways configature!";
-        return QString();
-    }
-
-    qCWarning(config) << "[getGateway]Cannot open /proc/net/route";
-    return QString();
-}
-
-bool ConfigManager::getnetworkmode(const QString& interfaceName) {
-    QFile file("/etc/network/interfaces");
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream in(&file);
-        QString line = in.readLine(); // get frist rows of headline
-
-        while (!in.atEnd()) {
-            line = in.readLine().trimmed();
-
-            if (line.startsWith("iface " + interfaceName)) {
-                if (line.contains("dhcp", Qt::CaseInsensitive)) {
-                    return true;
-                }
-
-                if (line.contains("static", Qt::CaseInsensitive)) {
-                    return false;
-                }
-            }
+            qCWarning(config) << "[getNetworkConfig]:/etc/network/interfaces opening failed!";
+            return false; // static
         }
     }
 
-    qCWarning(config) << "[getnetworkmode] Cannot open /etc/network/interfaces";
-    return false; // static
+    qCWarning(config) << "[getNetworkConfig]:not find target iface!";
+    return false;
 }
 
 bool ConfigManager::setinterfaces(bool isstatic,const QString& ip, const QString& netmask,const QString& gateway){
@@ -254,6 +203,7 @@ bool ConfigManager::setinterfaces(bool isstatic,const QString& ip, const QString
 
         QString restartCmd = "/etc/init.d/S40network restart";
         if (system(restartCmd.toStdString().c_str()) == 0) {
+            getNetworkConfig();
             return true;
         }
 
@@ -262,5 +212,18 @@ bool ConfigManager::setinterfaces(bool isstatic,const QString& ip, const QString
     }
 
     qCWarning(config) << "[refresh_interfaces]:Cannot open interfaces file for writing";
+    return false;
+}
+
+bool ConfigManager::setConfigValue(const QString &key, const QVariant &value)
+{
+    if (s_settings) {
+        // Automatically written at the end
+        s_settings->setValue(key, value);
+        // s_settings->sync();
+        return true;
+    }
+
+    qCWarning(config) << "[setConfigValue]:not setting exist!";
     return false;
 }

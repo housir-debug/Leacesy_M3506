@@ -6,8 +6,13 @@ namespace Vxi11 {
     constexpr int WEB_PORT = 8080;
 
     constexpr int VXI_PORT = 5025;
+    constexpr int VXI_SRQ_PORT = 5026;
+    constexpr int VXI_HISLIP_PORT = 4880;
+
     constexpr quint8  HEADER = 0x80;
     constexpr quint32 DEVICE_CORE  = 395183;
+    constexpr quint32 DEVICE_ASYNC = 395184;
+    constexpr quint32 DEVICE_INTR  = 395185;
 
     enum CoreProcedure : quint32 {
         GET_PORT              = 3,    // Useless
