@@ -73,6 +73,7 @@ private:
     QByteArray m_readbuffer;
     QByteArray m_responsebuffer;
 
+    bool isChExist{false};
     quint8 m_channel{0};
     quint8 m_InitIndex{0};
     quint16 m_scpiCommand{0};

@@ -118,7 +118,7 @@ void UartChannelManager::sendInitCommand()
         return;
     }
 
-    if(ConfigManager::s_enableDisplay || ConfigManager::s_enableWEBServer){
+    if(ConfigManager::s_enableDisplay && isChExist){
         m_refreshtimer->start();
     }
 }
@@ -869,12 +869,14 @@ void UartChannelManager::handleRegistercmd(quint8 func){
             qCDebug(uart_channel)<<"[handleRegistercmd]:Channel_"<<m_channel<<" Set[0x03]";
             return;
         case 0x84: // :SYST:SWVersion?
+            isChExist = true;
             emit CH_svChanged(m_channel,str);
             m_scpiManager->processCHStringResponse(str);
             emit to_CanServer(m_channel,0x0584,m_readparam);
             qCDebug(uart_channel)<<"[handleRegistercmd]:Channel_"<<m_channel<<" Query[0x84]"<<str;
             return;
         case 0x85: // :SYST:HWVersion?
+            isChExist = true;
             emit CH_hvChanged(m_channel,str);
             m_scpiManager->processCHStringResponse(str);
             emit to_CanServer(m_channel,0x0585,m_readparam);

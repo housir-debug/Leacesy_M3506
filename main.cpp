@@ -68,12 +68,17 @@ int main(int argc, char *argv[])
         mainwindow->m_modelManager = BatteryModel_share;
         //mainwindow->show();
 
-        scene.addWidget(mainwindow.get());
-        //view.fitInView(view.sceneRect(), Qt::KeepAspectRatio);
+        QGraphicsProxyWidget* proxy = scene.addWidget(mainwindow.get());
+        proxy->setFocusPolicy(Qt::NoFocus);
+        proxy->setRotation(0);
+
+        view.viewport()->setAttribute(Qt::WA_AcceptTouchEvents, false);
+        view.setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
         view.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         view.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        view.setDragMode(QGraphicsView::NoDrag);
         view.setFrameShape(QFrame::NoFrame);
-        view.rotate(0);
+        //view.rotate(0);
         view.show();
 
         mainwindow->update_cardtest();
@@ -137,7 +142,7 @@ int main(int argc, char *argv[])
             Channel_list.push_back(std::move(channel)); // move set <channel> can move
         }
 
-        mainwindow->update_showcard();
+        //mainwindow->update_showcard();
     }
 
     // LAN Server create

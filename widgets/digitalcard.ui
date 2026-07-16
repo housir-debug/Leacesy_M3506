@@ -37,7 +37,7 @@
    <cursorShape>BlankCursor</cursorShape>
   </property>
   <property name="mouseTracking">
-   <bool>true</bool>
+   <bool>false</bool>
   </property>
   <property name="contextMenuPolicy">
    <enum>Qt::NoContextMenu</enum>

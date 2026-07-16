@@ -267,9 +267,11 @@ void Mainwindow::add_digitalcard(int neededPages,const QList<quint8>& channels)
             QString chname = QString("CH-%1").arg(ch, 2, 10, QChar('0'));
             m_vercard->setChannelName(chname);
 
-            bool chstatus = m_digitalcards[ch]->getChstatus();
-            m_funcdigitalcard->setChannelState(chstatus);
             m_funcdigitalcard->setChannel(ch);
+            m_funcdigitalcard->setChannelState(m_digitalcards[ch]->getChstatus());
+            m_funcdigitalcard->setCvValue(m_digitalcards[ch]->getChCvValue());
+            m_funcdigitalcard->setCcValue(m_digitalcards[ch]->getChCcValue());
+            m_funcdigitalcard->setOvpValue(m_digitalcards[ch]->getChOvpValue());
 
             ui->cvvaluelabel->setText("");
             ui->ccvaluelabel->setText("");
@@ -322,7 +324,7 @@ void Mainwindow::add_batterycard(int neededPages,const QList<quint8>& channels)
             to_Channel(ch, 0x01, func, "");
         });
         connect(card, &batterycard::longPressed, this, [this](quint8 ch) {
-            m_initalpage = 0;
+            m_initalpage = 1;
             m_functioncCh = ch;
 
             m_vercard->setChSWVersion(m_ChsoftVer.value(ch));
@@ -330,9 +332,13 @@ void Mainwindow::add_batterycard(int neededPages,const QList<quint8>& channels)
             QString chname = QString("CH-%1").arg(ch, 2, 10, QChar('0'));
             m_vercard->setChannelName(chname);
 
-            bool chstatus = m_batterycards[ch]->getChstatus();
-            m_funcbatterycard->setChannelState(chstatus);
             m_funcbatterycard->setChannel(ch);
+            m_funcbatterycard->setChannelState(m_batterycards[ch]->getChstatus());
+            m_funcbatterycard->setSocValue(m_batterycards[ch]->getChSOCvalue());
+            m_funcbatterycard->setOcvValue(m_batterycards[ch]->getChOcvvalue());
+            m_funcbatterycard->setEsrValue(m_batterycards[ch]->getChEsrvalue());
+            m_funcbatterycard->setCapValue(m_batterycards[ch]->getChCapvalue());
+            m_funcbatterycard->setModelValue(m_batterycards[ch]->getChmodelname());
 
             ui->socvaluelabel->setText("");
             ui->capvaluelabel->setText("");
@@ -438,6 +444,10 @@ void Mainwindow::update_CurrentAndUnit(int ch,float current){
 
     if (m_batterycards.contains(ch) && m_batterycards[ch]->getChstatus()){
         m_batterycards[ch]->updateSocValue(current);
+
+        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh){
+            m_funcbatterycard->updateSocValue(current);
+        }
     }
 }
 
@@ -836,7 +846,7 @@ void Mainwindow::on_capradioButton_clicked()
 void Mainwindow::on_functionmodelpushButton_clicked()
 {
     if (m_batterycards.contains(m_functioncCh)){
-        quint8 currentIndex = m_batterycards[m_functioncCh]->getChmodel();
+        quint8 currentIndex = m_batterycards[m_functioncCh]->getChmodelindex();
 
         if (!m_currentModelList.isEmpty()) {
             currentIndex = (currentIndex + 1) % m_currentModelList.size();

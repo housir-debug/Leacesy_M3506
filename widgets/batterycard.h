@@ -16,7 +16,12 @@ public:
     ~batterycard();
 
     bool getChstatus() const;
-    quint8 getChmodel() const;
+    float getChSOCvalue() const;
+    float getChOcvvalue() const;
+    float getChEsrvalue() const;
+    float getChCapvalue() const;
+    QString getChmodelname() const;
+    quint8 getChmodelindex() const;
 
     void setChannel(quint8 ch);
     void setChannelState(bool state);
@@ -28,8 +33,8 @@ public:
     void setModelValue(const QString &model);
     void setModel(quint8 index,const QSharedPointer<BatteryModel> &model);
 
-    void updateSocValue(float current);
     void startupdateValue();
+    void updateSocValue(float current);
 
     float getcurrentOCV();
     float getcurrentESR();
@@ -37,20 +42,23 @@ public:
 
 private:
     Ui::batterycard *ui;
-    quint8 m_channel{0};
-    quint8 m_modelindex{0};
-
-    float m_capacityAH{2.4f};
-    float m_progressSOC{0.0f};
-    QElapsedTimer m_integralTimer;
-    //QString m_batteryModel{"empty"};
-    QSharedPointer<BatteryModel> m_activeModel;
 
     bool m_isPressed;
     QPoint m_pressPos;
 
     QTimer *m_longPressTimer;
     bool m_longPressTriggered;
+
+    quint8 m_channel{0};
+    float m_soc{72.0f};
+    float m_ocv{0.0f};
+    float m_esr{0.0f};
+    float m_cap{1.0f};
+    QString m_model{"empty"};
+
+    QSharedPointer<BatteryModel> m_activeModel;
+    QElapsedTimer m_integralTimer;
+    quint8 m_modelindex{0};
 
 signals:
     void clicked(quint8 ch,bool status);

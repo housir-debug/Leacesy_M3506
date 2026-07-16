@@ -37,9 +37,7 @@ void digitalcard::mousePressEvent(QMouseEvent *event)
     m_longPressTriggered = false;
     m_longPressTimer->start();
 
-    // event->accept();
-    // Pass to the parent class
-    QWidget::mousePressEvent(event);
+    event->accept();
 }
 
 void digitalcard::mouseReleaseEvent(QMouseEvent *event)
@@ -57,10 +55,7 @@ void digitalcard::mouseReleaseEvent(QMouseEvent *event)
     }
 
     m_isPressed = false;
-
-    // event->accept();
-    // Pass to the parent class
-    QWidget::mouseReleaseEvent(event);
+    event->accept();
 }
 
 void digitalcard::mouseMoveEvent(QMouseEvent *event)
@@ -72,9 +67,6 @@ void digitalcard::mouseMoveEvent(QMouseEvent *event)
             m_isPressed = false;
         }
     }
-
-    // Pass to the parent class
-    QWidget::mouseMoveEvent(event);
 }
 
 // property setting API

@@ -54,8 +54,8 @@ private:
     std::atomic<float> m_voltage{0.0f};
     std::atomic<float> m_current{0.0f};
     std::atomic<float> m_cv{0.0f};
-    std::atomic<float> m_cc{0.0f};
-    std::atomic<float> m_ovp{0.0f};
+    std::atomic<float> m_cc{1.0f};
+    std::atomic<float> m_ovp{8.0f};
 
 signals:
     void clicked(quint8 ch,bool status);
