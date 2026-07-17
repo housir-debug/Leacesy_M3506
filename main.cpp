@@ -96,7 +96,6 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        QObject::connect(mainwindow.get(),&Mainwindow::to_CANid,canServer.get(),&CanServerManager::change_canid,Qt::QueuedConnection);
         QObject::connect(canServer.get(),&CanServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
     }
 
@@ -117,26 +116,29 @@ int main(int argc, char *argv[])
                 return 1;
             }
 
-            QObject::connect(channel.get(),&UartChannelManager::CH_svChanged,mainwindow.get(),&Mainwindow::update_SoftVer,Qt::QueuedConnection);
-            QObject::connect(channel.get(),&UartChannelManager::CH_hvChanged,mainwindow.get(),&Mainwindow::update_HardVer,Qt::QueuedConnection);
-            QObject::connect(channel.get(),&UartChannelManager::CH_VoltageChanged,mainwindow.get(),&Mainwindow::update_Voltage,Qt::QueuedConnection);
-            QObject::connect(channel.get(),&UartChannelManager::CH_CurrentAndUnitChanged,mainwindow.get(),&Mainwindow::update_CurrentAndUnit,Qt::QueuedConnection);
-            QObject::connect(channel.get(),&UartChannelManager::CH_RangeChanged,mainwindow.get(),&Mainwindow::update_Range,Qt::QueuedConnection);
-            QObject::connect(channel.get(),&UartChannelManager::CH_StatusChanged,mainwindow.get(),&Mainwindow::update_Status,Qt::QueuedConnection);
-            QObject::connect(channel.get(),&UartChannelManager::CH_cvChanged,mainwindow.get(),&Mainwindow::update_Cv,Qt::QueuedConnection);
-            QObject::connect(channel.get(),&UartChannelManager::CH_ccChanged,mainwindow.get(),&Mainwindow::update_Cc,Qt::QueuedConnection);
-            QObject::connect(channel.get(),&UartChannelManager::CH_ovpChanged,mainwindow.get(),&Mainwindow::update_Ovp,Qt::QueuedConnection);
-            QObject::connect(channel.get(),&UartChannelManager::CH_isOutputChanged,mainwindow.get(),&Mainwindow::update_IsOutput,Qt::QueuedConnection);
-            QObject::connect(channel.get(),&UartChannelManager::CH_impChanged,mainwindow.get(),&Mainwindow::update_Imp,Qt::QueuedConnection);
-
-            /* screen view slot function */
-            QObject::connect(mainwindow.get(),qml_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
             /* remote api slot function */
             QObject::connect(Scpi_share.get(),scpi_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
 
             if (ConfigManager::s_enableCANServer){
                 QObject::connect(canServer.get(),can_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
                 QObject::connect(channel.get(),&UartChannelManager::to_CanServer,canServer.get(),&CanServerManager::sendFrame,Qt::QueuedConnection);
+            }
+
+            if (ConfigManager::s_enableDisplay){
+                QObject::connect(channel.get(),&UartChannelManager::CH_svChanged,mainwindow.get(),&Mainwindow::update_SoftVer,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_hvChanged,mainwindow.get(),&Mainwindow::update_HardVer,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_VoltageChanged,mainwindow.get(),&Mainwindow::update_Voltage,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_CurrentAndUnitChanged,mainwindow.get(),&Mainwindow::update_CurrentAndUnit,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_RangeChanged,mainwindow.get(),&Mainwindow::update_Range,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_StatusChanged,mainwindow.get(),&Mainwindow::update_Status,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_cvChanged,mainwindow.get(),&Mainwindow::update_Cv,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_ccChanged,mainwindow.get(),&Mainwindow::update_Cc,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_ovpChanged,mainwindow.get(),&Mainwindow::update_Ovp,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_isOutputChanged,mainwindow.get(),&Mainwindow::update_IsOutput,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_impChanged,mainwindow.get(),&Mainwindow::update_Imp,Qt::QueuedConnection);
+
+                /* screen view slot function */
+                QObject::connect(mainwindow.get(),qml_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
             }
 
             Channel_list.push_back(std::move(channel)); // move set <channel> can move
@@ -157,7 +159,9 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        QObject::connect(webServer.get(),&WebServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+        if (ConfigManager::s_enableDisplay){
+            QObject::connect(webServer.get(),&WebServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+        }
     }
 
     std::unique_ptr<TcpServerManager> vxiServer;

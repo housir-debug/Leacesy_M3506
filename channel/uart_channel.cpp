@@ -29,61 +29,86 @@ UartChannelManager::~UartChannelManager()
     qCDebug(uart_channel)<<"[~UartChannelManager]:Channel_"<<m_channel<<" Destroyed!!!";
 }
 
-bool UartChannelManager::initSerialPort(const QString &portName,qint32 baudRate)
+void UartChannelManager::writeFrame(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi) {
+    m_waitingForRes.store(true);
+    quint8 length = 4 + param.size();  //  Command+Function+Channel+CheckSum  + Parameter
+    quint8 checksum = length + cmd + func + m_channel; // The check code is taken from the lowest 8 bits.
+    for (char byte : param) {checksum += static_cast<quint8>(byte);}
+
+    m_responsebuffer.clear();
+    m_responsebuffer.reserve(length + 4);  // Pre-allocation enhances performance
+    m_responsebuffer.append(HEADER_HIGH);
+    m_responsebuffer.append(HEADER_LOW);
+    m_responsebuffer.append(length);
+    m_responsebuffer.append(cmd);
+    m_responsebuffer.append(func);
+    m_responsebuffer.append(m_channel);
+    m_responsebuffer.append(param);
+    m_responsebuffer.append(checksum);
+    m_responsebuffer.append(END_MARKER);
+
+    // m_serialPort->flush();
+    m_serialPort->write(m_responsebuffer);
+    if (isScpi){m_scpiCommand = (static_cast<quint16>(cmd) << 8) | func;} // 01 | 02 = 0x0102
+    qCDebug(uart_channel)<<"[writeFrame]:Channel_"<<m_channel<<" Send: "<<m_responsebuffer.toHex(' ');
+
+    for (int i = 0; i < 18; i++) {
+        if (!m_waitingForRes.load()) {return;}
+        QThread::msleep(1); // 18ms timeout
+    }
+}
+
+
+bool UartChannelManager::initSerialPort(quint8 ch, const QString &portName,qint32 baudRate)
 {
     if (!m_serialThread && !m_serialPort && !m_refreshtimer){
-        for (const auto& config : configs) {
-            if (config.port == portName) {
-                m_channel = config.channel;
-                m_serialPort = new QSerialPort(this);
+        m_serialPort = new QSerialPort(this);
+        // Set the data bit to 8 bits, For example: Data5 - Data8
+        m_serialPort->setDataBits(QSerialPort::Data8);
+        // Not use parity check bits, the upper-level protocol ensures data integrity.
+        m_serialPort->setParity(QSerialPort::NoParity);
+        // Use 1 stop bit, Mark the end of A data byte
+        m_serialPort->setStopBits(QSerialPort::OneStop);
+        // HardwareControl: Requires wiring support | SoftwareControl: Applicable only to written text
+        m_serialPort ->setFlowControl(QSerialPort::NoFlowControl);
+        // setting QSerialPort::Baud38400 and QSerialPort - name
+        m_serialPort->setBaudRate(baudRate);
+        m_serialPort->setPortName(portName);
 
-                m_serialPort->setPortName(portName);
-                m_serialPort->setBaudRate(baudRate); // QSerialPort::Baud115200
+        m_channel = ch;
+        m_commands = {
+            {0x04, 0x80, ""},// voltage
+            {0x04, 0x81, ""},// current
+            {0x05, 0x80, ""},// status
+        };
 
-                // Set the data bit to 8 bits, For example: Data5 - Data8
-                m_serialPort->setDataBits(QSerialPort::Data8);
-                // Not use parity check bits, the upper-level protocol ensures data integrity.
-                m_serialPort->setParity(QSerialPort::NoParity);
-                // Use 1 stop bit, Mark the end of A data byte
-                m_serialPort->setStopBits(QSerialPort::OneStop);
-                // HardwareControl: Requires wiring support | SoftwareControl: Applicable only to written text
-                m_serialPort ->setFlowControl(QSerialPort::NoFlowControl);
+        if (m_serialPort->open(QIODevice::ReadWrite)) {
+            m_refreshtimer = new QTimer;
+            m_refreshtimer->setInterval(180); // ms -> 60ms < target < at will
 
-                m_refreshtimer = new QTimer;
-                m_refreshtimer->setInterval(180); // ms -> 60ms < target < at will
+            m_serialThread = new QThread(this);
+            this->moveToThread(m_serialThread);
+            m_serialPort->moveToThread(m_serialThread);
+            m_refreshtimer->moveToThread(m_serialThread);
 
-                m_serialThread = new QThread(this);
-                m_serialThread->setObjectName(QString("UartChannel_%1_worker").arg(m_channel));
-
-                this->moveToThread(m_serialThread);
-                m_serialPort->moveToThread(m_serialThread);
-                m_refreshtimer->moveToThread(m_serialThread);
-                m_serialThread->start();
-
+            connect(m_serialThread, &QThread::started, this, [this]() {
                 connect(m_serialPort, &QSerialPort::readyRead, this, &UartChannelManager::handleReadyRead, Qt::DirectConnection);
                 connect(m_serialPort, &QSerialPort::errorOccurred, this, [this]() {
                     qCWarning(uart_channel)<<"[initSerialPort]:Channel_"<<m_channel<<" Error: "<<m_serialPort->errorString();
-                }, Qt::DirectConnection);
+                    }, Qt::DirectConnection);
                 connect(m_refreshtimer,&QTimer::timeout,this,[this]{
-                    static int step = 0;
-                    step = (step + 1) % 3;
-                    switch (step) {
-                        case 0:  writeFrame(0x04,0x80,"",false); break;
-                        case 1:  writeFrame(0x04,0x81,"",false); break;
-                        case 2:  writeFrame(0x05,0x80,"",false); break;
+                    if (!m_commands.isEmpty()){
+                        m_timeindex = (m_timeindex + 1) % m_commands.size();
+                        const Command &cmd = m_commands[m_timeindex];
+                        writeFrame(cmd.cmd, cmd.func, cmd.param, false);
                     }}, Qt::DirectConnection);
 
-                QMetaObject::invokeMethod(this, [this]() {
-                    if (m_serialPort->open(QIODevice::ReadWrite)) {
-                        //startLoopbackTest();
-                        sendInitCommand();
-                        return;
-                    }
-                    qCWarning(uart_channel)<<"[initSerialPort]:m_serialPort open failed!";
-                }, Qt::QueuedConnection);
+                sendInitCommand();
+            });
 
-                return true;
-            }
+            m_serialThread->setObjectName(QString("UartCh_%1_worker").arg(m_channel));
+            m_serialThread->start();
+            return true;
         }
     }
 
@@ -109,60 +134,21 @@ const QVector<Command> UartChannelManager::m_initCommands = {
 
 void UartChannelManager::sendInitCommand()
 {
-    if (m_InitIndex < m_initCommands.size()) {
-        const Command& cmd = m_initCommands[m_InitIndex];
-        writeFrame(cmd.cmd, cmd.func, cmd.param, false);
+    if (m_initindex < m_initCommands.size()) {
+       const Command& cmd = m_initCommands[m_initindex];
+       writeFrame(cmd.cmd, cmd.func, cmd.param, false);
 
-        QTimer::singleShot(60, this, &UartChannelManager::sendInitCommand);// 60ms
-        m_InitIndex++;
-        return;
-    }
-
-    if(ConfigManager::s_enableDisplay && isChExist){
-        m_refreshtimer->start();
-    }
+       // disable direct call this function, will block reception
+       QTimer::singleShot(60, this, &UartChannelManager::sendInitCommand);// 60ms
+       m_initindex++;
+       return;
+   }else{
+       if(ConfigManager::s_enableDisplay && isExist){
+           m_refreshtimer->start();
+       }
+   }
 }
 
-void UartChannelManager::startLoopbackTest()
-{
-    qCDebug(uart_channel)<<"[startLoopbackTest]:Starting Loopback Test.";
-    QByteArray testData(1024, 0);
-
-    m_testTimer.start();
-    m_serialPort->write(testData);
-}
-
-void UartChannelManager::writeFrame(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi) {
-    m_waitingForRes.store(true);
-    quint8 length = 4 + param.size();  //  Command+Function+Channel+CheckSum  + Parameter
-    quint8 checksum = length + cmd + func + m_channel; // The check code is taken from the lowest 8 bits.
-    for (char byte : param) {checksum += static_cast<quint8>(byte);}
-
-    m_responsebuffer.clear();
-    m_responsebuffer.reserve(length + 4);  // Pre-allocation enhances performance
-    m_responsebuffer.append(HEADER_HIGH);
-    m_responsebuffer.append(HEADER_LOW);
-    m_responsebuffer.append(length);
-    m_responsebuffer.append(cmd);
-    m_responsebuffer.append(func);
-    m_responsebuffer.append(m_channel);
-    m_responsebuffer.append(param);
-    m_responsebuffer.append(checksum);
-    m_responsebuffer.append(END_MARKER);
-
-    //m_serialPort->flush();//immediately
-    m_serialPort->write(m_responsebuffer);
-    if (isScpi){m_scpiCommand = (static_cast<quint16>(cmd) << 8) | func;}
-    qCDebug(uart_channel)<<"[writeFrame]:Channel_"<<m_channel<<" Send: "<<m_responsebuffer.toHex(' ');
-
-    for (int i = 0; i < 18; i++) {
-        if (!m_waitingForRes.load()) {
-            return;
-        }
-
-        QThread::msleep(1); // 1ms total 18ms
-    }
-}
 
 void UartChannelManager::handleReadyRead()
 {
@@ -203,44 +189,24 @@ void UartChannelManager::handleReadyRead()
                         }
 
                         m_readbuffer.remove(0,lengthB + 4);
-                        if(!m_readbuffer.isEmpty()){
-                            qCDebug(uart_channel)<<"[handleReadyRead]:Channel_"<<m_channel<<" continue next process";
-                            handleReadyRead();
-                        }
-
+                        if(!m_readbuffer.isEmpty()){handleReadyRead();}
                         return; // finish.
                     }
                 }
 
-                qCWarning(uart_channel)<<"[handleReadyRead]:Channel_"<<m_channel<<" Received For Error!!";
+                qCWarning(uart_channel)<<"[handleReadyRead]:Channel_"<<m_channel<<" Received end or check Error!!";
                 m_readbuffer.clear();
-                return;
             }
 
             return; // Insufficient length; wait to be completed.
         }
 
-        qCWarning(uart_channel)<<"[handleReadyRead]:Channel_"<<m_channel<<" Received Format Error!!!";
+        qCWarning(uart_channel)<<"[handleReadyRead]:Channel_"<<m_channel<<" Received frist format Error!!!";
         m_readbuffer.clear();
     }
-
-    // Test progressing
-    /*if (m_readbuffer.size() >= 1024) { // 1KB
-        qint64 elapsed = m_testTimer.elapsed(); // ms
-        double speedKBps =  (1024 * 1000.0) / (elapsed * 1024);
-        double speedBps = 1024 * 1000.0 / elapsed;
-
-        qCDebug(uart_channel) << "\n" << QString(
-            "Loopback Test Result:"
-            "Time elapsed: %1 ms"
-            "Speed: %2 KB/s (%3 bps)"
-        ).arg(elapsed).arg(speedKBps, 0, 'f', 2).arg(speedBps * 8, 0, 'f', 0);
-
-        m_readbuffer.clear();
-    }*/
 }
 
-//---------------------------------------------------------------------------------
+// ************************* 具体命令处理 *****************************
 
 void UartChannelManager::handleOutputcmd(quint8 func){
     quint32 shts{0};quint8 sh{0};bool status{false};
@@ -869,14 +835,14 @@ void UartChannelManager::handleRegistercmd(quint8 func){
             qCDebug(uart_channel)<<"[handleRegistercmd]:Channel_"<<m_channel<<" Set[0x03]";
             return;
         case 0x84: // :SYST:SWVersion?
-            isChExist = true;
+            isExist = true;
             emit CH_svChanged(m_channel,str);
             m_scpiManager->processCHStringResponse(str);
             emit to_CanServer(m_channel,0x0584,m_readparam);
             qCDebug(uart_channel)<<"[handleRegistercmd]:Channel_"<<m_channel<<" Query[0x84]"<<str;
             return;
         case 0x85: // :SYST:HWVersion?
-            isChExist = true;
+            isExist = true;
             emit CH_hvChanged(m_channel,str);
             m_scpiManager->processCHStringResponse(str);
             emit to_CanServer(m_channel,0x0585,m_readparam);

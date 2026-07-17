@@ -6,8 +6,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-// ========================== 初始化部分 ===================================
-
 Q_LOGGING_CATEGORY(can, "CAN:");
 
 CanServerManager::CanServerManager(QObject *parent): QObject(parent)
@@ -232,66 +230,66 @@ bool CanServerManager::startServer()
 
         if (createSocket(interface)) {
             m_serverThread = new QThread(this);
-            m_serverThread->setObjectName("CanServer");
-
             this->moveToThread(m_serverThread);
             m_readNotifier->moveToThread(m_serverThread);
             m_writeNotifier->moveToThread(m_serverThread);
-            m_serverThread->start();
 
-            connect(m_readNotifier, &QSocketNotifier::activated,this, [this](){
-                // Prevent re-entry
-                m_readNotifier->setEnabled(false);
-                struct can_frame frame;
+            connect(m_serverThread, &QThread::started, this, [this]() {
+                connect(m_readNotifier, &QSocketNotifier::activated,this, [this](){
+                    // Prevent re-entry
+                    struct can_frame frame;
+                    m_readNotifier->setEnabled(false);
 
-                while (true) {
-                    ssize_t nbytes = read(m_socketFd, &frame, sizeof(frame));
+                    while (true) {
+                        ssize_t nbytes = read(m_socketFd, &frame, sizeof(frame));
 
-                    if (nbytes == sizeof(frame)) { // always 16Bytes
-                        if (m_canid == frame.can_id){
+                        if (nbytes == sizeof(frame)) { // always 16Bytes
+                            if (frame.can_id == ConfigManager::s_CANid){
+                                QByteArray data(reinterpret_cast<const char*>(frame.data), frame.can_dlc);
+                                qCDebug(can)<<"[startServer]:Received Data: "<<data.toHex();
+
+                                if (ConfigManager::s_remoteSt.load()==1 || ConfigManager::s_remoteSt.load()==0){
+                                    if (ConfigManager::s_remoteSt.load()==0){emit isRemote(1);}
+                                    processFrame(data);
+                                }else{
+                                    qCDebug(can)<<"[startServer]: Currently in an alternative remote mode";
+                                    quint8 channel = static_cast<quint8>(data[0]);
+                                    sendFrame(channel,0xffff,"");
+                                }
+                            }
+                        } else if (nbytes < 0) {
+                            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                                // Data processing completed
+                                m_readNotifier->setEnabled(true);
+                                return;
+                            }
+                            qCWarning(can)<<"[startServer]:Read error: "<<strerror(errno);
+                }}}, Qt::DirectConnection);
+
+                connect(m_writeNotifier, &QSocketNotifier::activated,this, [this](){
+                    // Prevent re-entry
+                    m_writeNotifier->setEnabled(false);
+
+                    while (!m_sendQueue.isEmpty()) {
+                        const struct can_frame &frame = m_sendQueue.head();
+                        ssize_t sent = write(m_socketFd, &frame, sizeof(frame));
+
+                        if (sent == sizeof(frame)) {
+                            m_sendQueue.dequeue();
                             QByteArray data(reinterpret_cast<const char*>(frame.data), frame.can_dlc);
-                            qCDebug(can)<<"[startServer]:Received Data: "<<data.toHex();
-                            if (ConfigManager::s_remoteSt.load()==1){
-                                processFrame(data);
+                            qCDebug(can)<<"[sendFrame]:Sent Data: "<<data.toHex()<<", QueueRemain: "<<m_sendQueue.size();
+                        } else if (sent < 0) {
+                            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                                // sending buffer is full. Please try again later.
+                                m_writeNotifier->setEnabled(true);
+                                return;
                             }
-                            else if (ConfigManager::s_remoteSt.load()==0){
-                                processFrame(data);
-                                emit isRemote(1);
-                            }
-                            else{
-                                quint8 channel = static_cast<quint8>(data[0]);
-                                qCDebug(can)<<"[startServer]: Currently in an alternative remote mode";
-                                sendFrame(channel,0xffff,"");
-                            }
-                        }
-                    } else if (nbytes < 0) {
-                        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                            // Data processing completed
-                            m_readNotifier->setEnabled(true);
-                            return;
-                        }
-                        qCWarning(can)<<"[startServer]:Read error: "<<strerror(errno);
-                    }}}, Qt::DirectConnection);
+                            qCWarning(can)<<"[startServer]:Write error: "<<strerror(errno);
+                }}}, Qt::DirectConnection);
+            });
 
-            connect(m_writeNotifier, &QSocketNotifier::activated,this, [this](){
-                // Prevent re-entry
-                m_writeNotifier->setEnabled(false);
-
-                while (!m_sendQueue.isEmpty()) {
-                    const struct can_frame &frame = m_sendQueue.head();
-                    ssize_t sent = write(m_socketFd, &frame, sizeof(frame));
-
-                    if (sent == sizeof(frame)) {
-                        m_sendQueue.dequeue();
-                    } else if (sent < 0) {
-                        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                            // sending buffer is full. Please try again later.
-                            m_writeNotifier->setEnabled(true);
-                            return;
-                        }
-                        qCWarning(can)<<"[startServer]:Write error: "<<strerror(errno);
-                    }}}, Qt::DirectConnection);
-
+            m_serverThread->setObjectName("CanServer");
+            m_serverThread->start();
             return true;
         }
     }
@@ -300,326 +298,365 @@ bool CanServerManager::startServer()
     return false;
 }
 
-// ---------------------------------------------------------------------------------------------------------------
+void CanServerManager::sendFrame(quint8 ch,quint16 uart,const QByteArray &param)
+{
+    // Queue rate limiting (to prevent infinite growth)
+    if (m_sendQueue.size() <= 9999) {
+        struct can_frame frame{};
+        frame.can_id = ConfigManager::s_CANid;
+
+        quint32 cmf = m_uartToCan.value(uart);
+        if (cmf < 0x10000) {
+            cmf = (cmf << 8) | static_cast<quint32>(m_calibrate_step);
+        }else{
+            cmf = (cmf & 0x00FFFFFF) | (static_cast<quint32>(ch) << 24);
+        }
+
+        QByteArray data;
+        data.append(static_cast<char>((cmf >> 24) & 0xFF));
+        data.append(static_cast<char>((cmf >> 16) & 0xFF));
+        data.append(static_cast<char>((cmf >> 8) & 0xFF));
+        data.append(static_cast<char>(cmf & 0xFF));
+
+        QByteArray paddedParam(4, 0);
+        int copyLen = qMin(param.size(), 4);
+        memcpy(paddedParam.data() + (4 - copyLen), param.data(), copyLen);
+
+        data.append(paddedParam);
+        frame.can_dlc = static_cast<quint8>(data.size());
+        memcpy(frame.data, data.constData(), data.size());
+
+        if (m_sendQueue.isEmpty()) {m_writeNotifier->setEnabled(true);}
+        m_sendQueue.enqueue(frame);
+        return;
+    }
+
+    qCWarning(can)<<"[sendFrame]:Send queue overflow!!!";
+    return;
+}
+
+// *************************** 处理具体接收信息 ****************************************
 
 void CanServerManager::processFrame(const QByteArray &data)
 {
     quint8 channel = static_cast<quint8>(data[0]);
-    quint16 val = (static_cast<quint32>(data[1]) << 8) |(static_cast<quint32>(data[2]));
-    if (val != 0x1062){
-        val = (static_cast<quint32>(data[1]) << 16) |(static_cast<quint32>(data[2]) << 8)
+    quint16 caninf = (static_cast<quint32>(data[1]) << 8) |(static_cast<quint32>(data[2]));
+    if (caninf != 0x1062){
+        caninf = (static_cast<quint32>(data[1]) << 16) |(static_cast<quint32>(data[2]) << 8)
                 |(static_cast<quint32>(data[3]));
     }
 
-    quint16 cmf = m_canToUart.value(val);
-    quint8 highByte = (cmf >> 8) & 0xFF;
-    quint8 lowByte = cmf & 0xFF;
+    quint16 cmf = m_canToUart.value(caninf);
+    quint8  cmd = (cmf >> 8) & 0xFF;
+    quint8 func = cmf & 0xFF;
 
-    QByteArray one = data.mid(7);
-    QByteArray two = data.mid(4,2);
-    QByteArray four = data.mid(4,4);
+    // param extract
+    QByteArray one  = data.mid(7);
+    QByteArray two  = data.mid(6);
+    QByteArray four = data.mid(4);
 
     switch (cmf){
     // output
         case 0x0180:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x01:{
             quint8 func = static_cast<quint8>(data[7]);
-            to_Channel(channel,lowByte,func,"");
+            to_Channel(channel,func,func,"");
             return;}
         case 0x0108:
-            to_Channel(channel,highByte,lowByte,one);
+            to_Channel(channel,cmd,func,one);
             return;
         case 0x0188:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0109:
-            to_Channel(channel,highByte,lowByte,one);
+            to_Channel(channel,cmd,func,one);
             return;
         case 0x0189:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
     // setting
         case 0x0280:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0200:
-            to_Channel(channel,highByte,lowByte,four);
+            to_Channel(channel,cmd,func,four);
             return;
         case 0x0281:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0201:
-            to_Channel(channel,highByte,lowByte,four);
+            to_Channel(channel,cmd,func,four);
             return;
         case 0x0282:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0202:
-            to_Channel(channel,highByte,lowByte,four);
+            to_Channel(channel,cmd,func,four);
             return;
         case 0x0283:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0203:
-            to_Channel(channel,highByte,lowByte,four);
+            to_Channel(channel,cmd,func,four);
             return;
         case 0x0284:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0204:
-            to_Channel(channel,highByte,lowByte,four);
+            to_Channel(channel,cmd,func,four);
             return;
         case 0x0285:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0205:
-            to_Channel(channel,highByte,lowByte,four);
+            to_Channel(channel,cmd,func,four);
             return;
     // control
         case 0x0380:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0300:
-            to_Channel(channel,highByte,lowByte,one);
+            to_Channel(channel,cmd,func,one);
             return;
         case 0x0381:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0301:
-            to_Channel(channel,highByte,lowByte,one);
+            to_Channel(channel,cmd,func,one);
             return;
         case 0x0382:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0302:
-            to_Channel(channel,highByte,lowByte,one);
+            to_Channel(channel,cmd,func,one);
             return;
         case 0x0383:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0303:
-            to_Channel(channel,highByte,lowByte,one);
+            to_Channel(channel,cmd,func,one);
             return;
         case 0x0384:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0304:
-            to_Channel(channel,highByte,lowByte,one);
+            to_Channel(channel,cmd,func,one);
             return;
         case 0x0385:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0305:
-            to_Channel(channel,highByte,lowByte,one);
+            to_Channel(channel,cmd,func,one);
             return;
         case 0x0388:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0308:
-            to_Channel(channel,highByte,lowByte,one);
+            to_Channel(channel,cmd,func,one);
             return;
         case 0x0389:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0309:
-            to_Channel(channel,highByte,lowByte,one);
+            to_Channel(channel,cmd,func,one);
             return;
     // measurement
         case 0x048F:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x040F:
-            to_Channel(channel,highByte,lowByte,four);
+            to_Channel(channel,cmd,func,four);
             return;
         case 0x0480:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0481:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0482:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0483:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0484:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0485:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0486:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0487:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x048A:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x048B:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x048C:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0489:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0410:
-            to_Channel(channel,highByte,lowByte,one);
+            to_Channel(channel,cmd,func,one);
             return;
         case 0x0491:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0492:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0493:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0494:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0495:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0496:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0497:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0498:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0499:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x049A:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x049B:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x049C:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
     // register
         case 0x0580:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0581:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0582:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0583:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0503:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0584:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0585:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
     // trigger
         case 0x0800:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0801:
-            to_Channel(channel,highByte,lowByte,one);
+            to_Channel(channel,cmd,func,one);
             return;
         case 0x0802:
-            to_Channel(channel,highByte,lowByte,one);
+            to_Channel(channel,cmd,func,one);
             return;
         case 0x0803:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0804:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0805:
-            to_Channel(channel,highByte,lowByte,one);
+            to_Channel(channel,cmd,func,one);
             return;
         case 0x0885:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0806:
-            to_Channel(channel,highByte,lowByte,two);
+            to_Channel(channel,cmd,func,two);
             return;
         case 0x0886:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0807:
-            to_Channel(channel,highByte,lowByte,four);
+            to_Channel(channel,cmd,func,four);
             return;
         case 0x0887:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0808:
-            to_Channel(channel,highByte,lowByte,four);
+            to_Channel(channel,cmd,func,four);
             return;
         case 0x0888:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0809:
-            to_Channel(channel,highByte,lowByte,one);
+            to_Channel(channel,cmd,func,one);
             return;
         case 0x0889:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x088A:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x080A:
-            to_Channel(channel,highByte,lowByte,four);
+            to_Channel(channel,cmd,func,four);
             return;
         case 0x088B:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x080B:
-            to_Channel(channel,highByte,lowByte,four);
+            to_Channel(channel,cmd,func,four);
             return;
         case 0x088C:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x080C:
-            to_Channel(channel,highByte,lowByte,four);
+            to_Channel(channel,cmd,func,four);
             return;
     // calibrate
         case 0x0601:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0602:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0603:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0684:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0604:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0605:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x0606:
-            to_Channel(channel,highByte,lowByte,"");
+            to_Channel(channel,cmd,func,"");
             return;
         case 0x07:{
             m_calibrate_step = static_cast<quint8>(data[3]);
-            to_Channel(channel,lowByte,m_calibrate_step,four);
-            return;}
+            to_Channel(channel,func,m_calibrate_step,four);
+            return;
+        };
         default:qCWarning(can)<<"[processFrame]error case";return;
     }
 }
@@ -645,47 +682,4 @@ void CanServerManager::to_Channel(int channel,quint8 cmd,quint8 func,const QByte
     }
 }
 
-void CanServerManager::sendFrame(quint8 ch,quint16 uart,const QByteArray &param)
-{
-    // Queue rate limiting (to prevent infinite growth)
-    if (m_sendQueue.size() <= 9999) {
-        struct can_frame frame{};
-        frame.can_id = m_canid;
 
-        QByteArray data;
-        quint32 cmf = m_canToUart.value(uart);
-        if (cmf < 0x10000) {
-            cmf = (cmf << 8) | static_cast<quint32>(m_calibrate_step);
-        }
-        cmf = (cmf & 0x00FFFFFF) | (static_cast<quint32>(ch) << 24);
-
-        data.append(static_cast<char>((cmf >> 24) & 0xFF));
-        data.append(static_cast<char>((cmf >> 16) & 0xFF));
-        data.append(static_cast<char>((cmf >> 8) & 0xFF));
-        data.append(static_cast<char>(cmf & 0xFF));
-
-        QByteArray paddedParam(4, 0);
-        int copyLen = qMin(param.size(), 4);
-        memcpy(paddedParam.data() + (4 - copyLen), param.data(), copyLen);
-
-        data.append(paddedParam);
-        frame.can_dlc = static_cast<quint8>(data.size());
-        memcpy(frame.data, data.constData(), data.size());
-
-        qCDebug(can)<<"[sendFrame]:Sent Data: "<<data.toHex()<<", QueueRemain: "<<m_sendQueue.size()-1;
-        if (m_sendQueue.isEmpty()) {m_writeNotifier->setEnabled(true);}
-        m_sendQueue.enqueue(frame);
-        return;
-    }
-
-    qCWarning(can)<<"[sendFrame]:Send queue overflow, size: "<<m_sendQueue.size();
-}
-
-void CanServerManager::change_canid(QString id){
-    bool ok;
-    m_canid = static_cast<quint8>(id.toUInt(&ok));
-
-    if (!ok){
-        qCWarning(can)<<"[change_canid]:tranform failed!!!";
-    }
-}

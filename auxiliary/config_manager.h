@@ -58,8 +58,8 @@ public:
     static QString s_Gateway;
     static bool s_isDHCP;
 
-    static QString s_GPIBid;
-    static QString s_CANid;
+    static quint8 s_GPIBid;
+    static quint8 s_CANid;
 
 private:
     ConfigManager() = delete;       // Prohibition of construction

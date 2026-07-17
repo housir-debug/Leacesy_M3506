@@ -141,10 +141,9 @@ Mainwindow::Mainwindow(QWidget *parent) :
                 }
                 case 3:{// canid
                     ConfigManager::setConfigValue("Device/CANID",value);
+                    ConfigManager::s_CANid = value.toUInt();
                     ui->canidvaluelabel->setText(value);
-                    ConfigManager::s_CANid = value;
                     ui->canidlabel->setText(value);
-                    emit to_CANid(value);
                     return;
                 }
                 default:return;
@@ -612,8 +611,8 @@ void Mainwindow::refresh_settingpage()
     ui->maskvaluelabel->setText("");
     ui->gatevaluelabel->setText("");
 
-    ui->canidlabel->setText(ConfigManager::s_CANid);
-    ui->gpibidlabel->setText(ConfigManager::s_GPIBid);
+    ui->gpibidlabel->setText(QString::number(ConfigManager::s_GPIBid));
+    ui->canidlabel->setText(QString::number(ConfigManager::s_CANid));
     ui->snlabel->setText(ConfigManager::s_serialNumber);
     ui->canidvaluelabel->setText("");
     ui->gpibvaluelabel->setText("");

@@ -35,21 +35,16 @@ signals:
     void CH_isOutputChanged(int ch,bool status);
     void CH_impChanged(int ch,float imp);
 
-    /*
-    void CH_CurrentSOCChanged();
-    void CH_CapacityAHChanged();
-    void CH_BatteryModelChanged();*/
-
 public:
     explicit UartChannelManager(QObject *parent = nullptr);
     ~UartChannelManager();
 
     void writeFrame(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
-    bool initSerialPort(const QString &portName,qint32 baudRate);
-
+    bool initSerialPort(quint8 ch, const QString &portName,qint32 baudRate);
     std::shared_ptr<ScpiManager> m_scpiManager{nullptr};
 
 private:
+    void sendInitCommand();
     void handleReadyRead();
     void handleOutputcmd         (quint8 func);
     void handleSettingcmd        (quint8 func);
@@ -65,18 +60,16 @@ private:
     void handleErrorcmd          (quint8 func);
 
 private:
-    void sendInitCommand();
-    void startLoopbackTest();
-    QElapsedTimer m_testTimer;
-
     QByteArray m_readparam;
     QByteArray m_readbuffer;
     QByteArray m_responsebuffer;
 
-    bool isChExist{false};
+    bool isExist{false};
     quint8 m_channel{0};
-    quint8 m_InitIndex{0};
+    quint8 m_initindex{0};
+    quint8 m_timeindex{0};
     quint16 m_scpiCommand{0};
+    QVector<Command> m_commands;
     std::atomic<bool> m_waitingForRes{false};
 
     QTimer *m_refreshtimer{nullptr};

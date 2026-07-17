@@ -74,8 +74,8 @@ QString ConfigManager::s_MAC = "";
 QString ConfigManager::s_Gateway = "";
 bool ConfigManager::s_isDHCP = false;
 
-QString ConfigManager::s_GPIBid = "0";
-QString ConfigManager::s_CANid = "0";
+quint8 ConfigManager::s_GPIBid = 0;
+quint8 ConfigManager::s_CANid = 0;
 
 bool ConfigManager::init(const QString &configDir)
 {
@@ -100,8 +100,8 @@ bool ConfigManager::init(const QString &configDir)
             s_serialNumber = s_settings->value("Device/SerialNumber").toString();
             s_model = s_settings->value("Device/Model").toString();
 
-            s_GPIBid = s_settings->value("Device/GPIBID").toString();
-            s_CANid = s_settings->value("Device/CANID").toString();
+            s_GPIBid = s_settings->value("Device/GPIBID").toUInt();
+            s_CANid = s_settings->value("Device/CANID").toUInt();
 
             return true;
         }
