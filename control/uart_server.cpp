@@ -88,4 +88,28 @@ void UartServerManager::handleReadyRead()
         qCDebug(uart_server)<<"[handleReadyRead]:Uart SCPI Response: "<<m_responsebuffer;
         m_uartServer->write(m_responsebuffer);
     }
+
+    // Test progressing
+    /*if (m_readbuffer.size() >= 1024) { // 1KB
+        qint64 elapsed = m_testTimer.elapsed(); // ms
+        double speedKBps =  (1024 * 1000.0) / (elapsed * 1024);
+        double speedBps = 1024 * 1000.0 / elapsed;
+
+        qCDebug(uart_server) << "\n" << QString(
+            "Loopback Test Result:"
+            "Time elapsed: %1 ms"
+            "Speed: %2 KB/s (%3 bps)"
+        ).arg(elapsed).arg(speedKBps, 0, 'f', 2).arg(speedBps * 8, 0, 'f', 0);
+
+        m_readbuffer.clear();
+    }*/
+}
+
+void UartServerManager::startLoopbackTest()
+{
+    qCDebug(uart_server)<<"[startLoopbackTest]:Starting Loopback Test.";
+    QByteArray testData(1024, 0);
+
+    m_testTimer.start();
+    m_uartServer->write(testData);
 }

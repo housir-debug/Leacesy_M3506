@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
             auto channel = std::make_unique<UartChannelManager>();
             channel->m_scpiManager = Scpi_share;
 
-            if (!channel->initSerialPort(config.port, config.baudRate)) {
+            if (!channel->initSerialPort(config.channel, config.port, config.baudRate)) {
                 qCWarning(application) << "uart channel "<< config.port <<" Initialization failed!";
                 return 1;
             }

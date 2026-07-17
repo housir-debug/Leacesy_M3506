@@ -365,7 +365,6 @@ void WebServerManager::onWsTextMessageReceived(QWebSocket *socket,const QString 
 bool WebServerManager::addModelFromNetwork(const QString &modelName, const QJsonArray &modelData) {
     if (!modelName.isEmpty() && !m_BatteryManager->m_models.contains(modelName)) {
         auto model = QSharedPointer<BatteryModel>::create();
-        model->name = modelName;
 
         for (const auto &item : modelData) {
             if (!item.isNull() && item.isObject()) {
@@ -387,6 +386,7 @@ bool WebServerManager::addModelFromNetwork(const QString &modelName, const QJson
             }
         }
 
+        // model->name = modelName;   saveModel to set model->name
         m_BatteryManager->saveModel(model, modelName);
         return true;
     }

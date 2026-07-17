@@ -19,6 +19,9 @@ public:
     std::shared_ptr<ScpiManager> m_scpiManager{nullptr};
 
 private:
+    void startLoopbackTest();
+    QElapsedTimer m_testTimer;
+
     void handleReadyRead();
 
     QByteArray m_readbuffer;
