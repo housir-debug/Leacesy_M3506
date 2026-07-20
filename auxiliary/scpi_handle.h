@@ -26,23 +26,6 @@ signals:
     CHANNEL_COUNT
     #undef CHANNEL
 
-public:
-    explicit ScpiManager(QObject *parent = nullptr);
-    ~ScpiManager() override = default;
-
-    static const scpi_choice_def_t m_CmdparaChoices[];
-    static const scpi_command_t m_scpiCommands[];
-
-    // Control -> this
-    QByteArray processCommand(const QByteArray& command);
-
-    // Channel -> this
-    void processCHVoidResponse();                  // 0
-    void processCHStateResponse(bool state);       // 1
-    void processCHFloatResponse(float value);      // 2
-    void processCHIntResponse(int value);          // 3
-    void processCHStringResponse(QString value);   // 4
-
 private:
     // --- Output -------------------------------------------------------------------------------
     static scpi_result_t SCPI_OutputState(scpi_t* context);
@@ -178,36 +161,58 @@ private:
     static scpi_result_t SCPI_TriggerCurrQ(scpi_t* context)          {return sendQuery(context,0x08,0x8b);};
     static scpi_result_t SCPI_TriggerResQ(scpi_t* context)           {return sendQuery(context,0x08,0x8c);};
 
-private:
-    static scpi_result_t sendQuery(scpi_t* context, quint8 cmd, quint8 func);
-    // write
+    int32_t m_channel{0};
     static scpi_result_t sendBoolCmd(scpi_t* context, quint8 cmd, quint8 func);
     static scpi_result_t sendFloatCmd(scpi_t* context, quint8 cmd, quint8 func);
     static scpi_result_t sendChoiceCmd(scpi_t* context, quint8 cmd, quint8 func);
     static scpi_result_t sendIntCmd(scpi_t* context, quint8 cmd, quint8 func,quint8 bytes);
-    // common
-    static scpi_result_t SCPI_ReadQ(scpi_t* context);
-    static void sendAllCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data);
-    static void sendSingleCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data);
+
+    static scpi_result_t sendQuery(scpi_t* context, quint8 cmd, quint8 func);
+
     static scpi_result_t sendQueryCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data = "");
+    static void sendSingleCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data);
+    static void sendAllCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data);
+    static scpi_result_t SCPI_ReadQ(scpi_t* context);
+
+public:
+    static const scpi_choice_def_t m_CmdparaChoices[];
+    static const scpi_command_t m_scpiCommands[];
+    static const scpi_unit_def_t m_scpi_units[];
+
+    explicit ScpiManager(QObject *parent = nullptr);
+    ~ScpiManager() override = default;
+
+    // Channel -> this
+    void processCHVoidResponse();                  // 0
+    void processCHStateResponse(bool state);       // 1
+    void processCHFloatResponse(float value);      // 2
+    void processCHIntResponse(int value);          // 3
+    void processCHStringResponse(QString value);   // 4
+
+    // Control -> this
+    QByteArray processCommand(const QByteArray& command);
+
+private:
+    QMutex m_syncMutex;
+    quint8 m_ReturnType{0};
+    QWaitCondition m_syncCondition;
 
     int m_CHIntReturn{0};
     bool m_CHStateReturn{false};
     float m_CHFloatReturn{0.0f};
     QString m_CHStringReturn;
 
-    int32_t m_channel{0};
-    quint8 m_ReturnType{0};
-
     QMutex m_callMutex;
     QByteArray m_responseBuffer;
-    QMutex m_syncMutex;
-    QWaitCondition m_syncCondition;
 
     QByteArray m_idnManufacturer;
     QByteArray m_idnModel;
     QByteArray m_idnSerialNumber;
     QByteArray m_idnVersion;
+
+    scpi_t m_scpiContext;
+    char m_inputBuffer[256];
+    scpi_error_t m_errorQueue[18];
 
     scpi_interface_t m_interface;
     static scpi_result_t staticFlush(scpi_t* context);
@@ -215,8 +220,4 @@ private:
     static int           staticError(scpi_t* context, int_fast16_t err);
     static size_t        staticWrite(scpi_t* context, const char* data, size_t len);
     static scpi_result_t staticControl(scpi_t* context, scpi_ctrl_name_t ctrl, scpi_reg_val_t val);
-
-    scpi_t m_scpiContext;
-    char m_inputBuffer[256];
-    scpi_error_t m_errorQueue[18];
 };
