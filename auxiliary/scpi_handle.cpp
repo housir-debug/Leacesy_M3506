@@ -25,7 +25,7 @@ const scpi_choice_def_t ScpiManager::m_CmdparaChoices[] = {
     {"CURR",     0},
     {"DVM",      1},
     {"VOLT",     2},
-    {"SCRR",     3},
+    {"SCUR",     3},
     {"BTMP",     4},
     {"HTMP",     5},
     {"TMP1",     6},
@@ -43,8 +43,24 @@ const scpi_choice_def_t ScpiManager::m_CmdparaChoices[] = {
     SCPI_CHOICE_LIST_END
 };
 
-// Output
+scpi_result_t ScpiManager::SCPI_Query(scpi_t* context){
+    auto* self = static_cast<ScpiManager*>(context->user_context);
 
+    switch (self->m_querymode){ // Only query ,not response. Read -> response
+        case 0: return sendQueryCmd(context,0x04,0x81);//CURR
+        case 1: return sendQueryCmd(context,0x04,0x86);//DVM
+        case 2: return sendQueryCmd(context,0x04,0x80);//VOLT
+        case 3: return sendQueryCmd(context,0x04,0x82);//SCUR
+        case 4: return sendQueryCmd(context,0x04,0x83);//BTMP
+        case 5: return sendQueryCmd(context,0x04,0x84);//HTMP
+        case 6: return sendQueryCmd(context,0x04,0x8a);//TMP1
+        case 7: return sendQueryCmd(context,0x04,0x8b);//TMP2
+        case 8: return sendQueryCmd(context,0x04,0x8d);//TMP3
+        default:return SCPI_RES_ERR;
+    }
+}
+
+// Output
 scpi_result_t ScpiManager::SCPI_OutputState(scpi_t* context) {
     scpi_bool_t OpenOut;
     if(SCPI_ParamBool(context, &OpenOut,true)){
@@ -53,127 +69,22 @@ scpi_result_t ScpiManager::SCPI_OutputState(scpi_t* context) {
         return sendQueryCmd(context,0x01,func,"");
     }
 
-    SCPI_ErrorPush(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE); // parameter value is invalid.
-    return SCPI_RES_ERR;
-}
-// -
-scpi_result_t ScpiManager::SCPI_OutputBandQ(scpi_t* context) {
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-    if(sendQueryCmd(context,0x01,0x88)){
-        SCPI_ResultMnemonic(context, self->m_CHStateReturn ? "HIGH" : "LOW");
-        return SCPI_RES_OK;
-    }
-
-    return SCPI_RES_ERR;
-}
-scpi_result_t ScpiManager::SCPI_OutputCompModeQ(scpi_t* context) {
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-    if(sendQueryCmd(context,0x01,0x89)){
-        switch (self->m_CHIntReturn) {
-            case 1:SCPI_ResultMnemonic(context, "Llocal"); return SCPI_RES_OK;
-            case 2:SCPI_ResultMnemonic(context, "Lremote");return SCPI_RES_OK;
-            case 3:SCPI_ResultMnemonic(context, "Hlocal"); return SCPI_RES_OK;
-            case 4:SCPI_ResultMnemonic(context, "Hremote");return SCPI_RES_OK;
-            default:break;
-        }
-    }
-
-    return SCPI_RES_ERR;
-}
-
-// Control
-
-scpi_result_t ScpiManager::SCPI_ControlSAV(scpi_t* context) {
-    int value;
-    if (SCPI_ParamInt(context, &value, true)) {
-        qCDebug(scpi) <<"[SCPI_ControlSAV]:Channel SAV Set Value:"<< value;
-        QByteArray data(1, static_cast<quint8>(value));
-        return sendAllCHCmd(context,0x03,0x06,data);
-    }
-
-    SCPI_ErrorPush(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE); // parameter value is invalid.
-    return SCPI_RES_ERR;
-}
-scpi_result_t ScpiManager::SCPI_ControlRCL(scpi_t* context) {
-    int value;
-    if (SCPI_ParamInt(context, &value, true)) {
-        qCDebug(scpi) <<"[SCPI_ControlRCL]:Channel RCL Set Value:" << value;
-        QByteArray data(1, static_cast<quint8>(value));
-        return sendAllCHCmd(context,0x03,0x07,data);
-    }
-
-    SCPI_ErrorPush(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE); // parameter value is invalid.
-    return SCPI_RES_ERR;
-}
-// -
-scpi_result_t ScpiManager::SCPI_ControlCurrQ(scpi_t* context) {
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-    if(sendQueryCmd(context,0x03,0x82)){
-        SCPI_ResultMnemonic(context, self->m_CHStateReturn ? "TRIP" : "LIM");
-        return SCPI_RES_OK;
-    }
-
-    return SCPI_RES_ERR;
-}
-scpi_result_t ScpiManager::SCPI_ControlSystQ(scpi_t* context) {
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-    if(sendQueryCmd(context,0x03,0x85)){
-        switch (self->m_CHIntReturn) {
-            case 0:SCPI_ResultMnemonic(context, "RST"); return SCPI_RES_OK;
-            case 1:SCPI_ResultMnemonic(context, "SAV0");return SCPI_RES_OK;
-            case 2:SCPI_ResultMnemonic(context, "SAV1");return SCPI_RES_OK;
-            case 3:SCPI_ResultMnemonic(context, "SAV2");return SCPI_RES_OK;
-            case 4:SCPI_ResultMnemonic(context, "SAV3");return SCPI_RES_OK;
-            case 5:SCPI_ResultMnemonic(context, "SAV4");return SCPI_RES_OK;
-            default:break;
-        }
-    }
-
-    return SCPI_RES_ERR;
-}
-scpi_result_t ScpiManager::SCPI_ControlLoadQ(scpi_t* context) {
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-    if(sendQueryCmd(context,0x03,0x89)){
-        SCPI_ResultMnemonic(context, self->m_CHStateReturn ? "TRIP" : "LIM");
-        return SCPI_RES_OK;
-    }
-
     return SCPI_RES_ERR;
 }
 
 // Measurement
-
 scpi_result_t ScpiManager::SCPI_MeasureFunc(scpi_t* context) {
-    // 0x04-cmd 0x10-func of little use .conflicts with under. Therefore, selection not supported.
     int32_t choice;
+    auto* self = static_cast<ScpiManager*>(context->user_context);
     if (SCPI_ParamChoice(context, m_CmdparaChoices, &choice, true)) {
         qCDebug(scpi) <<"[SCPI_MeasureFunc]:Param choice: "<< choice;
-        switch (choice){ // Only query ,not response. Read -> response
-            case 0: return sendQueryCmd(context,0x04,0x81);//CURR
-            case 1: return sendQueryCmd(context,0x04,0x86);//DVM
-            case 2: return sendQueryCmd(context,0x04,0x80);//VOLT
-            case 3: return sendQueryCmd(context,0x04,0x82);//SCRR
-            case 4: return sendQueryCmd(context,0x04,0x83);//BTMP
-            case 5: return sendQueryCmd(context,0x04,0x84);//HTMP
-            case 6: return sendQueryCmd(context,0x04,0x8a);//TMP1
-            case 7: return sendQueryCmd(context,0x04,0x8b);//TMP2
-            case 8: return sendQueryCmd(context,0x04,0x8d);//TMP3
-            default:break;
-        }
-    }
-
-    SCPI_ErrorPush(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE); // parameter value is invalid.
-    return SCPI_RES_ERR;
-}
-// -
-scpi_result_t ScpiManager::SCPI_MeasureFuncQ(scpi_t* context) {
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-    if(sendQueryCmd(context,0x04,0x90)){
-        switch (self->m_CHIntReturn) {
-            case 0:SCPI_ResultMnemonic(context, "CURR");return SCPI_RES_OK;
-            case 1:SCPI_ResultMnemonic(context, "DVM"); return SCPI_RES_OK;
-            case 2:SCPI_ResultMnemonic(context, "VOLT");return SCPI_RES_OK;
-            default:break;
+        QByteArray data(1, static_cast<quint8>(choice));
+        self->m_querymode = choice;
+        switch (choice){
+            case 0: return sendQueryCmd(context,0x04,0x10,data);
+            case 1: return sendQueryCmd(context,0x04,0x10,data);
+            case 2: return sendQueryCmd(context,0x04,0x10,data);
+            default:return SCPI_RES_OK;
         }
     }
 
@@ -181,71 +92,26 @@ scpi_result_t ScpiManager::SCPI_MeasureFuncQ(scpi_t* context) {
 }
 
 // Calibrate
-
 scpi_result_t ScpiManager::SCPI_CalibrateStep(scpi_t* context) {
     int32_t step;
     float parameter;
     if (SCPI_ParamInt(context, &step, true)) {
         if (SCPI_ParamFloat(context, &parameter, true)) {
             QByteArray data(4, 0);
+            qCDebug(scpi) <<"[SCPI_CalibrateStep]:step: "<<step<<" param: "<<parameter;
             qToBigEndian(parameter, reinterpret_cast<uint8_t*>(data.data()));
             return sendQueryCmd(context,0x07,step,data);
         }
     }
 
-    SCPI_ErrorPush(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE); // parameter value is invalid.
     return SCPI_RES_ERR;
 }
 // -
-scpi_result_t ScpiManager::SCPI_CalibrateAllQ(scpi_t* context) {
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-    if(sendQueryCmd(context,0x06,0x84)){
-        switch (self->m_CHIntReturn) {
-            case 0:SCPI_ResultMnemonic(context, "OFF");return SCPI_RES_OK;
-            case 1:SCPI_ResultMnemonic(context, "ALL");return SCPI_RES_OK;
-            case 2:SCPI_ResultMnemonic(context, "ADC");return SCPI_RES_OK;
-            case 3:SCPI_ResultMnemonic(context, "DAC");return SCPI_RES_OK;
-            default:break;
-        }
-    }
-
-    return SCPI_RES_ERR;
-}
 scpi_result_t ScpiManager::SCPI_CalibrateStepQ(scpi_t* context) {
     int value;
     if (SCPI_ParamInt(context, &value, true)) {
         qCDebug(scpi) <<"[SCPI_CalibrateStepQ]:Step Value: "<< value;
         return sendQueryCmd(context,0x07,value);
-    }
-
-    SCPI_ErrorPush(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE); // parameter value is invalid.
-    return SCPI_RES_ERR;
-}
-
-// Trigger
-
-scpi_result_t ScpiManager::SCPI_TriggerSeq2SoQ(scpi_t* context) {
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-    if(sendQueryCmd(context,0x08,0x85)){
-        switch (self->m_CHIntReturn) {
-            case 1:SCPI_ResultMnemonic(context, "BUS");return SCPI_RES_OK;
-            case 2:SCPI_ResultMnemonic(context, "INT");return SCPI_RES_OK;
-            case 3:SCPI_ResultMnemonic(context, "EXT");return SCPI_RES_OK;
-            default:break;
-        }
-    }
-
-    return SCPI_RES_ERR;
-}
-scpi_result_t ScpiManager::SCPI_TriggerSeq2SlQ(scpi_t* context) {
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-    if(sendQueryCmd(context,0x08,0x89)){
-        switch (self->m_CHIntReturn) {
-            case 1:SCPI_ResultMnemonic(context, "POSitive");return SCPI_RES_OK;
-            case 2:SCPI_ResultMnemonic(context, "NEGative");return SCPI_RES_OK;
-            case 3:SCPI_ResultMnemonic(context, "EITHer");  return SCPI_RES_OK;
-            default:break;
-        }
     }
 
     return SCPI_RES_ERR;
@@ -262,7 +128,6 @@ scpi_result_t ScpiManager::sendBoolCmd(scpi_t* context, quint8 cmd, quint8 func)
         return sendQueryCmd(context,cmd,func,data);
     }
 
-    SCPI_ErrorPush(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE); // parameter value is invalid.
     return SCPI_RES_ERR;
 }
 
@@ -275,7 +140,6 @@ scpi_result_t ScpiManager::sendFloatCmd(scpi_t* context, quint8 cmd, quint8 func
         return sendQueryCmd(context,cmd,func,data);
     }
 
-    SCPI_ErrorPush(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE); // parameter value is invalid.
     return SCPI_RES_ERR;
 }
 
@@ -287,7 +151,6 @@ scpi_result_t ScpiManager::sendChoiceCmd(scpi_t* context,quint8 cmd, quint8 func
         return sendQueryCmd(context,cmd,func,data);
     }
 
-    SCPI_ErrorPush(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE); // parameter value is invalid.
     return SCPI_RES_ERR;
 }
 
@@ -296,19 +159,20 @@ scpi_result_t ScpiManager::sendIntCmd(scpi_t* context, quint8 cmd, quint8 func,q
     if (SCPI_ParamInt(context, &value, true)) {
         qCDebug(scpi) <<"[sendIntCmd]:Channel Set Value:"<< value;
 
-        QByteArray data;
+        QByteArray data(bytes, 0);
         if (bytes == 1) {
             data.append(static_cast<quint8>(value));
-        } else {
+        }else if(bytes == 2){
             quint16 val = static_cast<quint16>(value);
-            data.append(static_cast<quint8>((val >> 8) & 0xFF));
-            data.append(static_cast<quint8>(val & 0xFF));
+            qToBigEndian(val, data.data());
+        }else{
+            int val = static_cast<int>(value); // 32 Bytes +-
+            qToBigEndian(val, data.data());
         }
 
         return sendQueryCmd(context,cmd,func,data);
     }
 
-    SCPI_ErrorPush(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE); // parameter value is invalid.
     return SCPI_RES_ERR;
 }
 
@@ -316,23 +180,21 @@ scpi_result_t ScpiManager::sendIntCmd(scpi_t* context, quint8 cmd, quint8 func,q
 
 scpi_result_t ScpiManager::sendQueryCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data) {
     auto* self = static_cast<ScpiManager*>(context->user_context);
-
-    QMutexLocker locker(&self->m_syncMutex);
     std::vector<ChannelAddress> channels = parseChannelList(context);
 
     if (!channels.empty()) {
         return sendMultiCHCmd(context, cmd, func, data, channels);
     }else{ // Extract only the numerical parts that are filled with "#" in the command list
-        if(SCPI_CommandNumbers(context, &self->m_channel, 1, 0)){ // Array 1, Default Channel 0
+        if(SCPI_CommandNumbers(context, &self->m_channel, 1, -1)){ // Array 1, Default Channel -1
             if (self->m_channel == 0){
                 return sendAllCHCmd(context, cmd, func, data);
-            }else{
+            }else if(self->m_channel > 0){
                 return sendSingleCHCmd(context, cmd, func, data);
-            }
-        }
+            } // channel not exist of command
+        } // channel is not single number
     }
 
-    SCPI_ErrorPush(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE); // parameter value is invalid.
+    SCPI_ErrorPush(context, SCPI_ERROR_EXECUTION_ERROR);
     return SCPI_RES_ERR; // SCPI_RES_ERR = -1; SCPI_RES_OK = 1
 }
 
@@ -409,10 +271,10 @@ scpi_result_t ScpiManager::sendSingleCHCmd(scpi_t* context, quint8 cmd, quint8 f
             case n: \
                 emit self->to_UartChannel##n(cmd,func,data,true);  \
                 qCDebug(scpi)<<"[sendSingleCHCmd]: Single-Channel: "<<n; \
-                if(self->m_syncCondition.wait(&self->m_syncMutex, 600) && SCPI_ReadQ(context) == SCPI_RES_OK){ \
+                if(self->m_syncCondition.wait(&self->m_syncMutex, 120) && SCPI_ReadQ(context) == SCPI_RES_OK){ \
                     return SCPI_RES_OK; \
                 } \
-                SCPI_ErrorPush(context, SCPI_ERROR_EXECUTION_ERROR); \
+                self->m_responseBuffer.append("Null"); \
                 return SCPI_RES_ERR;
 
         CHANNEL_COUNT
@@ -426,8 +288,8 @@ scpi_result_t ScpiManager::sendAllCHCmd(scpi_t* context, quint8 cmd, quint8 func
     self->m_responseBuffer.append("[");
     #define CHANNEL(n) \
         emit self->to_UartChannel##n(cmd,func,data,true); \
-        if(!self->m_syncCondition.wait(&self->m_syncMutex, 600) || SCPI_ReadQ(context) == SCPI_RES_ERR){ \
-            SCPI_ErrorPush(context, SCPI_ERROR_EXECUTION_ERROR); \
+        if(!self->m_syncCondition.wait(&self->m_syncMutex, 120) || SCPI_ReadQ(context) == SCPI_RES_ERR){ \
+            self->m_responseBuffer.append("Null"); \
         } \
         self->m_responseBuffer.append(",");
 
@@ -446,7 +308,7 @@ scpi_result_t ScpiManager::SCPI_ReadQ(scpi_t* context) {
         case 2: SCPI_ResultFloat(context, self->m_CHFloatReturn);                       return SCPI_RES_OK;
         case 3: SCPI_ResultInt(context, self->m_CHIntReturn);                           return SCPI_RES_OK;
         case 4: SCPI_ResultText(context, self->m_CHStringReturn.toUtf8().constData());  return SCPI_RES_OK;
-        default:SCPI_ErrorPush(context, SCPI_ERROR_EXECUTION_ERROR);                    return SCPI_RES_ERR;
+        default:return SCPI_RES_ERR;
     }
 }
 
@@ -518,7 +380,7 @@ const scpi_command_t ScpiManager::m_scpiCommands[] = {
     { "*WAI",      SCPI_CoreWai,    0 },//等待操作完成
 
     /* Required SCPI commands (SCPI std V1999.0 4.2.1) */
-    { ":READ?",                                       ScpiManager::SCPI_ReadQ,                0 },
+    { ":READ?",                                       ScpiManager::SCPI_Query,                0 },
     // --- Output -------------------------------------------------------------------------------
     { ":OUTPut#[:STATe]",                             ScpiManager::SCPI_OutputState,          0 },
     { ":OUTPut#:BANDwidth",                           ScpiManager::SCPI_OutputBand,           0 },
@@ -544,15 +406,15 @@ const scpi_command_t ScpiManager::m_scpiCommands[] = {
     // --- Control ------------------------------------------------------------------------------
     { ":SOURce#:VOLTage:PROTection:CLAMp",            ScpiManager::SCPI_ControlClamp,         0 },
     { ":SOURce#:CURRent[:LIMit]:TYPE",                ScpiManager::SCPI_ControlCurr,          0 },
-    { ":SYSTem:POSetup",                              ScpiManager::SCPI_ControlSyst,          0 },
-    { "*SAV",                                         ScpiManager::SCPI_ControlSAV,           0 },
-    { "*RCL",                                         ScpiManager::SCPI_ControlRCL,           0 },
+    { ":SYSTem#:POSetup",                             ScpiManager::SCPI_ControlSyst,          0 },
+    { "*SAV#",                                        ScpiManager::SCPI_ControlSAV,           0 },
+    { "*RCL#",                                        ScpiManager::SCPI_ControlRCL,           0 },
     { ":LOAD#:INDEpendence[:STATe]",                  ScpiManager::SCPI_ControlInde,          0 },
     { ":LOAD#:CURRent[:LIMit]:TYPE",                  ScpiManager::SCPI_ControlLoad,          0 },
     // -
     { ":SOURce#:VOLTage:PROTection:CLAMp?",           ScpiManager::SCPI_ControlClampQ,        0 },
     { ":SOURce#:CURRent[:LIMit]:TYPE?",               ScpiManager::SCPI_ControlCurrQ,         0 },
-    { ":SYSTem:POSetup?",                             ScpiManager::SCPI_ControlSystQ,         0 },
+    { ":SYSTem#:POSetup?",                            ScpiManager::SCPI_ControlSystQ,         0 },
     { ":LOAD#:INDEpendence[:STATe]?",                 ScpiManager::SCPI_ControlIndeQ,         0 },
     { ":LOAD#:CURRent[:LIMit]:TYPE?",                 ScpiManager::SCPI_ControlLoadQ,         0 },
     // --- Measurement --------------------------------------------------------------------------
@@ -583,8 +445,8 @@ const scpi_command_t ScpiManager::m_scpiCommands[] = {
     { ":MEASure#:ARRay:CURRent[:DC]?",                ScpiManager::SCPI_MeasureArrCurrQ,      0 },
     { ":MEASure#:ARRay:VOLTage[:DC]?",                ScpiManager::SCPI_MeasureArrVoltQ,      0 },
     { ":MEASure#:ARRay:DVMeter?",                     ScpiManager::SCPI_MeasureArrDvmQ,       0 },
-    { ":THERmal#:FAN?",                               ScpiManager::SCPI_MeasureFanQ,          0 },
-    { ":THERmal#:DUTY?",                              ScpiManager::SCPI_MeasureDutyQ,         0 },
+    { ":THERmal#[:PROTection]:FAN?",                  ScpiManager::SCPI_MeasureFanQ,          0 },
+    { ":THERmal#[:PROTection]:DUTY?",                 ScpiManager::SCPI_MeasureDutyQ,         0 },
     { ":SENSe#:NPLCycles?",                           ScpiManager::SCPI_MeasureNplcQ,         0 },
     { ":SENSe#:CURRent[:DC]:RANGe:TIMe?",             ScpiManager::SCPI_MeasureTimeQ,         0 },
     { ":SENSe#:CURRent[:DC]:RANGe[:UPPer][:AUTO]?",   ScpiManager::SCPI_MeasureRangQ,         0 },

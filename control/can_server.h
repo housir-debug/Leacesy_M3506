@@ -35,6 +35,7 @@ private:
     int m_socketFd{-1};
     quint8 m_calibrate_step{0};
 
+    QQueue<quint32> m_pendingRequests;
     QQueue<struct can_frame> m_sendQueue;
     QHash<quint32, quint16> m_canToUart;
     QHash<quint16, quint32> m_uartToCan;

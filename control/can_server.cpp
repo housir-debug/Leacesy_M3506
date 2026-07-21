@@ -301,33 +301,39 @@ bool CanServerManager::startServer()
 void CanServerManager::sendFrame(quint8 ch,quint16 uart,const QByteArray &param)
 {
     // Queue rate limiting (to prevent infinite growth)
-    if (m_sendQueue.size() <= 9999) {
-        struct can_frame frame{};
-        frame.can_id = ConfigManager::s_CANid;
-
+    if (!m_pendingRequests.isEmpty() && m_sendQueue.size() <= 9999) {
         quint32 cmf = m_uartToCan.value(uart);
-        if (cmf < 0x10000) {
-            cmf = (cmf << 8) | static_cast<quint32>(m_calibrate_step);
-        }else{
-            cmf = (cmf & 0x00FFFFFF) | (static_cast<quint32>(ch) << 24);
+
+        if (cmf != 0 && m_pendingRequests.head() == cmf){
+            if (cmf < 0x10000) {
+                cmf = (cmf << 8) | static_cast<quint32>(m_calibrate_step);
+            }else{
+                cmf = (cmf & 0x00FFFFFF) | (static_cast<quint32>(ch) << 24);
+            }
+
+            QByteArray data;
+            data.append(static_cast<char>((cmf >> 24) & 0xFF));
+            data.append(static_cast<char>((cmf >> 16) & 0xFF));
+            data.append(static_cast<char>((cmf >> 8) & 0xFF));
+            data.append(static_cast<char>(cmf & 0xFF));
+
+            QByteArray paddedParam(4, 0);
+            int copyLen = qMin(param.size(), 4);
+            memcpy(paddedParam.data() + (4 - copyLen), param.data(), copyLen);
+            data.append(paddedParam);
+
+            struct can_frame frame{};
+            frame.can_id = ConfigManager::s_CANid;
+            frame.can_dlc = static_cast<quint8>(data.size());
+            memcpy(frame.data, data.constData(), data.size());
+
+            if (m_sendQueue.isEmpty()) {m_writeNotifier->setEnabled(true);}
+            m_pendingRequests.dequeue();
+            m_sendQueue.enqueue(frame);
+            return;
         }
 
-        QByteArray data;
-        data.append(static_cast<char>((cmf >> 24) & 0xFF));
-        data.append(static_cast<char>((cmf >> 16) & 0xFF));
-        data.append(static_cast<char>((cmf >> 8) & 0xFF));
-        data.append(static_cast<char>(cmf & 0xFF));
-
-        QByteArray paddedParam(4, 0);
-        int copyLen = qMin(param.size(), 4);
-        memcpy(paddedParam.data() + (4 - copyLen), param.data(), copyLen);
-
-        data.append(paddedParam);
-        frame.can_dlc = static_cast<quint8>(data.size());
-        memcpy(frame.data, data.constData(), data.size());
-
-        if (m_sendQueue.isEmpty()) {m_writeNotifier->setEnabled(true);}
-        m_sendQueue.enqueue(frame);
+        qCWarning(can)<<"[sendFrame]:ERROR uart command!!!";
         return;
     }
 
@@ -340,12 +346,13 @@ void CanServerManager::sendFrame(quint8 ch,quint16 uart,const QByteArray &param)
 void CanServerManager::processFrame(const QByteArray &data)
 {
     quint8 channel = static_cast<quint8>(data[0]);
-    quint16 caninf = (static_cast<quint32>(data[1]) << 8) |(static_cast<quint32>(data[2]));
+    quint32 caninf = (static_cast<quint32>(data[1]) << 8) |(static_cast<quint32>(data[2]));
     if (caninf != 0x1062){
         caninf = (static_cast<quint32>(data[1]) << 16) |(static_cast<quint32>(data[2]) << 8)
                 |(static_cast<quint32>(data[3]));
     }
 
+    m_pendingRequests.enqueue(caninf);
     quint16 cmf = m_canToUart.value(caninf);
     quint8  cmd = (cmf >> 8) & 0xFF;
     quint8 func = cmf & 0xFF;

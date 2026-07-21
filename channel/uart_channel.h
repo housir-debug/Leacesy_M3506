@@ -1,10 +1,8 @@
 #pragma once
 #include <QTimer>
-#include <QDataStream>
-#include <QElapsedTimer>
 #include <QLoggingCategory>
-#include "auxiliary/config_manager.h"
 #include "auxiliary/scpi_handle.h"
+#include "auxiliary/config_manager.h"
 
 Q_DECLARE_LOGGING_CATEGORY(uart_channel)
 
@@ -46,17 +44,17 @@ public:
 private:
     void sendInitCommand();
     void handleReadyRead();
-    void handleOutputcmd         (quint8 func);
-    void handleSettingcmd        (quint8 func);
-    void handleControlcmd        (quint8 func);
-    void handleMeasurementcmd    (quint8 func);
-    void handleRegistercmd       (quint8 func);
-    void handleCalibratecmd      (quint8 func);
-    void handleCalibrationcmd    (quint8 func);
-    void handleTriggercmd        (quint8 func);
-    void handleISPcmd            (quint8 func);
-    void handleSNcmd             (quint8 func);
-    void handleIDcmd             (quint8 func);
+    void handleOutputcmd         (quint8 func,quint16 scpiIdentify);
+    void handleSettingcmd        (quint8 func,quint16 scpiIdentify);
+    void handleControlcmd        (quint8 func,quint16 scpiIdentify);
+    void handleMeasurementcmd    (quint8 func,quint16 scpiIdentify);
+    void handleRegistercmd       (quint8 func,quint16 scpiIdentify);
+    void handleCalibratecmd      (quint8 func,quint16 scpiIdentify);
+    void handleCalibrationcmd    (quint8 func,quint16 scpiIdentify);
+    void handleTriggercmd        (quint8 func,quint16 scpiIdentify);
+    void handleISPcmd            (quint8 func,quint16 scpiIdentify);
+    void handleSNcmd             (quint8 func,quint16 scpiIdentify);
+    void handleIDcmd             (quint8 func,quint16 scpiIdentify);
     void handleErrorcmd          (quint8 func);
 
 private:
@@ -64,18 +62,18 @@ private:
     QByteArray m_readbuffer;
     QByteArray m_responsebuffer;
 
+    int m_timeindex{0};
+    int m_initindex{0};
     bool isExist{false};
+    bool m_waitR{false};
     quint8 m_channel{0};
-    quint8 m_initindex{0};
-    quint8 m_timeindex{0};
     quint16 m_scpiCommand{0};
     QVector<Command> m_commands;
-    std::atomic<bool> m_waitingForRes{false};
 
     QTimer *m_refreshtimer{nullptr};
-    QThread *m_serialThread{nullptr};
     QSerialPort *m_serialPort{nullptr};
 
+    static QThread* getWorkerThread(quint32 channel);
     static const QVector<Command> m_initCommands;
     static constexpr quint8 HEADER_HIGH = 0xAA;
     static constexpr quint8 HEADER_LOW = 0x55;

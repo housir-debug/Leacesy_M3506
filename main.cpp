@@ -96,7 +96,9 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        QObject::connect(canServer.get(),&CanServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+        if (ConfigManager::s_enableDisplay){
+            QObject::connect(canServer.get(),&CanServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+        }
     }
 
     // can channel create
@@ -173,7 +175,9 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        QObject::connect(vxiServer.get(),&TcpServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+        if (ConfigManager::s_enableDisplay){
+            QObject::connect(vxiServer.get(),&TcpServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+        }
     }
 
     // UART Server create
@@ -186,7 +190,9 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        QObject::connect(uartServer.get(),&UartServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+        if (ConfigManager::s_enableDisplay){
+            QObject::connect(uartServer.get(),&UartServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+        }
     }
 
     // GPIB server create

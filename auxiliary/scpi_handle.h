@@ -32,14 +32,16 @@ signals:
     #undef CHANNEL
 
 private:
+    int32_t m_querymode{0};
+    static scpi_result_t SCPI_Query(scpi_t* context);
     // --- Output -------------------------------------------------------------------------------
     static scpi_result_t SCPI_OutputState(scpi_t* context);
     static scpi_result_t SCPI_OutputBand(scpi_t* context)            {return sendChoiceCmd(context,0x01,0x08);};
     static scpi_result_t SCPI_OutputCompMode(scpi_t* context)        {return sendChoiceCmd(context,0x01,0x09);};
     // -
     static scpi_result_t SCPI_OutputStateQ(scpi_t* context)          {return sendQueryCmd(context,0x01,0x80);};
-    static scpi_result_t SCPI_OutputBandQ(scpi_t* context);
-    static scpi_result_t SCPI_OutputCompModeQ(scpi_t* context);
+    static scpi_result_t SCPI_OutputBandQ(scpi_t* context)           {return sendQueryCmd(context,0x01,0x88);};
+    static scpi_result_t SCPI_OutputCompModeQ(scpi_t* context)       {return sendQueryCmd(context,0x01,0x89);};
     // --- Setting ------------------------------------------------------------------------------
     static scpi_result_t SCPI_SettingVolt(scpi_t* context)           {return sendFloatCmd(context,0x02,0x00);};
     static scpi_result_t SCPI_SettingCurr(scpi_t* context)           {return sendFloatCmd(context,0x02,0x01);};
@@ -58,23 +60,23 @@ private:
     static scpi_result_t SCPI_ControlClamp(scpi_t* context)          {return sendBoolCmd(context,0x03,0x01);};
     static scpi_result_t SCPI_ControlCurr(scpi_t* context)           {return sendChoiceCmd(context,0x03,0x02);};
     static scpi_result_t SCPI_ControlSyst(scpi_t* context)           {return sendChoiceCmd(context,0x03,0x05);};
-    static scpi_result_t SCPI_ControlSAV(scpi_t* context);
-    static scpi_result_t SCPI_ControlRCL(scpi_t* context);
+    static scpi_result_t SCPI_ControlSAV(scpi_t* context)            {return sendIntCmd(context,0x03,0x06,1);};
+    static scpi_result_t SCPI_ControlRCL(scpi_t* context)            {return sendIntCmd(context,0x03,0x07,1);};
     static scpi_result_t SCPI_ControlInde(scpi_t* context)           {return sendBoolCmd(context,0x03,0x08);};
     static scpi_result_t SCPI_ControlLoad(scpi_t* context)           {return sendChoiceCmd(context,0x03,0x09);};
     // -
     static scpi_result_t SCPI_ControlClampQ(scpi_t* context)         {return sendQueryCmd(context,0x03,0x81);};
-    static scpi_result_t SCPI_ControlCurrQ(scpi_t* context);
-    static scpi_result_t SCPI_ControlSystQ(scpi_t* context);
+    static scpi_result_t SCPI_ControlCurrQ(scpi_t* context)          {return sendQueryCmd(context,0x03,0x82);};
+    static scpi_result_t SCPI_ControlSystQ(scpi_t* context)          {return sendQueryCmd(context,0x03,0x85);};
     static scpi_result_t SCPI_ControlIndeQ(scpi_t* context)          {return sendQueryCmd(context,0x03,0x88);};
-    static scpi_result_t SCPI_ControlLoadQ(scpi_t* context);
+    static scpi_result_t SCPI_ControlLoadQ(scpi_t* context)          {return sendQueryCmd(context,0x03,0x89);};
     // --- Measurement --------------------------------------------------------------------------
     static scpi_result_t SCPI_MeasureNplc(scpi_t* context)           {return sendFloatCmd(context,0x04,0x0c);};
     static scpi_result_t SCPI_MeasureTime(scpi_t* context)           {return sendFloatCmd(context,0x04,0x1f);};
     static scpi_result_t SCPI_MeasureRang(scpi_t* context)           {return sendIntCmd(context,0x04,0x0e,1);};
     static scpi_result_t SCPI_MeasureAver(scpi_t* context)           {return sendIntCmd(context,0x04,0x0f,1);};
     static scpi_result_t SCPI_MeasureFunc(scpi_t* context);
-    static scpi_result_t SCPI_MeasureOffs(scpi_t* context)           {return sendFloatCmd(context,0x04,0x23);};
+    static scpi_result_t SCPI_MeasureOffs(scpi_t* context)           {return sendIntCmd(context,0x04,0x23,4);};
     static scpi_result_t SCPI_MeasurePoin(scpi_t* context)           {return sendIntCmd(context,0x04,0x1d,2);};
     static scpi_result_t SCPI_MeasureTint(scpi_t* context)           {return sendFloatCmd(context,0x04,0x1e);};
     // -
@@ -99,7 +101,7 @@ private:
     static scpi_result_t SCPI_MeasureTimeQ(scpi_t* context)          {return sendQueryCmd(context,0x04,0x9f);};
     static scpi_result_t SCPI_MeasureRangQ(scpi_t* context)          {return sendQueryCmd(context,0x04,0x8e);};
     static scpi_result_t SCPI_MeasureAverQ(scpi_t* context)          {return sendQueryCmd(context,0x04,0x8f);};
-    static scpi_result_t SCPI_MeasureFuncQ(scpi_t* context);
+    static scpi_result_t SCPI_MeasureFuncQ(scpi_t* context)          {return sendQueryCmd(context,0x04,0x90);};
     static scpi_result_t SCPI_MeasureCurrHighQ(scpi_t* context)      {return sendQueryCmd(context,0x04,0x91);};
     static scpi_result_t SCPI_MeasureCurrLowQ(scpi_t* context)       {return sendQueryCmd(context,0x04,0x92);};
     static scpi_result_t SCPI_MeasureCurrMaxQ(scpi_t* context)       {return sendQueryCmd(context,0x04,0x93);};
@@ -113,10 +115,10 @@ private:
     static scpi_result_t SCPI_MeasureVoltMaxQ(scpi_t* context)       {return sendQueryCmd(context,0x04,0x9b);};
     static scpi_result_t SCPI_MeasureVoltMinQ(scpi_t* context)       {return sendQueryCmd(context,0x04,0x9c);};
     static scpi_result_t SCPI_MeasureOffsQ(scpi_t* context)          {return sendQueryCmd(context,0x04,0xa3);};
-    static scpi_result_t SCPI_MeasurePoinQ(scpi_t* context)          {Q_UNUSED(context);return SCPI_RES_OK;};
+    static scpi_result_t SCPI_MeasurePoinQ(scpi_t* context)          {return SCPI_MeasureDutyQ(context);}; //  repeat 9d-func
     static scpi_result_t SCPI_MeasureTintQ(scpi_t* context)          {return sendQueryCmd(context,0x04,0x9e);};
-    static scpi_result_t SCPI_MeasureArrCurrQ(scpi_t* context)       {return sendQueryCmd(context,0x04,0xa0);};
-    static scpi_result_t SCPI_MeasureArrVoltQ(scpi_t* context)       {return sendQueryCmd(context,0x04,0xa1);};
+    static scpi_result_t SCPI_MeasureArrVoltQ(scpi_t* context)       {return sendQueryCmd(context,0x04,0xa0);};
+    static scpi_result_t SCPI_MeasureArrCurrQ(scpi_t* context)       {return sendQueryCmd(context,0x04,0xa1);};
     static scpi_result_t SCPI_MeasureArrDvmQ(scpi_t* context)        {return sendQueryCmd(context,0x04,0xa2);};
     // --- Register -----------------------------------------------------------------------------
     static scpi_result_t SCPI_RegisterCle(scpi_t* context)           {return sendQueryCmd(context,0x05,0x03);};
@@ -139,7 +141,7 @@ private:
     static scpi_result_t SCPI_CalibrateDcn(scpi_t* context)          {return sendQueryCmd(context,0x06,0x11);};
     static scpi_result_t SCPI_CalibrateStep(scpi_t* context);
     // -
-    static scpi_result_t SCPI_CalibrateAllQ(scpi_t* context);
+    static scpi_result_t SCPI_CalibrateAllQ(scpi_t* context)         {return sendQueryCmd(context,0x06,0x84);};
     static scpi_result_t SCPI_CalibrateStepQ(scpi_t* context);
     // --- Trigger ------------------------------------------------------------------------------
     static scpi_result_t SCPI_TriggerAbort(scpi_t* context)          {return sendQueryCmd(context,0x08,0x00);};
@@ -157,11 +159,11 @@ private:
     static scpi_result_t SCPI_TriggerCurr(scpi_t* context)           {return sendFloatCmd(context,0x08,0x0b);};
     static scpi_result_t SCPI_TriggerRes(scpi_t* context)            {return sendFloatCmd(context,0x08,0x0c);};
     // -
-    static scpi_result_t SCPI_TriggerSeq2SoQ(scpi_t* context);
+    static scpi_result_t SCPI_TriggerSeq2SoQ(scpi_t* context)        {return sendQueryCmd(context,0x08,0x85);};
     static scpi_result_t SCPI_TriggerSeq2CoQ(scpi_t* context)        {return sendQueryCmd(context,0x08,0x86);};
     static scpi_result_t SCPI_TriggerSeq2HyQ(scpi_t* context)        {return sendQueryCmd(context,0x08,0x87);};
     static scpi_result_t SCPI_TriggerSeq2LeQ(scpi_t* context)        {return sendQueryCmd(context,0x08,0x88);};
-    static scpi_result_t SCPI_TriggerSeq2SlQ(scpi_t* context);
+    static scpi_result_t SCPI_TriggerSeq2SlQ(scpi_t* context)        {return sendQueryCmd(context,0x08,0x89);};
     static scpi_result_t SCPI_TriggerAmplQ(scpi_t* context)          {return sendQueryCmd(context,0x08,0x8a);};
     static scpi_result_t SCPI_TriggerCurrQ(scpi_t* context)          {return sendQueryCmd(context,0x08,0x8b);};
     static scpi_result_t SCPI_TriggerResQ(scpi_t* context)           {return sendQueryCmd(context,0x08,0x8c);};
@@ -200,7 +202,7 @@ public:
 
 private:
     QMutex m_syncMutex;
-    quint8 m_ReturnType{0};
+    int m_ReturnType{0};
     QWaitCondition m_syncCondition;
 
     int m_CHIntReturn{0};
