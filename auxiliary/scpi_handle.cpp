@@ -88,8 +88,7 @@ scpi_result_t ScpiManager::SCPI_ControlSAV(scpi_t* context) {
     if (SCPI_ParamInt(context, &value, true)) {
         qCDebug(scpi) <<"[SCPI_ControlSAV]:Channel SAV Set Value:"<< value;
         QByteArray data(1, static_cast<quint8>(value));
-        sendAllCHCmd(context,0x03,0x06,data);
-        return SCPI_RES_OK;
+        return sendAllCHCmd(context,0x03,0x06,data);
     }
 
     SCPI_ErrorPush(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE); // parameter value is invalid.
@@ -100,8 +99,7 @@ scpi_result_t ScpiManager::SCPI_ControlRCL(scpi_t* context) {
     if (SCPI_ParamInt(context, &value, true)) {
         qCDebug(scpi) <<"[SCPI_ControlRCL]:Channel RCL Set Value:" << value;
         QByteArray data(1, static_cast<quint8>(value));
-        sendAllCHCmd(context,0x03,0x07,data);
-        return SCPI_RES_OK;
+        return sendAllCHCmd(context,0x03,0x07,data);
     }
 
     SCPI_ErrorPush(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE); // parameter value is invalid.
@@ -217,7 +215,7 @@ scpi_result_t ScpiManager::SCPI_CalibrateStepQ(scpi_t* context) {
     int value;
     if (SCPI_ParamInt(context, &value, true)) {
         qCDebug(scpi) <<"[SCPI_CalibrateStepQ]:Step Value: "<< value;
-        return sendQuery(context,0x07,value);
+        return sendQueryCmd(context,0x07,value);
     }
 
     SCPI_ErrorPush(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE); // parameter value is invalid.
@@ -314,59 +312,130 @@ scpi_result_t ScpiManager::sendIntCmd(scpi_t* context, quint8 cmd, quint8 func,q
     return SCPI_RES_ERR;
 }
 
-// ********************************* Basic query **************************************
-
-scpi_result_t ScpiManager::sendQuery(scpi_t* context, quint8 cmd, quint8 func) {
-    if(sendQueryCmd(context,cmd,func)){
-        return SCPI_ReadQ(context);
-    }
-
-    return SCPI_RES_ERR;
-}
-
 // ********************************* Basic helper *************************************
 
 scpi_result_t ScpiManager::sendQueryCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data) {
     auto* self = static_cast<ScpiManager*>(context->user_context);
-    // Extract only the numerical parts that are filled with "#" in the command list
-    if(SCPI_CommandNumbers(context, &self->m_channel, 1, 0)){ // Array 1, Default Channel 0
-        qCDebug(scpi)<<"[sendQueryCmd]:SCPI_Processing Channel: "<<self->m_channel;
 
-        QMutexLocker locker(&self->m_syncMutex);
-        sendSingleCHCmd(context,cmd,func,data);
-        if(self->m_syncCondition.wait(&self->m_syncMutex, 600)){
-            // unload m_syncMutex and wait . wake = true / timeout = false   // 600ms
-            return SCPI_RES_OK;
+    QMutexLocker locker(&self->m_syncMutex);
+    std::vector<ChannelAddress> channels = parseChannelList(context);
+
+    if (!channels.empty()) {
+        return sendMultiCHCmd(context, cmd, func, data, channels);
+    }else{ // Extract only the numerical parts that are filled with "#" in the command list
+        if(SCPI_CommandNumbers(context, &self->m_channel, 1, 0)){ // Array 1, Default Channel 0
+            if (self->m_channel == 0){
+                return sendAllCHCmd(context, cmd, func, data);
+            }else{
+                return sendSingleCHCmd(context, cmd, func, data);
+            }
         }
-
-        SCPI_ErrorPush(context, SCPI_ERROR_EXECUTION_ERROR); // Execution error
-        return SCPI_RES_ERR;
     }
 
     SCPI_ErrorPush(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE); // parameter value is invalid.
-    return SCPI_RES_ERR;
+    return SCPI_RES_ERR; // SCPI_RES_ERR = -1; SCPI_RES_OK = 1
 }
 
-void ScpiManager::sendSingleCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data) {
+std::vector<ChannelAddress> ScpiManager::parseChannelList(scpi_t* context) {
+    std::vector<ChannelAddress> channelList;
+    scpi_parameter_t channelListParam;
+    const int MAX_DIM = 2; // SCPI standard Max 2 dimensions
+
+    if (SCPI_Parameter(context, &channelListParam, false)) { // false = Unnecessary parameters
+        scpi_expr_result_t result;
+        scpi_bool_t isRange;
+        size_t index = 0;
+
+        int32_t valuesFrom[MAX_DIM]; // 1!1
+        int32_t valuesTo[MAX_DIM];   // 2!3
+        // 1!1:2!3 = [(1.1)(1.2)(1.3)(2.1)(2.2)(2.3)]
+        size_t dimensions;
+
+        do {
+            result = SCPI_ExprChannelListEntry(context, &channelListParam, index,
+                                               &isRange, valuesFrom, valuesTo, MAX_DIM, &dimensions);
+            if (result == SCPI_EXPR_OK) {
+                if (!isRange) {          // (@1)  or  (@1!2)
+                    channelList.push_back({valuesFrom[0],dimensions >= 2 ? valuesFrom[1] : 0});
+                } else {                 // (@1:5) or (@1,2)
+                    int start_ch = valuesFrom[0];
+                    int end_ch = valuesTo[0];
+                    int step_ch = (start_ch <= end_ch) ? 1 : -1;
+
+                    for (int ch = start_ch; step_ch > 0 ? ch <= end_ch : ch >= end_ch; ch += step_ch) {
+                        if (dimensions >= 2) {
+                            int start_sub = valuesFrom[1];
+                            int end_sub = valuesTo[1];
+                            int step_sub = (start_sub <= end_sub) ? 1 : -1;
+
+                            for (int sub = start_sub; step_sub > 0 ? sub <= end_sub : sub >= end_sub; sub += step_sub) {
+                                channelList.push_back({ch, sub});
+                            }
+                        } else {
+                            channelList.push_back({ch, 0});
+                        }
+                    }
+                }
+
+                index++;
+            } // return emtry;
+        } while (result == SCPI_EXPR_OK);
+    }
+
+    return channelList; // emtry or true list
+}
+
+
+scpi_result_t ScpiManager::sendMultiCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data, const std::vector<ChannelAddress> &channels){
+    auto* self = static_cast<ScpiManager*>(context->user_context);
+    self->m_responseBuffer.append("[");
+
+    for (ChannelAddress chaddress : channels) {
+        self->m_channel = chaddress.channel;
+
+        sendSingleCHCmd(context, cmd, func, data);
+        self->m_responseBuffer.append(",");
+    }
+
+    self->m_responseBuffer.chop(1); // remove ","
+    self->m_responseBuffer.append("]");
+    return SCPI_RES_OK;
+}
+
+scpi_result_t ScpiManager::sendSingleCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data) {
     auto* self = static_cast<ScpiManager*>(context->user_context);
     switch (self->m_channel){
         #define CHANNEL(n) \
-            case n: emit self->to_UartChannel##n(cmd,func,data,true); return;
+            case n: \
+                emit self->to_UartChannel##n(cmd,func,data,true);  \
+                qCDebug(scpi)<<"[sendSingleCHCmd]: Single-Channel: "<<n; \
+                if(self->m_syncCondition.wait(&self->m_syncMutex, 600) && SCPI_ReadQ(context) == SCPI_RES_OK){ \
+                    return SCPI_RES_OK; \
+                } \
+                SCPI_ErrorPush(context, SCPI_ERROR_EXECUTION_ERROR); \
+                return SCPI_RES_ERR;
 
         CHANNEL_COUNT
         #undef CHANNEL
-        default: return;
+            default:return SCPI_RES_ERR;
     }
 }
 
-void ScpiManager::sendAllCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data) {
+scpi_result_t ScpiManager::sendAllCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data) {
     auto* self = static_cast<ScpiManager*>(context->user_context);
+    self->m_responseBuffer.append("[");
     #define CHANNEL(n) \
-        emit self->to_UartChannel##n(cmd,func,data,true);
+        emit self->to_UartChannel##n(cmd,func,data,true); \
+        if(!self->m_syncCondition.wait(&self->m_syncMutex, 600) || SCPI_ReadQ(context) == SCPI_RES_ERR){ \
+            SCPI_ErrorPush(context, SCPI_ERROR_EXECUTION_ERROR); \
+        } \
+        self->m_responseBuffer.append(",");
 
     CHANNEL_COUNT
     #undef CHANNEL
-    return;
+    self->m_responseBuffer.chop(1); // remove ","
+    self->m_responseBuffer.append("]");
+    return SCPI_RES_OK;
 }
 
 scpi_result_t ScpiManager::SCPI_ReadQ(scpi_t* context) {
@@ -377,11 +446,8 @@ scpi_result_t ScpiManager::SCPI_ReadQ(scpi_t* context) {
         case 2: SCPI_ResultFloat(context, self->m_CHFloatReturn);                       return SCPI_RES_OK;
         case 3: SCPI_ResultInt(context, self->m_CHIntReturn);                           return SCPI_RES_OK;
         case 4: SCPI_ResultText(context, self->m_CHStringReturn.toUtf8().constData());  return SCPI_RES_OK;
-        default:break;
+        default:SCPI_ErrorPush(context, SCPI_ERROR_EXECUTION_ERROR);                    return SCPI_RES_ERR;
     }
-
-    SCPI_ErrorPush(context, SCPI_ERROR_EXECUTION_ERROR); // Execution error
-    return SCPI_RES_ERR;
 }
 
 // ********************************** external API **********************************
@@ -663,8 +729,8 @@ scpi_result_t ScpiManager::staticReset(scpi_t* context) {
 
 int ScpiManager::staticError(scpi_t* context, int_fast16_t err) {
     auto* self = static_cast<ScpiManager*>(context->user_context);
-    qCDebug(scpi)<<"[staticError]:SCPI Error Code:"<< err << "Desc:" << SCPI_ErrorTranslate(err);
-    QString errorMsg = QString("%1,\"%2\"").arg(err).arg(SCPI_ErrorTranslate(err));
+    QString errorMsg = QString("{%1,'%2'}").arg(err).arg(SCPI_ErrorTranslate(err));
+    qCDebug(scpi)<<"[staticError]:SCPI Error:"<< errorMsg;
     self->m_responseBuffer.append(errorMsg.toUtf8());
     return 0;
 }
