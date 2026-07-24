@@ -19,11 +19,9 @@ UartServerManager::~UartServerManager()
         delete m_serverThread;
         m_serverThread = nullptr;
     }
-
-    qCDebug(uart_server)<<"[~UartServerManager]:UartServerManager Destroyed!!!";
 }
 
-bool UartServerManager::startServer(const QString &portName,qint32 baudRate)
+bool UartServerManager::startServer()
 {
     if (!m_serverThread && !m_uartServer){
         m_uartServer  = new QSerialPort(this);
@@ -36,8 +34,8 @@ bool UartServerManager::startServer(const QString &portName,qint32 baudRate)
         // HardwareControl: Requires wiring support | SoftwareControl: Applicable only to written text
         m_uartServer ->setFlowControl(QSerialPort::NoFlowControl);
         // QSerialPort::Baud115200
-        m_uartServer->setBaudRate(baudRate);
-        m_uartServer->setPortName(portName);
+        m_uartServer->setBaudRate(QSerialPort::Baud38400);
+        m_uartServer->setPortName("/dev/ttyWCH27");
 
         if (m_uartServer->open(QIODevice::ReadWrite)) {
             m_serverThread = new QThread(this);
@@ -57,36 +55,12 @@ bool UartServerManager::startServer(const QString &portName,qint32 baudRate)
         }
     }
 
-    qCWarning(uart_server)<<"[startServer]:already exist A certain member";
+    qCDebug(uart_server)<<"[startServer]:already exist!";
     return false;
 }
 
 void UartServerManager::handleReadyRead()
 {
-    if (ConfigManager::s_remoteSt.load()==3 || ConfigManager::s_remoteSt.load()==0){
-        if (ConfigManager::s_remoteSt.load()==0){emit isRemote(3);}
-
-        // read information
-        m_readbuffer.clear();
-        m_readbuffer.append(m_uartServer->readAll());
-        QString message = QString::fromUtf8(m_readbuffer).trimmed();   // SOCKET ASCll Define(0x00-0x7F)
-        qCDebug(uart_server)<<"[handleReadyRead]:Uart SCPI Request Commend: "<< message;
-
-        // Return response
-        m_responsebuffer.clear();
-        m_responsebuffer = m_scpiManager->processCommand(m_readbuffer);
-        if (!m_responsebuffer.isEmpty()){
-            qCDebug(uart_server)<<"[handleReadyRead]:UartServer SCPI Response: "<<m_responsebuffer;
-            m_uartServer->write(m_responsebuffer);
-        }
-
-        return;
-    }
-
-    QByteArray errMsg = QString("Other interfaces of the instrument are currently in operation").toUtf8();
-    qCDebug(uart_server)<<"[handleReadyRead]:Currently in an alternative remote mode";
-    m_uartServer->write(errMsg);
-
     // Test progressing
     /*if (m_readbuffer.size() >= 1024) { // 1KB
         qint64 elapsed = m_testTimer.elapsed(); // ms
@@ -101,6 +75,23 @@ void UartServerManager::handleReadyRead()
 
         m_readbuffer.clear();
     }*/
+
+    if (ConfigManager::s_remoteSt.load()==3 || ConfigManager::s_remoteSt.load()==0){
+        if (ConfigManager::s_remoteSt.load()==0){emit isRemote(3);}
+
+        m_readbuffer = m_uartServer->readAll();
+        qCDebug(uart_server)<<"[handleReadyRead]:UartServer SCPI-Commend: "<< m_readbuffer;
+
+        m_responsebuffer = m_scpiManager->processCommand(m_readbuffer);
+        if (!m_responsebuffer.isEmpty()){m_uartServer->write(m_responsebuffer);}
+        qCDebug(uart_server)<<"[handleReadyRead]:UartServer SCPI Response: "<<m_responsebuffer;
+
+        return;
+    }
+
+    QByteArray errMsg = "Other instrument interfaces are currently in remote mode.";
+    qCDebug(uart_server)<<"[handleReadyRead]: "<<errMsg;
+    m_uartServer->write(errMsg);
 }
 
 void UartServerManager::startLoopbackTest()

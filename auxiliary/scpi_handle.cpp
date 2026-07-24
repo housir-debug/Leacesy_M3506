@@ -180,17 +180,16 @@ scpi_result_t ScpiManager::sendIntCmd(scpi_t* context, quint8 cmd, quint8 func,q
 
 scpi_result_t ScpiManager::sendQueryCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data) {
     auto* self = static_cast<ScpiManager*>(context->user_context);
-    std::vector<ChannelAddress> channels = parseChannelList(context);
 
-    if (!channels.empty()) {
-        return sendMultiCHCmd(context, cmd, func, data, channels);
-    }else{ // Extract only the numerical parts that are filled with "#" in the command list
-        if(SCPI_CommandNumbers(context, &self->m_channel, 1, -1)){ // Array 1, Default Channel -1
-            if (self->m_channel == 0){
-                return sendAllCHCmd(context, cmd, func, data);
-            }else if(self->m_channel > 0){
-                return sendSingleCHCmd(context, cmd, func, data);
-            } // channel not exist of command
+    // Extract only the numerical parts that are filled with "#" in the command list
+    if(SCPI_CommandNumbers(context, &self->m_channel, 1, -1)){ // Array 1, Default Channel -1
+        if (self->m_channel == 0){
+            return sendAllCHCmd(context, cmd, func, data);
+        }else if(self->m_channel > 0){
+            return sendSingleCHCmd(context, cmd, func, data);
+        }else{
+            std::vector<ChannelAddress> channels = parseChannelList(context);
+            if (!channels.empty()) {return sendMultiCHCmd(context, cmd, func, data, channels);}
         } // channel is not single number
     }
 
@@ -203,7 +202,7 @@ std::vector<ChannelAddress> ScpiManager::parseChannelList(scpi_t* context) {
     scpi_parameter_t channelListParam;
     const int MAX_DIM = 2; // SCPI standard Max 2 dimensions
 
-    if (SCPI_Parameter(context, &channelListParam, false)) { // false = Unnecessary parameters
+    if (SCPI_Parameter(context, &channelListParam, true)) { // false = Unnecessary parameters
         scpi_expr_result_t result;
         scpi_bool_t isRange;
         size_t index = 0;
@@ -574,18 +573,13 @@ scpi_result_t ScpiManager::staticFlush(scpi_t* context) {
 
 scpi_result_t ScpiManager::staticReset(scpi_t* context) {
     auto* self = static_cast<ScpiManager*>(context->user_context);
-    qCDebug(scpi) <<"[staticReset]:SCPI and channel Reset";
 
-    #define CHANNEL(n) \
-        emit self->to_UartChannel##n##Reset();
+    #define CHANNEL(n) emit self->to_UartChannel##n##Reset();
 
     CHANNEL_COUNT
     #undef CHANNEL
 
-    memset(self->m_inputBuffer, 0, sizeof(self->m_inputBuffer));
-    memset(self->m_errorQueue, 0, sizeof(self->m_errorQueue));
-    self->m_responseBuffer.clear();
-
+    qCDebug(scpi) <<"[staticReset]: Reset";
     return SCPI_RES_OK;
 }
 

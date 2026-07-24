@@ -184,7 +184,7 @@ void UartChannelManager::handleReadyRead()
                             case 0x10:handleSNcmd              (func,scpiId);break;
                             case 0x11:handleIDcmd              (func,scpiId);break;
                             case 0xFF:handleErrorcmd           (func);       break;
-                            default:qCDebug(uart_channel)<<"[handleReadyRead]:Ch_"<<m_channel<<" UndefCommand!";
+                            default:qCDebug(uart_channel)<<"[handleReadyRead]:Ch_"<<m_channel<<" UndefCommand: "<<cmd;
                         }
 
                         if (m_scpiCommand == scpiId){

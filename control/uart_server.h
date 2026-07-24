@@ -14,14 +14,14 @@ public:
     explicit UartServerManager(QObject *parent = nullptr);
     ~UartServerManager();
 
-    bool startServer(const QString &portName,qint32 baudRate);
     std::shared_ptr<ScpiManager> m_scpiManager{nullptr};
+    bool startServer();
 
 private:
-    void handleReadyRead();
     void startLoopbackTest();
     QElapsedTimer m_testTimer;
 
+    void handleReadyRead();
     QByteArray m_readbuffer;
     QByteArray m_responsebuffer;
 
