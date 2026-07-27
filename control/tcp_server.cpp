@@ -181,9 +181,9 @@ void TcpServerManager::handleCreateLink(QTcpSocket* client,const quint32 xid)
     m_deviceLinks.insert(link.id, link);
     qCDebug(tcp)<<"[handleCreateLink]:Create VXI-Link: "<<link.id<<" Client: "<<client->objectName();
 
+    buildfoundResponse(xid,Vxi11::NO_ERROR,12);
     QDataStream stream(&m_responsebuffer, QIODevice::Append);
     stream.setByteOrder(QDataStream::BigEndian);
-    buildfoundResponse(xid,Vxi11::NO_ERROR,12);
     stream << link.id;
     stream << quint32(0);     // abort_port .Not Support -> 0
     stream << quint32(2048);  // max_recv_size
@@ -204,9 +204,9 @@ void TcpServerManager::handleDeviceWrite(QTcpSocket* client,const quint32 xid,co
         qCDebug(tcp)<<"[handleDeviceWrite]: SCPI-Command: "<<scpicmd;
         link.VxiScpi_response = m_scpiManager->processCommand(scpicmd);
 
+        buildfoundResponse(xid, Vxi11::NO_ERROR, 4);
         QDataStream stream(&m_responsebuffer, QIODevice::Append);
         stream.setByteOrder(QDataStream::BigEndian);
-        buildfoundResponse(xid, Vxi11::NO_ERROR, 4);
         stream << cmdlen; // write_size
 
         client->write(m_responsebuffer);
@@ -242,10 +242,11 @@ void TcpServerManager::handleDeviceReadStb(QTcpSocket* client, const quint32 xid
     if (lid !=0) {
         DeviceLink& link = m_deviceLinks[lid];
         link.VxiScpi_response = m_scpiManager->processCommand("*STB?\n");
+        link.VxiScpi_response.chop(2);
 
+        buildfoundResponse(xid,Vxi11::NO_ERROR,4 + link.VxiScpi_response.size());
         QDataStream stream(&m_responsebuffer, QIODevice::Append);
         stream.setByteOrder(QDataStream::BigEndian);
-        buildfoundResponse(xid,Vxi11::NO_ERROR,4);
         stream << link.VxiScpi_response;
 
         client->write(m_responsebuffer);
@@ -271,6 +272,8 @@ void TcpServerManager::handleDeviceClear(QTcpSocket* client, const quint32 xid,c
 
     if (lid !=0) {
         m_scpiManager->processCommand("*CLS\n");
+        DeviceLink& link = m_deviceLinks[lid];
+        link.VxiScpi_response.clear();
 
         qCDebug(tcp)<<"[handleDeviceClear]:DEVICE_CLEAR";
         buildfoundResponse(xid, Vxi11::NO_ERROR);

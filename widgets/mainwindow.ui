@@ -2105,7 +2105,7 @@ border:none;
                </widget>
               </item>
               <item row="0" column="3">
-               <widget class="QRadioButton" name="snradioButton">
+               <widget class="QRadioButton" name="rs232radioButton">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -2136,7 +2136,7 @@ border:none;
                  <enum>Qt::NoContextMenu</enum>
                 </property>
                 <property name="text">
-                 <string>SN</string>
+                 <string>RS-232</string>
                 </property>
                 <property name="checked">
                  <bool>false</bool>
@@ -2191,7 +2191,7 @@ border:none;
                </widget>
               </item>
               <item row="1" column="3">
-               <widget class="QLabel" name="snlabel">
+               <widget class="QLabel" name="rs232label">
                 <property name="font">
                  <font>
                   <family>WenQuanYi Micro Hei</family>
@@ -2208,7 +2208,7 @@ border:none;
                  <number>0</number>
                 </property>
                 <property name="text">
-                 <string>000-000-000</string>
+                 <string>Baud115200</string>
                 </property>
                </widget>
               </item>

@@ -56,7 +56,7 @@ bool ConfigManager::s_enableCANServer  = true;
 bool ConfigManager::s_enableUARTServer = true;
 bool ConfigManager::s_enableDisplay    = true;
 
-std::atomic<quint8> ConfigManager::s_remoteSt{0};
+std::atomic<int> ConfigManager::s_remoteSt{0};
 QSettings* ConfigManager::s_settings = nullptr;
 
 // global variable - Internal fixation

@@ -34,7 +34,7 @@ bool UartServerManager::startServer()
         // HardwareControl: Requires wiring support | SoftwareControl: Applicable only to written text
         m_uartServer ->setFlowControl(QSerialPort::NoFlowControl);
         // QSerialPort::Baud115200
-        m_uartServer->setBaudRate(QSerialPort::Baud38400);
+        m_uartServer->setBaudRate(QSerialPort::Baud115200);
         m_uartServer->setPortName("/dev/ttyWCH27");
 
         if (m_uartServer->open(QIODevice::ReadWrite)) {

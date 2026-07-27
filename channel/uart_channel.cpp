@@ -96,6 +96,7 @@ void UartChannelManager::sendInitCommand()
        return;
    }else if(ConfigManager::s_enableDisplay && isExist){
         m_refreshtimer->start();
+        m_initindex = 0;
    }
 }
 

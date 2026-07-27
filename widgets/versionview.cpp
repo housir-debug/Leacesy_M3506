@@ -17,17 +17,11 @@ versionview::~versionview()
     delete ui;
 }
 
-void versionview::setChannelName(const QString &name)
-{
+void versionview::setChannelName(int channel){
+    QString name = QString("CH-%1").arg(channel, 2, 10, QChar('0'));
     ui->channellabel->setText(name);
 }
 
-void versionview::setChSWVersion(const QString &ver)
-{
-    ui->chswvaluelabel->setText(ver);
-}
+void versionview::setChSWVersion(const QString &ver){ui->chswvaluelabel->setText(ver);}
 
-void versionview::setChHWVersion(const QString &ver)
-{
-    ui->chhwvaluelabel->setText(ver);
-}
+void versionview::setChHWVersion(const QString &ver){ui->chhwvaluelabel->setText(ver);}

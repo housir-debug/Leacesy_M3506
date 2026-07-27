@@ -1,13 +1,18 @@
 #pragma once
 #include <QFrame>
 
-namespace Ui {
-    class numberkeypad;
-}
+namespace Ui {class numberkeypad;}
 
 class numberkeypad : public QFrame
 {
     Q_OBJECT
+
+private:
+    Ui::numberkeypad *ui;
+
+    bool m_isPressed;
+    QTimer *m_longPressTimer;
+    bool m_longPressTriggered;
 
 public:
     explicit numberkeypad(QWidget *parent = nullptr);
@@ -20,6 +25,7 @@ signals:
     void valueEntered(const QString &value);
 
 private slots:
+    void on_deletebtn_clicked();
     void on_btn0_clicked();
     void on_btn1_clicked();
     void on_btn2_clicked();
@@ -32,14 +38,6 @@ private slots:
     void on_btn9_clicked();
     void on_btndot_clicked();
     void on_btnenter_clicked();
-    void on_deletebtn_clicked();
     void insertText(const QString &text);
-
-private:
-    Ui::numberkeypad *ui;
-
-    bool m_isPressed;
-    QTimer *m_longPressTimer;
-    bool m_longPressTriggered;
 };
 

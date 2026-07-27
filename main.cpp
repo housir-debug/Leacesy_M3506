@@ -37,6 +37,13 @@ std::vector<ScpiSign_toUartCh> scpi_signal = {
     #undef CHANNEL
 };
 
+using ScpiRSTSign_toUartCh = void (ScpiManager::*)();
+std::vector<ScpiRSTSign_toUartCh> scpi_rst_signal = {
+    #define CHANNEL(n) static_cast<ScpiRSTSign_toUartCh>(&ScpiManager::to_UartChannel##n##Reset),
+    CHANNEL_COUNT
+    #undef CHANNEL
+};
+
 
 int main(int argc, char *argv[])
 {
@@ -111,6 +118,7 @@ int main(int argc, char *argv[])
             auto channel = std::make_unique<UartChannelManager>();
             if (!channel->initSerialPort(config.channel, config.port, config.baudRate)) {return 1;}
             QObject::connect(Scpi_share.get(),scpi_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
+            QObject::connect(Scpi_share.get(),scpi_rst_signal[config.channel-1],channel.get(),&UartChannelManager::sendInitCommand,Qt::QueuedConnection);
 
             if (ConfigManager::s_enableCANServer){
                 QObject::connect(canServer.get(),can_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);

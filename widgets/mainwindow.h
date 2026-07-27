@@ -12,35 +12,44 @@
 
 Q_DECLARE_LOGGING_CATEGORY(widget)
 
-namespace Ui {
-    class Mainwindow;
-}
+namespace Ui {class Mainwindow;}
 
 class Mainwindow : public QWidget
 {
     Q_OBJECT
 
-signals:
-    void to_CANid(QString id);
-    void to_GPIBid(QString id);
+private:
+    Ui::Mainwindow *ui;
+    versionview* m_vercard;
+    chstatusview* m_chstatuscard;
+    digitalcard* m_funcdigitalcard;
+    batterycard* m_funcbatterycard;
+    numberkeypad* m_funcnmbkeycard;
+    numberkeypad* m_setnmbkeycard;
+    remoteoverlay* m_remoteOverlay;
 
-    #define CHANNEL(n) \
-        void to_UartChannel##n(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
+    QMap<int,digitalcard*> m_digitalcards;
+    QMap<int,batterycard*> m_batterycards;
+    void add_digitalcard(int neededPages,const QList<int>& channels);
+    void add_batterycard(int neededPages,const QList<int>& channels);
 
-    CHANNEL_COUNT
-    #undef CHANNEL
+    QMap<int,QString> m_ChsoftVer;
+    QMap<int,QString> m_ChhardVer;
+    QMap<int,QString> m_range = {
+        {0x00, "A"},
+        {0x01, "mA"},
+        {0x10, "Auto"},
+    };
+
+    int m_functioncsetmode{0};
+    int m_functioncCh{0};
+    int m_initalpage{0};
+
+    int m_setmode{0};
 
 public:
-    explicit Mainwindow(QWidget *parent = nullptr);
-    ~Mainwindow();
-
-    QJsonArray getAllChannelsData();
-    void load_BatteryModel();
-    bool update_cardtest();
-    bool update_showcard();
-
-    QStringList m_currentModelList;
-    std::shared_ptr<BatteryModelManager> m_modelManager{nullptr};
+    void update_cardtest();
+    void update_showcard();
 
     void update_SoftVer(int ch,const QString &ver);
     void update_HardVer(int ch,const QString &ver);
@@ -48,35 +57,43 @@ public:
     void update_Voltage(int ch,float voltage);
     void update_CurrentAndUnit(int ch,float current);
     void update_Cv(int ch,float cv);
-
-    void update_Range(int ch,quint8 range);
-    void update_Status(int ch,quint16 status);
     void update_Cc(int ch,float cc);
     void update_Ovp(int ch,float ovp);
+    void update_Range(int ch,int range);
+    void update_Status(int ch,quint16 status);
 
     void update_Imp(int ch,float imp);
-    void update_remotemodel(quint8 reface);
+    void update_remotemodel(int reface);
 
-private:
-    void add_digitalcard(int neededPages,const QList<quint8>& channels);
-    void add_batterycard(int neededPages,const QList<quint8>& channels);
+    bool load_BatteryModel();
+    QJsonArray getAllChannelsData();
 
-    void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param);
+    explicit Mainwindow(QWidget *parent = nullptr);
+    ~Mainwindow();
+
+    QStringList m_currentModelList;
+    std::shared_ptr<BatteryModelManager> m_modelManager{nullptr};
+
+signals:
+    void to_CANid(QString id);
+    void to_GPIBid(QString id);
+
+    #define CHANNEL(n) void to_UartChannel##n(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
+
+    CHANNEL_COUNT
+    #undef CHANNEL
 
 private slots:
-    // to setting page or digital - battery
+    void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param);
+    void refresh_settingpage();
+    void allONrefresh();
+
+    // digital / battery to switchs cards
     void on_digitalsettingspushButton_clicked();
     void on_batterysettingspushButton_clicked();
-    void on_functionsettingspushButton_clicked();
-    void refresh_settingpage();
-
-    void on_functionrowsbackpushButton_clicked();
-    void on_settingrowsbackpushButton_clicked();
-
     void on_digitalmodepushButton_clicked();
     void on_batterymodepushButton_clicked();
 
-    // digital / battery to switchs cards
     void on_digitalrowsbackpushButton_clicked();
     void on_digitalrowsnextpushButton_clicked();
     void on_batteryrowsbackpushButton_clicked();
@@ -88,6 +105,8 @@ private slots:
     void on_batteryallmodelpushButton_clicked();
 
     // function page switchs
+    void on_functionrowsbackpushButton_clicked();
+    void on_functionsettingspushButton_clicked();
     void on_functionallapplypushButton_clicked();
 
     void on_cvradioButton_clicked();
@@ -100,35 +119,14 @@ private slots:
     void on_functionmodelpushButton_clicked();
 
     // setting page switchs
-    void on_dhcpradioButton_clicked();
+    void on_settingrowsbackpushButton_clicked();
     void on_setstaticradioButton_clicked();
+    void on_dhcpradioButton_clicked();
 
     void on_ipradioButton_clicked();
     void on_maskradioButton_clicked();
     void on_gateradioButton_clicked();
     void on_canidradioButton_clicked();
     void on_gpibidradioButton_clicked();
-
-private:
-    Ui::Mainwindow *ui;
-    versionview* m_vercard;
-    chstatusview* m_chstatuscard;
-    numberkeypad* m_funcnmbkeycard;
-    digitalcard* m_funcdigitalcard;
-    batterycard* m_funcbatterycard;
-    numberkeypad* m_setnmbkeycard;
-    remoteoverlay* m_remoteOverlay;
-
-    QMap<quint8,digitalcard*> m_digitalcards;
-    QMap<quint8,batterycard*> m_batterycards;
-
-    QMap<quint8,QString> m_ChsoftVer;
-    QMap<quint8,QString> m_ChhardVer;
-
-    quint8 m_functioncsetmode{0};
-    quint8 m_functioncCh{0};
-
-    quint8 m_initalpage{0};
-    quint8 m_setmode{0};
 };
 

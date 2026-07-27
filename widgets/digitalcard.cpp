@@ -29,105 +29,65 @@ digitalcard::~digitalcard()
 
 // mouse event procressing
 
+void digitalcard::mouseMoveEvent(QMouseEvent *event)
+{
+    if (m_isPressed && (event->pos() - m_pressPos).manhattanLength() > 18) {
+        m_longPressTimer->stop();
+        m_isPressed = false;
+    }
+}
+
 void digitalcard::mousePressEvent(QMouseEvent *event)
 {
-    m_isPressed = true;
-    m_pressPos = event->pos();
-
     m_longPressTriggered = false;
     m_longPressTimer->start();
 
+    m_pressPos = event->pos();
+    m_isPressed = true;
     event->accept();
 }
 
 void digitalcard::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (m_isPressed){
-        m_longPressTimer->stop();
-
-        if (!m_longPressTriggered) {
-            QPoint delta = event->pos() - m_pressPos;
-            if (delta.manhattanLength() < 18) {
-                bool status = property("outputed").toBool();
-                emit clicked(m_channel,!status);
-            }
-        }
+    if (m_isPressed && !m_longPressTriggered){
+        bool status = property("outputed").toBool();
+        emit clicked(m_channel,!status);
     }
 
+    m_longPressTimer->stop();
     m_isPressed = false;
     event->accept();
 }
 
-void digitalcard::mouseMoveEvent(QMouseEvent *event)
-{
-    if (m_isPressed) {
-        QPoint delta = event->pos() - m_pressPos;
-        if (delta.manhattanLength() > 18) {
-            m_longPressTimer->stop();
-            m_isPressed = false;
-        }
-    }
-}
+// property get API
+
+int digitalcard::getChRange() const{return m_range.load();}
+
+bool digitalcard::getChstatus() const{return property("outputed").toBool();}
+
+float digitalcard::getChVoltage() const{return m_voltage.load();}
+
+float digitalcard::getChCurrent() const{return m_current.load();}
+
+QString digitalcard::getChunit() const{return ui->currentunitlabel->text();}
+
+float digitalcard::getChCvValue() const{return m_cv.load();}
+
+bool digitalcard::getChCVChecked() const{return ui->cvcheckbox->isChecked();}
+
+float digitalcard::getChCcValue() const{return m_cc.load();}
+
+bool digitalcard::getChCCChecked() const{return ui->cccheckbox->isChecked();}
+
+float digitalcard::getChOvpValue() const{return m_ovp.load();}
+
+bool digitalcard::getChOVPChecked() const{return ui->ovpcheckbox->isChecked();}
 
 // property setting API
 
-bool digitalcard::getChstatus() const
-{
-    return property("outputed").toBool();
-}
+void digitalcard::setChannelRange(int range){m_range.store(range);}// 0 -0x01-mA; 1 -0x10-Auto; 2 -0x00-A
 
-quint8 digitalcard::getChRange() const
-{
-    return m_range.load();
-}
-
-float digitalcard::getChVoltage() const
-{
-    return m_voltage.load();
-}
-
-float digitalcard::getChCurrent() const
-{
-    return m_current.load();
-}
-
-QString digitalcard::getChunit() const
-{
-    return ui->currentunitlabel->text();
-}
-
-float digitalcard::getChCvValue() const
-{
-    return m_cv.load();
-}
-
-bool digitalcard::getChCVChecked() const
-{
-    return ui->cvcheckbox->isChecked();
-}
-
-float digitalcard::getChCcValue() const
-{
-    return m_cc.load();
-}
-
-bool digitalcard::getChCCChecked() const
-{
-    return ui->cccheckbox->isChecked();
-}
-
-float digitalcard::getChOvpValue() const
-{
-    return m_ovp.load();
-}
-
-bool digitalcard::getChOVPChecked() const
-{
-    return ui->ovpcheckbox->isChecked();
-}
-
-
-void digitalcard::setChannel(quint8 ch)
+void digitalcard::setChannel(int ch)
 {
     QString name = QString("CH-%1").arg(ch, 2, 10, QChar('0'));
     ui->channellabel->setText(name);
@@ -141,13 +101,6 @@ void digitalcard::setChannelState(bool state)
     style()->polish(this);
     update();
 }
-
-void digitalcard::setChannelRange(quint8 range)
-{
-    // 0 -0x01-mA; 1 -0x10-Auto; 2 -0x00-A
-    m_range.store(range);
-}
-
 
 void digitalcard::setVoltage(float value)
 {
@@ -165,20 +118,15 @@ void digitalcard::setCurrent(float value)
 
 void digitalcard::setCurrentUnit(const QString &unit)
 {
-    bool state = unit.size()==2;
-    ui->currentunitlabel->setProperty("mA",state);
     ui->currentunitlabel->setText(unit);
+    ui->currentunitlabel->setProperty("mA",unit.size()==2);
 
     ui->currentunitlabel->style()->unpolish(ui->currentunitlabel);
     ui->currentunitlabel->style()->polish(ui->currentunitlabel);
     ui->currentunitlabel->update();
 }
 
-
-void digitalcard::setCVChecked(bool checked)
-{
-    ui->cvcheckbox->setChecked(checked);
-}
+void digitalcard::setCVChecked(bool checked){ui->cvcheckbox->setChecked(checked);}
 
 void digitalcard::setCvValue(float value)
 {
@@ -187,10 +135,7 @@ void digitalcard::setCvValue(float value)
     m_cv.store(value);
 }
 
-void digitalcard::setCCChecked(bool checked)
-{
-    ui->cccheckbox->setChecked(checked);
-}
+void digitalcard::setCCChecked(bool checked){ui->cccheckbox->setChecked(checked);}
 
 void digitalcard::setCcValue(float value)
 {
@@ -199,10 +144,7 @@ void digitalcard::setCcValue(float value)
     m_cc.store(value);
 }
 
-void digitalcard::setOVPChecked(bool checked)
-{
-    ui->ovpcheckbox->setChecked(checked);
-}
+void digitalcard::setOVPChecked(bool checked){ui->ovpcheckbox->setChecked(checked);}
 
 void digitalcard::setOvpValue(float value)
 {

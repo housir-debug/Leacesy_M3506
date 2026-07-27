@@ -39,9 +39,10 @@ public:
     bool removeModel(const QString &modelName);
     bool saveModel(QSharedPointer<BatteryModel> model, const QString &modelName);
 
+    QStringList getAvailableModels() const;
+    QSharedPointer<BatteryModel> getModel(const QString &modelName) const;
+
     QMap<QString, QSharedPointer<BatteryModel>> m_models;
-    QStringList getAvailableModels() const{return m_models.keys();};
-    QSharedPointer<BatteryModel> getModel(const QString &modelName) const{return m_models.value(modelName);};
 
 private:
     QSharedPointer<BatteryModel> parseCSV(const QString &filePath);

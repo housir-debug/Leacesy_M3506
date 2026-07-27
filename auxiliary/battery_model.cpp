@@ -228,3 +228,8 @@ bool BatteryModelManager::saveModel(QSharedPointer<BatteryModel> model,const QSt
     qCWarning(battery)<<"[saveModel]: model file already exist!";
     return false;
 }
+
+
+QStringList BatteryModelManager::getAvailableModels() const{return m_models.keys();}
+
+QSharedPointer<BatteryModel> BatteryModelManager::getModel(const QString &modelName) const{return m_models.value(modelName);}

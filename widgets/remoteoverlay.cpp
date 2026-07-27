@@ -8,12 +8,11 @@ remoteoverlay::remoteoverlay(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::remoteoverlay)
 {
-    ui->setupUi(this);
-
     QGraphicsOpacityEffect *logoOpacity = new QGraphicsOpacityEffect(this);
     logoOpacity->setOpacity(0.6);
-    ui->remotelogo->setGraphicsEffect(logoOpacity);
+    ui->setupUi(this);
 
+    ui->remotelogo->setGraphicsEffect(logoOpacity);
     hide();
 }
 
@@ -35,6 +34,6 @@ void remoteoverlay::hideEvent(QHideEvent *event)
 
 void remoteoverlay::on_gobackpushButton_clicked()
 {
-    hide();
     emit exitRemote();
+    hide();
 }

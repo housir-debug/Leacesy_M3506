@@ -1,22 +1,20 @@
 #pragma once
 #include <QFrame>
 
-namespace Ui {
-    class versionview;
-}
+namespace Ui {class versionview;}
 
 class versionview : public QFrame
 {
     Q_OBJECT
 
-public:
-    explicit versionview(QWidget *parent = nullptr);
-    ~versionview();
+private:
+    Ui::versionview *ui;
 
-    void setChannelName(const QString &name);
+public:
+    void setChannelName(int channel);
     void setChSWVersion(const QString &ver);
     void setChHWVersion(const QString &ver);
 
-private:
-    Ui::versionview *ui;
+    explicit versionview(QWidget *parent = nullptr);
+    ~versionview();
 };

@@ -31,7 +31,7 @@ signals:
     CHANNEL_COUNT
     #undef CHANNEL
 
-private:
+private:   // auto inline
     int32_t m_querymode{0};
     static scpi_result_t SCPI_Query(scpi_t* context);
     // --- Output -------------------------------------------------------------------------------

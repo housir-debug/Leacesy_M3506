@@ -40,7 +40,7 @@ public:
     static bool s_enableDisplay;
     /* ***************************** */
 
-    static std::atomic<quint8> s_remoteSt;
+    static std::atomic<int> s_remoteSt;
     static bool setinterfaces(bool isstatic,const QString& ip, const QString& netmask,const QString& gateway);
     static bool setConfigValue(const QString &key, const QVariant &value);
 
