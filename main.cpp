@@ -91,8 +91,6 @@ int main(int argc, char *argv[])
 
         //testview = std::make_unique<test>();
         //testview->show();
-
-
     }
 
     // can channel create

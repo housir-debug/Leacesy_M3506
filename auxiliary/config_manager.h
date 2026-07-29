@@ -43,7 +43,7 @@ public:
     static std::atomic<int> s_remoteSt;
     static bool setinterfaces(bool isstatic,const QString& ip, const QString& netmask,const QString& gateway);
     static bool setConfigValue(const QString &key, const QVariant &value);
-
+    static bool getNetworkConfig();
 
     static QString s_firmwareVersion;
     static QString s_hardwareVersion;
@@ -65,7 +65,5 @@ private:
     ConfigManager() = delete;       // Prohibition of construction
     ~ConfigManager() = delete;      // Prohibit destruction
     Q_DISABLE_COPY(ConfigManager)   // Prohibition of copying
-
     static QSettings* s_settings;
-    static bool getNetworkConfig();
 };

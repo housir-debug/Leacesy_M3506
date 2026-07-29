@@ -11,8 +11,8 @@ void Mainwindow::update_cardtest()
 {
     QList<int> channels;
     //channels = {1,2,3,4,5};
-    //channels = {3, 1, 4,2,8,9,24,15,32,12,18};
-    for (int i = 1; i <= 36; i++) {channels.append(i);}
+    channels = {3, 1, 4,2,8,9,24,15,32,12,18};
+    //for (int i = 1; i <= 36; i++) {channels.append(i);}
     std::sort(channels.begin(), channels.end());
 
     int totalChannels = channels.size();
@@ -71,28 +71,36 @@ void Mainwindow::add_digitalcard(int neededPages,const QList<int>& channels)
         connect(card, &digitalcard::longPressed, this, [this](quint8 ch) {
             m_initalpage = 0;
             m_functioncCh = ch;
-            int range = m_digitalcards[ch]->getChRange();
-            QString unit = m_range.contains(range) ? m_range[range] : "";
 
             m_vercard->setChannelName(ch);
             m_vercard->setChSWVersion(m_ChsoftVer.value(ch));
             m_vercard->setChHWVersion(m_ChhardVer.value(ch));
 
+            m_chstatuscard->setChtatus("0000000000000000");
+            int range = m_digitalcards[ch]->getChRange();
+
             m_funcdigitalcard->setChannel(ch);
             m_funcdigitalcard->setChannelRange(range);
+            m_funcdigitalcard->setVoltage(m_digitalcards[ch]->getChVoltage());
+            m_funcdigitalcard->setCurrent(m_digitalcards[ch]->getChCurrent());
+            m_funcdigitalcard->setCurrentUnit(m_digitalcards[ch]->getChunit());
             m_funcdigitalcard->setCvValue(m_digitalcards[ch]->getChCvValue());
             m_funcdigitalcard->setCcValue(m_digitalcards[ch]->getChCcValue());
             m_funcdigitalcard->setOvpValue(m_digitalcards[ch]->getChOvpValue());
             m_funcdigitalcard->setChannelState(m_digitalcards[ch]->getChstatus());
+            m_funcdigitalcard->setCVChecked(m_digitalcards[ch]->getChCVChecked());
+            m_funcdigitalcard->setCCChecked(m_digitalcards[ch]->getChCCChecked());
+            m_funcdigitalcard->setOVPChecked(m_digitalcards[ch]->getChOVPChecked());
 
+            m_functioncsetmode = 0;
+            ui->cvradioButton->setChecked(true);
             ui->cvvaluelabel->setText("");
             ui->ccvaluelabel->setText("");
             ui->ovpvaluelabel->setText("");
-            ui->cvradioButton->setChecked(true);
-            ui->functionunitpushButton->setText(unit);
+            ui->functionunitpushButton->setText(m_range.value(range));
 
-            ui->topstackedwidget->setCurrentIndex(3);
             ui->functionstackedWidget->setCurrentIndex(0); // = m_initalpage
+            ui->topstackedwidget->setCurrentIndex(3);
         });
 
         QHBoxLayout* layout = qobject_cast<QHBoxLayout*>(frame->layout());
@@ -139,11 +147,13 @@ void Mainwindow::add_batterycard(int neededPages,const QList<int>& channels)
         connect(card, &batterycard::longPressed, this, [this](quint8 ch) {
             m_initalpage = 1;
             m_functioncCh = ch;
-            QString modelname = m_batterycards[ch]->getChmodelname();
 
             m_vercard->setChannelName(ch);
             m_vercard->setChSWVersion(m_ChsoftVer.value(ch));
             m_vercard->setChHWVersion(m_ChhardVer.value(ch));
+
+            m_chstatuscard->setChtatus("0000000000000000");
+            QString modelname = m_batterycards[ch]->getChmodelname();
 
             m_funcbatterycard->setChannel(ch);
             m_funcbatterycard->setModelValue(modelname);
@@ -153,13 +163,14 @@ void Mainwindow::add_batterycard(int neededPages,const QList<int>& channels)
             m_funcbatterycard->setCapValue(m_batterycards[ch]->getChCapvalue());
             m_funcbatterycard->setChannelState(m_batterycards[ch]->getChstatus());
 
+            m_functioncsetmode = 0;
+            ui->socradioButton->setChecked(true);
             ui->socvaluelabel->setText("");
             ui->capvaluelabel->setText("");
-            ui->socradioButton->setChecked(true);
             ui->functionmodelpushButton->setText(modelname);
 
-            ui->topstackedwidget->setCurrentIndex(3);  // functionpage
             ui->functionstackedWidget->setCurrentIndex(1); // = m_initalpage
+            ui->topstackedwidget->setCurrentIndex(3);  // functionpage
         });
 
         QHBoxLayout* layout = qobject_cast<QHBoxLayout*>(frame->layout());
@@ -219,7 +230,7 @@ void Mainwindow::update_Voltage(int ch,float voltage){
 }
 
 void Mainwindow::update_CurrentAndUnit(int ch,float current){
-    if (m_digitalcards.contains(ch) && m_initalpage == 0) {
+    if (m_initalpage == 0 && m_digitalcards.contains(ch)) {
         QString newUnit = (qAbs(current) < 1e-4) ? "mA" : "A";
         m_digitalcards[ch]->setCurrent(current);
         m_digitalcards[ch]->setCurrentUnit(newUnit);
@@ -278,7 +289,7 @@ void Mainwindow::update_Ovp(int ch,float ovp){
 
 void Mainwindow::update_Range(int ch,int range)
 {
-    if (m_digitalcards.contains(ch) && m_initalpage == 0) {
+    if (m_initalpage == 0 && m_digitalcards.contains(ch)) {
         m_digitalcards[ch]->setChannelRange(range);
 
         if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh){
@@ -444,33 +455,23 @@ Mainwindow::Mainwindow(QWidget *parent) : QWidget(parent), ui(new Ui::Mainwindow
     m_setnmbkeycard->setGeometry(ui->settingkeyframe->geometry());
     QObject::connect(m_setnmbkeycard, &numberkeypad::valueEntered, this, [this](const QString &value) {
         if (!value.isEmpty()){
-            switch(m_setmode){
-                case 0:{// IP
-                    ConfigManager::setinterfaces(true,value,ConfigManager::s_SM,ConfigManager::s_Gateway);
-                    ui->iplabel->setText(ConfigManager::s_IP);
-                    ui->ipvaluelabel->setText(value);
-                    return;
+            QString *fields[] = { &ConfigManager::s_IP, &ConfigManager::s_SM, &ConfigManager::s_Gateway };
+            QLabel *valueLabels[] = { ui->ipvaluelabel, ui->maskvaluelabel, ui->gatevaluelabel };
+            QLabel *displayLabels[] = { ui->iplabel, ui->masklabel, ui->gatelabel };
+
+            if (m_setmode < 3) {
+                valueLabels[m_setmode]->setText(value);
+                *fields[m_setmode] = value;
+
+                if (ConfigManager::s_IP != "---.---.---.---" && ConfigManager::s_SM != "---.---.---.---" && ConfigManager::s_Gateway != "---.---.---.---") {
+                    ConfigManager::setinterfaces(true, ConfigManager::s_IP, ConfigManager::s_SM, ConfigManager::s_Gateway);
+                    for (int i = 0; i < 3; i++) {displayLabels[i]->setText(*fields[i]);}
                 }
-                case 1:{// SM
-                    ConfigManager::setinterfaces(true,ConfigManager::s_IP,value,ConfigManager::s_Gateway);
-                    ui->masklabel->setText(ConfigManager::s_SM);
-                    ui->maskvaluelabel->setText(value);
-                    return;
-                }
-                case 2:{// gateway
-                    ConfigManager::setinterfaces(true,ConfigManager::s_IP,ConfigManager::s_SM,value);
-                    ui->gatelabel->setText(ConfigManager::s_Gateway);
-                    ui->gatevaluelabel->setText(value);
-                    return;
-                }
-                case 3:{// canid
-                    ConfigManager::setConfigValue("Device/CANID",value);
-                    ConfigManager::s_CANid = value.toUInt();
-                    ui->canidvaluelabel->setText(value);
-                    ui->canidlabel->setText(value);
-                    return;
-                }
-                default:return;
+            } else if (m_setmode == 3) {
+                ConfigManager::setConfigValue("Device/CANID", value);
+                ConfigManager::s_CANid = value.toUInt();
+                ui->canidvaluelabel->setText(value);
+                ui->canidlabel->setText(value);
             }
         }
     });
@@ -508,42 +509,40 @@ void Mainwindow::to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray&
 
 void Mainwindow::refresh_settingpage()
 {
-    ui->topstackedwidget->setCurrentIndex(2);  // settingspage
-
-    if (ConfigManager::s_isDHCP){
-        ui->dhcpradioButton->setChecked(true);
-
-        ui->ipradioButton->setEnabled(false);
-        ui->maskradioButton->setEnabled(false);
-        ui->gateradioButton->setEnabled(false);
-
-        m_setnmbkeycard->setValue(QString::number(ConfigManager::s_CANid));
-        ui->canidradioButton->setChecked(true);
-        m_setmode = 3;
-    }else{
-        ui->setstaticradioButton->setChecked(true);
-
-        ui->ipradioButton->setEnabled(true);
-        ui->maskradioButton->setEnabled(true);
-        ui->gateradioButton->setEnabled(true);
-
-        m_setnmbkeycard->setValue(ConfigManager::s_IP);
-        ui->ipradioButton->setChecked(true);
-        m_setmode = 0;
-    }
-
-    ui->iplabel->setText(ConfigManager::s_IP);
-    ui->masklabel->setText(ConfigManager::s_SM);
-    ui->gatelabel->setText(ConfigManager::s_Gateway);
-    ui->maclabel->setText(ConfigManager::s_MAC);
     ui->ipvaluelabel->setText("");
     ui->maskvaluelabel->setText("");
     ui->gatevaluelabel->setText("");
+    ui->iplabel->setText(ConfigManager::s_IP);
+    ui->masklabel->setText(ConfigManager::s_SM);
+    ui->maclabel->setText(ConfigManager::s_MAC);
+    ui->gatelabel->setText(ConfigManager::s_Gateway);
 
-    ui->gpibidlabel->setText(QString::number(ConfigManager::s_GPIBid));
-    ui->canidlabel->setText(QString::number(ConfigManager::s_CANid));
-    ui->canidvaluelabel->setText("");
+    if (ConfigManager::s_isDHCP){
+        ui->dhcpradioButton->setChecked(true);
+        ui->canidradioButton->setChecked(true);
+
+        ui->refreshpushButton->setEnabled(true);
+        ui->ipradioButton->setEnabled(false);
+        ui->maskradioButton->setEnabled(false);
+        ui->gateradioButton->setEnabled(false);
+        m_setmode = 3;
+    }else{
+        ui->setstaticradioButton->setChecked(true);
+        ui->ipradioButton->setChecked(true);
+
+        ui->refreshpushButton->setEnabled(false);
+        ui->ipradioButton->setEnabled(true);
+        ui->maskradioButton->setEnabled(true);
+        ui->gateradioButton->setEnabled(true);
+        m_setmode = 0;
+    }
+
     ui->gpibvaluelabel->setText("");
+    ui->canidvaluelabel->setText("");
+    ui->canidlabel->setText(QString::number(ConfigManager::s_CANid));
+    ui->gpibidlabel->setText(QString::number(ConfigManager::s_GPIBid));
+
+    ui->topstackedwidget->setCurrentIndex(2);  // settingspage
 }
 
 void Mainwindow::allONrefresh()
@@ -618,10 +617,10 @@ void Mainwindow::on_digitalallONpushButton_clicked(){allONrefresh();}
 void Mainwindow::on_digitalallunitpushButton_clicked()
 {
     static int range = 0;
-
     auto it = m_range.upperBound(range);
     if (it == m_range.end()) {it = m_range.begin();}
 
+    range = it.key();
     QString newunit = "All - " + it.value();
     ui->digitalallunitpushButton->setText(newunit);
     to_Channel(0,0x04, 0x0E, QByteArray(1, char(it.key())));
@@ -730,29 +729,36 @@ void Mainwindow::on_settingrowsbackpushButton_clicked(){ui->topstackedwidget->se
 
 void Mainwindow::on_setstaticradioButton_clicked()
 {
+    m_setmode = 0;
+    ui->ipradioButton->setChecked(true);
     ui->ipradioButton->setEnabled(true);
     ui->maskradioButton->setEnabled(true);
     ui->gateradioButton->setEnabled(true);
+    ui->refreshpushButton->setEnabled(false);
+}
 
-    m_setnmbkeycard->setValue(ConfigManager::s_IP);
-    ui->ipradioButton->setChecked(true);
-    m_setmode = 0;
+void Mainwindow::on_refreshpushButton_clicked()
+{
+    if (ConfigManager::getNetworkConfig()){
+        ui->iplabel->setText(ConfigManager::s_IP);
+        ui->masklabel->setText(ConfigManager::s_SM);
+        ui->gatelabel->setText(ConfigManager::s_Gateway);
+    }
 }
 
 void Mainwindow::on_dhcpradioButton_clicked()
 {
+    m_setmode = 3;
+    ui->canidradioButton->setChecked(true);
     ui->ipradioButton->setEnabled(false);
     ui->maskradioButton->setEnabled(false);
     ui->gateradioButton->setEnabled(false);
+    QTimer::singleShot(6000, ui->refreshpushButton,[btn = ui->refreshpushButton]() {btn->setEnabled(true);}); // 6s
 
-    m_setnmbkeycard->setValue(QString::number(ConfigManager::s_CANid));
-    ConfigManager::setinterfaces(false,"","",""); // refresh ip,sm,gate
-    ui->canidradioButton->setChecked(true);
-    m_setmode = 3;
-
-    ui->iplabel->setText(ConfigManager::s_IP);
-    ui->masklabel->setText(ConfigManager::s_SM);
-    ui->gatelabel->setText(ConfigManager::s_Gateway);
+    ui->iplabel->setText("---.---.---.---");
+    ui->masklabel->setText("---.---.---.---");
+    ui->gatelabel->setText("---.---.---.---");
+    ConfigManager::setinterfaces(false, "", "", "");
 }
 
 
@@ -760,34 +766,29 @@ void Mainwindow::on_ipradioButton_clicked()
 {
     m_setmode = 0;
     ui->ipradioButton->setChecked(true);
-    m_setnmbkeycard->setValue(ConfigManager::s_IP);
 }
 
 void Mainwindow::on_maskradioButton_clicked()
 {
     m_setmode = 1;
     ui->maskradioButton->setChecked(true);
-    m_setnmbkeycard->setValue(ConfigManager::s_SM);
 }
 
 void Mainwindow::on_gateradioButton_clicked()
 {
     m_setmode = 2;
     ui->gateradioButton->setChecked(true);
-    m_setnmbkeycard->setValue(ConfigManager::s_Gateway);
 }
 
 void Mainwindow::on_canidradioButton_clicked()
 {
     m_setmode = 3;
     ui->canidradioButton->setChecked(true);
-    m_setnmbkeycard->setValue(QString::number(ConfigManager::s_CANid));
 }
 
 void Mainwindow::on_gpibidradioButton_clicked()
 {
     m_setmode = 4;
     ui->gpibidradioButton->setChecked(true);
-    m_setnmbkeycard->setValue(QString::number(ConfigManager::s_GPIBid));
 }
 

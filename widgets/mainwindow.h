@@ -121,6 +121,7 @@ private slots:
     // setting page switchs
     void on_settingrowsbackpushButton_clicked();
     void on_setstaticradioButton_clicked();
+    void on_refreshpushButton_clicked();
     void on_dhcpradioButton_clicked();
 
     void on_ipradioButton_clicked();

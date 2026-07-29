@@ -21,8 +21,8 @@ private:
     float m_soc{72.0f};
     float m_ocv{0.0f};
     float m_esr{0.0f};
-    float m_cap{1.0f};
-    QString m_model{""};
+    float m_cap{3.6f};
+    QString m_model{"empty"};
     quint8 m_modelindex{0};
 
     QElapsedTimer m_integralTimer;

@@ -1,6 +1,7 @@
 #include "config_manager.h"
 #include <QBigEndianStorageType>
 #include <QNetworkInterface>
+#include <QProcess>
 #include <QFile>
 
 Q_LOGGING_CATEGORY(config, "CONFIG:")
@@ -43,12 +44,9 @@ std::vector<UartConfig> configs = {
     {"/dev/ttyS1",    QSerialPort::Baud38400, 0x01},   // test
 };
 
-// log config
-QString ConfigManager::s_loglevel = "release";
-bool ConfigManager::s_enablelogfile = false;
 // channel switch
 bool ConfigManager::s_enableUartMess   = true;
-bool ConfigManager::s_enableCanMess    = true;
+bool ConfigManager::s_enableCanMess    = false;
 // control switch
 bool ConfigManager::s_enableLANServer  = true;
 bool ConfigManager::s_enableWEBServer  = false;
@@ -56,13 +54,16 @@ bool ConfigManager::s_enableCANServer  = true;
 bool ConfigManager::s_enableUARTServer = true;
 bool ConfigManager::s_enableDisplay    = true;
 
+// log config
+QString ConfigManager::s_loglevel = "info";
+bool ConfigManager::s_enablelogfile = false;
+
 std::atomic<int> ConfigManager::s_remoteSt{0};
 QSettings* ConfigManager::s_settings = nullptr;
 
 // global variable - Internal fixation
 QString ConfigManager::s_firmwareVersion = "1.0.0";
 QString ConfigManager::s_hardwareVersion = "1.0.0";
-
 QString ConfigManager::s_manufacturer = "Leacesy";
 QString ConfigManager::s_serialNumber = "SN-66004";
 QString ConfigManager::s_model = "66004";
@@ -85,11 +86,8 @@ bool ConfigManager::init(const QString &configDir)
         if (QFile::exists(fullPath) && !s_settings) {
             s_settings = new QSettings(fullPath, QSettings::IniFormat);
 
-            s_loglevel = s_settings->value("Logger/logLevel").toString();
-            s_enablelogfile = s_settings->value("Logger/EnablelogFile").toBool();
-
             s_enableUartMess = s_settings->value("Channel/EnableUartMess").toBool();
-            s_enableCanMess = s_settings->value("Channel/EnableCanMess").toBool();
+            //s_enableCanMess = s_settings->value("Channel/EnableCanMess").toBool();
 
             s_enableLANServer = s_settings->value("Control/EnableLANServer").toBool();
             s_enableWEBServer = s_settings->value("Control/EnableWEBServer").toBool();
@@ -99,7 +97,6 @@ bool ConfigManager::init(const QString &configDir)
 
             s_serialNumber = s_settings->value("Device/SerialNumber").toString();
             s_model = s_settings->value("Device/Model").toString();
-
             s_GPIBid = s_settings->value("Device/GPIBID").toUInt();
             s_CANid = s_settings->value("Device/CANID").toUInt();
 
@@ -117,45 +114,60 @@ bool ConfigManager::getNetworkConfig() {
     const auto interfaces = QNetworkInterface::allInterfaces();
     for (const QNetworkInterface& iface : qAsConst(interfaces)) {
         if (iface.name() == "eth0") {
-            QFile file("/etc/network/interfaces");
-            if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                int readcount = 0;
-                QTextStream in(&file);
-                QString line = in.readLine(); // get frist rows of headline
+            s_isDHCP = false;
+            s_IP = "---.---.---.---";
+            s_SM = "---.---.---.---";
+            s_Gateway = "---.---.---.---";
+            s_MAC = iface.hardwareAddress();
 
-                while (!in.atEnd()) {
-                    line = in.readLine().trimmed(); // Remove first and end spaces
-
-                    if (line.startsWith("iface " + iface.name())) {
-                        readcount += 1;
-                        if (line.contains("dhcp", Qt::CaseInsensitive)) {
-                            s_isDHCP = true;
-                        }else{
-                            s_isDHCP = false;
-                        }
-                    }
-
-                    if (line.startsWith("gateway ")) {
-                        readcount += 1;
-                        s_Gateway = line.mid(8).trimmed();
-                    }
-
-                    if (readcount >= 2){break;}
-                }
-
-                s_MAC = iface.hardwareAddress();
-                const auto entries = iface.addressEntries();
-                for (const QNetworkAddressEntry& entry : qAsConst(entries)) {
-                    if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
-                        s_IP = entry.ip().toString();
-                        s_SM = entry.netmask().toString();
-                        return true;
-                    }
+            const auto entries = iface.addressEntries();
+            for (const QNetworkAddressEntry& entry : qAsConst(entries)) {
+                if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
+                    s_SM = entry.netmask().toString();
+                    s_IP = entry.ip().toString();
+                    break;
                 }
             }
 
-            qCWarning(config) << "[getNetworkConfig]:/etc/network/interfaces opening failed!";
-            return false; // static
+            QFile gatefile("/proc/net/route");
+            if (gatefile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+               QTextStream gatein(&gatefile);
+               QString gateline = gatein.readLine(); // get frist rows of headline
+
+               while (!gatein.atEnd()) {
+                   gateline = gatein.readLine();
+                   QStringList fields = gateline.trimmed().split('\t', Qt::SkipEmptyParts);
+                   if (fields.size() >= 3 && fields[0] == "eth0" && fields[1] == "00000000") {
+                       bool ok; quint32 gw = fields[2].toUInt(&ok, 16);
+                       if (ok) {
+                           s_Gateway = QHostAddress(qFromBigEndian(gw)).toString();
+                           break;
+                       }
+                   }
+               }
+
+               QFile file("/etc/network/interfaces");
+               if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                   QTextStream in(&file);
+                   QString line = in.readLine(); // get frist rows of headline
+
+                   while (!in.atEnd()) {
+                       line = in.readLine().trimmed(); // Remove first and end spaces
+                       if (line.startsWith("iface eth0") && line.contains("dhcp")) {
+                           s_isDHCP = true;
+                           break;
+                       }
+                   }
+
+                   return true;
+               }
+
+               qCWarning(config) << "[getNetworkConfig]:/etc/network/interfaces opening failed!";
+               return false;
+            }
+
+            qCWarning(config) << "[getNetworkConfig]:/proc/net/route opening failed!";
+            return false;
         }
     }
 
@@ -166,6 +178,8 @@ bool ConfigManager::getNetworkConfig() {
 bool ConfigManager::setinterfaces(bool isstatic,const QString& ip, const QString& netmask,const QString& gateway){
     QFile file("/etc/network/interfaces");
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        // WriteOnly -> Clear the original content
+        QTextStream out(&file);
         QString configContent;
         if(isstatic){
             configContent =
@@ -176,39 +190,39 @@ bool ConfigManager::setinterfaces(bool isstatic,const QString& ip, const QString
                 "iface eth0 inet static\n"
                 "    address " + ip + "\n"
                 "    netmask " + netmask + "\n"
-                "    gateway " + gateway + "\n\n"
-                "auto eth1\n"
-                "iface eth1 inet static\n"
-                "    address 192.168.2.136\n"
-                "    netmask 255.255.255.0\n"
-                "    gateway 192.168.2.1\n";
+                "    gateway " + gateway;
+
+            out << configContent;
+            file.close();
+
+            QString restartCmd = "/etc/init.d/S40network restart";
+            if (system(restartCmd.toStdString().c_str()) == 0) {
+                getNetworkConfig();
+                return true;
+            }
+
+            qCWarning(config) << "[refresh_interfaces]:/etc/init.d/S40network restart failed!";
+            return false;
         }else{
             configContent =
                 "# interface file auto-generated by buildroot\n"
                 "auto lo\n"
                 "iface lo inet loopback\n\n"
                 "auto eth0\n"
-                "iface eth0 inet dhcp\n\n"
-                "auto eth1\n"
-                "iface eth1 inet static\n"
-                "    address 192.168.2.136\n"
-                "    netmask 255.255.255.0\n"
-                "    gateway 192.168.2.1\n";
-        }
+                "iface eth0 inet dhcp";
 
-        // WriteOnly -> Clear the original content
-        QTextStream out(&file);
-        out << configContent;
-        file.close();
+            out << configContent;
+            file.close();
 
-        QString restartCmd = "/etc/init.d/S40network restart";
-        if (system(restartCmd.toStdString().c_str()) == 0) {
-            getNetworkConfig();
+            QProcess *process = new QProcess(); // not parent class ,so I need delete it
+            QObject::connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),[process](int exitCode, QProcess::ExitStatus) {
+                 if (exitCode != 0) {qCWarning(config) << "[refresh_interfaces]:S40network restart failed!";}
+                 process->deleteLater(); // After achieving success, the IP address have not yet been updated.
+             });
+
+            process->start("/etc/init.d/S40network", QStringList() << "restart");
             return true;
         }
-
-        qCWarning(config) << "[refresh_interfaces]:/etc/init.d/S40network restart failed!";
-        return false;
     }
 
     qCWarning(config) << "[refresh_interfaces]:Cannot open interfaces file for writing";

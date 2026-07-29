@@ -248,7 +248,7 @@ font-size: 18px;
            <number>0</number>
           </property>
           <property name="text">
-           <string>002.40 Ah</string>
+           <string>3.60 Ah</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

@@ -113,6 +113,9 @@ void TcpServerManager::processClientData(QTcpSocket *client)
         m_responsebuffer = m_scpiManager->processCommand(m_readbuffer);
         if (!m_responsebuffer.isEmpty()){client->write(m_responsebuffer);}
         qCDebug(tcp)<<"[processClientData]:SOCKET SCPI-Response: "<<m_responsebuffer;
+
+        m_readbuffer.clear();
+        return;
     // VXI-11 0x800000 + length
     }else if (m_readbuffer.size() > 44 && static_cast<quint8>(m_readbuffer[0]) == Vxi11::HEADER){
         const uchar* readAddress = reinterpret_cast<const uchar*>(m_readbuffer.constData());
@@ -150,14 +153,14 @@ void TcpServerManager::processClientData(QTcpSocket *client)
                 return; // finish.
             }
 
-            qCDebug(tcp)<<"[handleReadyRead]: end/check format Error!";
+            qCDebug(tcp)<<"[processClientData]: end/check format Error!";
             m_readbuffer.clear(); // format error
         }
 
         return; // data not Complete. wait next information
     }
 
-    qCDebug(tcp)<<"[handleReadyRead]: head format Error!";
+    qCDebug(tcp)<<"[processClientData]: head format Error!";
     m_readbuffer.clear();  // socket and format error
 }
 
