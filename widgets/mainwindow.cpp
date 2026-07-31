@@ -451,29 +451,14 @@ Mainwindow::Mainwindow(QWidget *parent) : QWidget(parent), ui(new Ui::Mainwindow
 
     // setting page component
 
+    m_devicesetcard = new devicesetting(ui->settingframe->parentWidget());
+    m_devicesetcard->setGeometry(ui->settingframe->geometry());
+    delete ui->settingframe;
+
     m_setnmbkeycard = new numberkeypad(ui->settingkeyframe->parentWidget());
     m_setnmbkeycard->setGeometry(ui->settingkeyframe->geometry());
     QObject::connect(m_setnmbkeycard, &numberkeypad::valueEntered, this, [this](const QString &value) {
-        if (!value.isEmpty()){
-            QString *fields[] = { &ConfigManager::s_IP, &ConfigManager::s_SM, &ConfigManager::s_Gateway };
-            QLabel *valueLabels[] = { ui->ipvaluelabel, ui->maskvaluelabel, ui->gatevaluelabel };
-            QLabel *displayLabels[] = { ui->iplabel, ui->masklabel, ui->gatelabel };
-
-            if (m_setmode < 3) {
-                valueLabels[m_setmode]->setText(value);
-                *fields[m_setmode] = value;
-
-                if (ConfigManager::s_IP != "---.---.---.---" && ConfigManager::s_SM != "---.---.---.---" && ConfigManager::s_Gateway != "---.---.---.---") {
-                    ConfigManager::setinterfaces(true, ConfigManager::s_IP, ConfigManager::s_SM, ConfigManager::s_Gateway);
-                    for (int i = 0; i < 3; i++) {displayLabels[i]->setText(*fields[i]);}
-                }
-            } else if (m_setmode == 3) {
-                ConfigManager::setConfigValue("Device/CANID", value);
-                ConfigManager::s_CANid = value.toUInt();
-                ui->canidvaluelabel->setText(value);
-                ui->canidlabel->setText(value);
-            }
-        }
+        if (!value.isEmpty()){m_devicesetcard->setting(value);}
     });
     delete ui->settingkeyframe;
 
@@ -507,44 +492,6 @@ void Mainwindow::to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray&
     }
 }
 
-void Mainwindow::refresh_settingpage()
-{
-    ui->ipvaluelabel->setText("");
-    ui->maskvaluelabel->setText("");
-    ui->gatevaluelabel->setText("");
-    ui->iplabel->setText(ConfigManager::s_IP);
-    ui->masklabel->setText(ConfigManager::s_SM);
-    ui->maclabel->setText(ConfigManager::s_MAC);
-    ui->gatelabel->setText(ConfigManager::s_Gateway);
-
-    if (ConfigManager::s_isDHCP){
-        ui->dhcpradioButton->setChecked(true);
-        ui->canidradioButton->setChecked(true);
-
-        ui->refreshpushButton->setEnabled(true);
-        ui->ipradioButton->setEnabled(false);
-        ui->maskradioButton->setEnabled(false);
-        ui->gateradioButton->setEnabled(false);
-        m_setmode = 3;
-    }else{
-        ui->setstaticradioButton->setChecked(true);
-        ui->ipradioButton->setChecked(true);
-
-        ui->refreshpushButton->setEnabled(false);
-        ui->ipradioButton->setEnabled(true);
-        ui->maskradioButton->setEnabled(true);
-        ui->gateradioButton->setEnabled(true);
-        m_setmode = 0;
-    }
-
-    ui->gpibvaluelabel->setText("");
-    ui->canidvaluelabel->setText("");
-    ui->canidlabel->setText(QString::number(ConfigManager::s_CANid));
-    ui->gpibidlabel->setText(QString::number(ConfigManager::s_GPIBid));
-
-    ui->topstackedwidget->setCurrentIndex(2);  // settingspage
-}
-
 void Mainwindow::allONrefresh()
 {
     static bool allOn{false};
@@ -562,9 +509,9 @@ void Mainwindow::on_digitalmodepushButton_clicked(){ui->topstackedwidget->setCur
 
 void Mainwindow::on_batterymodepushButton_clicked(){ui->topstackedwidget->setCurrentIndex(0);m_initalpage = 0;}
 
-void Mainwindow::on_digitalsettingspushButton_clicked(){refresh_settingpage();m_initalpage = 0;}
+void Mainwindow::on_digitalsettingspushButton_clicked(){ui->topstackedwidget->setCurrentIndex(2);m_initalpage = 0;}
 
-void Mainwindow::on_batterysettingspushButton_clicked(){refresh_settingpage();m_initalpage = 1;}
+void Mainwindow::on_batterysettingspushButton_clicked(){ui->topstackedwidget->setCurrentIndex(2);m_initalpage = 1;}
 
 
 void Mainwindow::on_digitalrowsbackpushButton_clicked()
@@ -646,11 +593,15 @@ void Mainwindow::on_batteryallmodelpushButton_clicked()
     }
 }
 
+// setting page switchs
+
+void Mainwindow::on_settingrowsbackpushButton_clicked(){ui->topstackedwidget->setCurrentIndex(m_initalpage);}
+
 // function page switchs or other
 
 void Mainwindow::on_functionrowsbackpushButton_clicked(){ui->topstackedwidget->setCurrentIndex(m_initalpage);}
 
-void Mainwindow::on_functionsettingspushButton_clicked(){refresh_settingpage();}
+void Mainwindow::on_functionsettingspushButton_clicked(){ui->topstackedwidget->setCurrentIndex(2);}
 
 void Mainwindow::on_functionallapplypushButton_clicked()
 {
@@ -721,74 +672,5 @@ void Mainwindow::on_functionmodelpushButton_clicked()
         m_batterycards[m_functioncCh]->setModelValue(batteryModel);
         m_batterycards[m_functioncCh]->setModel(currentIndex,m_modelManager->getModel(batteryModel));
     }
-}
-
-// setting page switchs
-
-void Mainwindow::on_settingrowsbackpushButton_clicked(){ui->topstackedwidget->setCurrentIndex(m_initalpage);}
-
-void Mainwindow::on_setstaticradioButton_clicked()
-{
-    m_setmode = 0;
-    ui->ipradioButton->setChecked(true);
-    ui->ipradioButton->setEnabled(true);
-    ui->maskradioButton->setEnabled(true);
-    ui->gateradioButton->setEnabled(true);
-    ui->refreshpushButton->setEnabled(false);
-}
-
-void Mainwindow::on_refreshpushButton_clicked()
-{
-    if (ConfigManager::getNetworkConfig()){
-        ui->iplabel->setText(ConfigManager::s_IP);
-        ui->masklabel->setText(ConfigManager::s_SM);
-        ui->gatelabel->setText(ConfigManager::s_Gateway);
-    }
-}
-
-void Mainwindow::on_dhcpradioButton_clicked()
-{
-    m_setmode = 3;
-    ui->canidradioButton->setChecked(true);
-    ui->ipradioButton->setEnabled(false);
-    ui->maskradioButton->setEnabled(false);
-    ui->gateradioButton->setEnabled(false);
-    QTimer::singleShot(6000, ui->refreshpushButton,[btn = ui->refreshpushButton]() {btn->setEnabled(true);}); // 6s
-
-    ui->iplabel->setText("---.---.---.---");
-    ui->masklabel->setText("---.---.---.---");
-    ui->gatelabel->setText("---.---.---.---");
-    ConfigManager::setinterfaces(false, "", "", "");
-}
-
-
-void Mainwindow::on_ipradioButton_clicked()
-{
-    m_setmode = 0;
-    ui->ipradioButton->setChecked(true);
-}
-
-void Mainwindow::on_maskradioButton_clicked()
-{
-    m_setmode = 1;
-    ui->maskradioButton->setChecked(true);
-}
-
-void Mainwindow::on_gateradioButton_clicked()
-{
-    m_setmode = 2;
-    ui->gateradioButton->setChecked(true);
-}
-
-void Mainwindow::on_canidradioButton_clicked()
-{
-    m_setmode = 3;
-    ui->canidradioButton->setChecked(true);
-}
-
-void Mainwindow::on_gpibidradioButton_clicked()
-{
-    m_setmode = 4;
-    ui->gpibidradioButton->setChecked(true);
 }
 

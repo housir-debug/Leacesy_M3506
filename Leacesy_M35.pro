@@ -27,6 +27,7 @@ HEADERS += \
  \    #windows/mainwindow.h
     widgets/batterycard.h \
     widgets/chstatusview.h \
+    widgets/devicesetting.h \
     widgets/digitalcard.h \
     widgets/mainwindow.h \
     widgets/numberkeypad.h \
@@ -53,6 +54,7 @@ SOURCES += \
  \    #windows/mainwindow.cpp
     widgets/batterycard.cpp \
     widgets/chstatusview.cpp \
+    widgets/devicesetting.cpp \
     widgets/digitalcard.cpp \
     widgets/mainwindow.cpp \
     widgets/numberkeypad.cpp \
@@ -80,6 +82,7 @@ INSTALLS += auxiliary_files
 FORMS += \
     widgets/batterycard.ui \
     widgets/chstatusview.ui \
+    widgets/devicesetting.ui \
     widgets/digitalcard.ui \
     widgets/mainwindow.ui \
     widgets/numberkeypad.ui \

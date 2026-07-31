@@ -8,6 +8,7 @@
 #include "versionview.h"
 #include "chstatusview.h"
 #include "numberkeypad.h"
+#include "devicesetting.h"
 #include "remoteoverlay.h"
 
 Q_DECLARE_LOGGING_CATEGORY(widget)
@@ -25,6 +26,7 @@ private:
     digitalcard* m_funcdigitalcard;
     batterycard* m_funcbatterycard;
     numberkeypad* m_funcnmbkeycard;
+    devicesetting* m_devicesetcard;
     numberkeypad* m_setnmbkeycard;
     remoteoverlay* m_remoteOverlay;
 
@@ -44,8 +46,6 @@ private:
     int m_functioncsetmode{0};
     int m_functioncCh{0};
     int m_initalpage{0};
-
-    int m_setmode{0};
 
 public:
     void update_cardtest();
@@ -85,7 +85,6 @@ signals:
 
 private slots:
     void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param);
-    void refresh_settingpage();
     void allONrefresh();
 
     // digital / battery to switchs cards
@@ -104,6 +103,9 @@ private slots:
     void on_batteryallONpushButton_clicked();
     void on_batteryallmodelpushButton_clicked();
 
+    // setting page switchs
+    void on_settingrowsbackpushButton_clicked();
+
     // function page switchs
     void on_functionrowsbackpushButton_clicked();
     void on_functionsettingspushButton_clicked();
@@ -117,17 +119,5 @@ private slots:
     void on_socradioButton_clicked();
     void on_capradioButton_clicked();
     void on_functionmodelpushButton_clicked();
-
-    // setting page switchs
-    void on_settingrowsbackpushButton_clicked();
-    void on_setstaticradioButton_clicked();
-    void on_refreshpushButton_clicked();
-    void on_dhcpradioButton_clicked();
-
-    void on_ipradioButton_clicked();
-    void on_maskradioButton_clicked();
-    void on_gateradioButton_clicked();
-    void on_canidradioButton_clicked();
-    void on_gpibidradioButton_clicked();
 };
 
