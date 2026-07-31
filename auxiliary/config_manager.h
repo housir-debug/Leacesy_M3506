@@ -30,13 +30,13 @@ public:
     static QString s_loglevel;
     static bool s_enablelogfile;
 
-    static bool s_enableUartMess;
     static bool s_enableCanMess;
+    static bool s_enableUartMess;
 
+    static bool s_enableUARTServer;
+    static bool s_enableCANServer;
     static bool s_enableLANServer;
     static bool s_enableWEBServer;
-    static bool s_enableCANServer;
-    static bool s_enableUARTServer;
     static bool s_enableDisplay;
     /* ***************************** */
 
@@ -45,19 +45,18 @@ public:
     static bool setConfigValue(const QString &key, const QVariant &value);
     static bool getNetworkConfig();
 
-    static QString s_firmwareVersion;
-    static QString s_hardwareVersion;
-
-    static QString s_manufacturer;
-    static QString s_serialNumber;
-    static QString s_model;
-
     static QString s_IP;
     static QString s_SM;
     static QString s_MAC;
     static QString s_Gateway;
     static bool s_isDHCP;
 
+    static QString s_firmwareVersion;
+    static QString s_hardwareVersion;
+    static QString s_manufacturer;
+
+    static QString s_serialNumber;
+    static QString s_model;
     static quint8 s_GPIBid;
     static quint8 s_CANid;
 

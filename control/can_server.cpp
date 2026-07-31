@@ -208,14 +208,13 @@ bool CanServerManager::createSocket(const QString &interface)
 
 bool CanServerManager::startServer()
 {
-    QString interface = "can1";
+    QString interface = "can0";
     if (!m_serverThread && !m_readNotifier && !m_writeNotifier){
         QStringList commands;
         commands << QString("ip link set %1 down").arg(interface);
         commands << QString("ip link set %1 txqueuelen 1000").arg(interface);
-        commands << QString("ip link set %1 type can bitrate 1000000").arg(interface);
-        commands << QString("ip link set %1 type can restart-ms 18").arg(interface);
-        commands << QString("ip link set %1 type can loopback on").arg(interface);
+        commands << QString("ip link set %1 type can bitrate 500000 restart-ms 18 dbitrate 2000000 fd on loopback on").arg(interface);
+        //commands << QString("ip link set %1 type can bitrate 1000000 restart-ms 18 fd off loopback on").arg(interface);
         commands << QString("ip link set %1 up").arg(interface);
 
         for (const QString &cmd : qAsConst(commands)) {

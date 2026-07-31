@@ -102,7 +102,6 @@ void loggermanage(const QString &loglevel,const QString &parentPath) {
     else if (loglevel == "debug")   {rules = "*.debug=true\n*.info=true\n*.warning=true";}
     else if (loglevel == "warning") {rules = "*.debug=false\n*.info=false\n*.warning=true";}
     else if (loglevel == "release") {rules = "*.debug=false\n*.info=false\n*.warning=false";}
-    else {qCDebug(log) << "[loggermanage]:No configured print rules.";}
     QLoggingCategory::setFilterRules(rules);
 
     if (ConfigManager::s_enablelogfile){
