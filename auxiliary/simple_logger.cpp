@@ -89,19 +89,11 @@ namespace {
 
 void loggermanage(const QString &loglevel,const QString &parentPath) {
     QString rules;
-    if (loglevel == "ryan"){
-        rules = "LOG:.debug=false\nCONFIG:.debug=false\n"
-                "SCPI:.debug=false\nLIBTRIPC:.debug=false\n"
-                "CAN:.debug=false\nWEB:.debug=false\nTCP:.debug=false\n"
-                "UART_BRIDGE:.debug=false\nUART_SERVER:.debug=false\n"
-                "UART_CHANNEL:.debug=true\n"
-                "qt.quick.touch.debug=true\n"
-                "qt.qpa.input.debug=true\n"
-                //"*.info=true\n"
-                "*.warning=true";}
-    else if (loglevel == "debug")   {rules = "*.debug=true\n*.info=true\n*.warning=true";}
-    else if (loglevel == "warning") {rules = "*.debug=false\n*.info=false\n*.warning=true";}
-    else if (loglevel == "release") {rules = "*.debug=false\n*.info=false\n*.warning=false";}
+    // Critical / Fatal = Program failure, forced output
+    if (loglevel == "release"){rules = "*.debug=false\n*.info=false\n*.warning=false";}
+    else if (loglevel == "debug"){rules = "*.debug=true\n*.info=true\n*.warning=true";}
+    else if (loglevel == "self"){rules = "*.debug=false\n*.info=false\n*.warning=false"
+            "UART_BRIDGE:.debug=false\nUART_SERVER:.debug=false\n";}
     QLoggingCategory::setFilterRules(rules);
 
     if (ConfigManager::s_enablelogfile){

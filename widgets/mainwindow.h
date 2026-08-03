@@ -68,6 +68,7 @@ public:
     bool load_BatteryModel();
     QJsonArray getAllChannelsData();
 
+    void update_setting();
     explicit Mainwindow(QWidget *parent = nullptr);
     ~Mainwindow();
 
@@ -75,8 +76,9 @@ public:
     std::shared_ptr<BatteryModelManager> m_modelManager{nullptr};
 
 signals:
-    void to_CANid(QString id);
-    void to_GPIBid(QString id);
+    void set_network(bool isstatic);
+    void set_canbaud();
+    void set_RS232Baud();
 
     #define CHANNEL(n) void to_UartChannel##n(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
 

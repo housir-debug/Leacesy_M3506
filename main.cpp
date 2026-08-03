@@ -104,6 +104,8 @@ int main(int argc, char *argv[])
 
         if (ConfigManager::s_enableDisplay){
             QObject::connect(canServer.get(),&CanServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+            QObject::connect(mainwindow.get(),&Mainwindow::set_canbaud,canServer.get(),&CanServerManager::changebaudandid,Qt::QueuedConnection);
+            QObject::connect(canServer.get(),&CanServerManager::baudrefresh,mainwindow.get(),&Mainwindow::update_setting,Qt::QueuedConnection);
         }
     }
 
@@ -157,6 +159,8 @@ int main(int argc, char *argv[])
 
         if (ConfigManager::s_enableDisplay){
             QObject::connect(uartServer.get(),&UartServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+            QObject::connect(mainwindow.get(),&Mainwindow::set_RS232Baud,uartServer.get(),&UartServerManager::changeBaudRate,Qt::QueuedConnection);
+            QObject::connect(uartServer.get(),&UartServerManager::baudrefresh,mainwindow.get(),&Mainwindow::update_setting,Qt::QueuedConnection);
         }
     }
 
@@ -171,7 +175,9 @@ int main(int argc, char *argv[])
         webServer->m_scpiManager = Scpi_share;
 
         if (ConfigManager::s_enableDisplay){
+            QObject::connect(mainwindow.get(),&Mainwindow::set_network,webServer.get(),&WebServerManager::set_network,Qt::QueuedConnection);
             QObject::connect(webServer.get(),&WebServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+            QObject::connect(webServer.get(),&WebServerManager::networkrefresh,mainwindow.get(),&Mainwindow::update_setting,Qt::QueuedConnection);
         }
     }
 

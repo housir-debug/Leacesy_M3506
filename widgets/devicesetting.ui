@@ -861,7 +861,7 @@ border-color: rgba(100, 100, 130, 0.8);
     font-size: 16px;
 }
 
-#canidvaluelabel, #gpibvaluelabel {
+#canidvaluelabel, #canbaudvaluelabel ,#rs232baudvaluelabel{
     color: #E0E8F0;
     background-color: #1A2840;
     border: 1px solid rgba(90, 180, 160, 0.3);
@@ -878,18 +878,18 @@ border-color: rgba(100, 100, 130, 0.8);
      <property name="lineWidth">
       <number>0</number>
      </property>
-     <layout class="QGridLayout" name="gridLayout_5" rowstretch="1,1,1" columnstretch="1,3,3,3,2">
+     <layout class="QGridLayout" name="gridLayout" rowstretch="1,1,1" columnstretch="1,3,3,3,2">
       <property name="leftMargin">
        <number>0</number>
       </property>
       <property name="topMargin">
-       <number>6</number>
+       <number>0</number>
       </property>
       <property name="rightMargin">
        <number>0</number>
       </property>
       <property name="bottomMargin">
-       <number>6</number>
+       <number>0</number>
       </property>
       <item row="0" column="1">
        <widget class="QRadioButton" name="canidradioButton">
@@ -930,17 +930,10 @@ border-color: rgba(100, 100, 130, 0.8);
         </attribute>
        </widget>
       </item>
-      <item row="1" column="4">
-       <widget class="QLabel" name="label_19">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QRadioButton" name="rs232radioButton">
+      <item row="0" column="2">
+       <widget class="QRadioButton" name="canbaudradioButton">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -969,7 +962,7 @@ border-color: rgba(100, 100, 130, 0.8);
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="text">
-         <string>RS-232</string>
+         <string>CAN BaudRate</string>
         </property>
         <property name="checked">
          <bool>false</bool>
@@ -979,26 +972,49 @@ border-color: rgba(100, 100, 130, 0.8);
         </attribute>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QLabel" name="canidvaluelabel">
+      <item row="0" column="3">
+       <widget class="QRadioButton" name="rs232baudradioButton">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="font">
          <font>
           <family>WenQuanYi Micro Hei</family>
           <pointsize>-1</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
          </font>
         </property>
         <property name="cursor">
          <cursorShape>BlankCursor</cursorShape>
         </property>
+        <property name="mouseTracking">
+         <bool>false</bool>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="contextMenuPolicy">
          <enum>Qt::NoContextMenu</enum>
         </property>
-        <property name="lineWidth">
-         <number>0</number>
-        </property>
         <property name="text">
-         <string/>
+         <string>RS-232 BaudRate</string>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup</string>
+        </attribute>
        </widget>
       </item>
       <item row="1" column="0">
@@ -1026,59 +1042,8 @@ border-color: rgba(100, 100, 130, 0.8);
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
-       <widget class="QLabel" name="rs232label">
-        <property name="font">
-         <font>
-          <family>WenQuanYi Micro Hei</family>
-          <pointsize>-1</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="lineWidth">
-         <number>0</number>
-        </property>
-        <property name="text">
-         <string>Baud115200</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="gpibvaluelabel">
-        <property name="font">
-         <font>
-          <family>WenQuanYi Micro Hei</family>
-          <pointsize>-1</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="lineWidth">
-         <number>0</number>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="4">
-       <widget class="QLabel" name="label_21">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="gpibidlabel">
+      <item row="1" column="1">
+       <widget class="QLabel" name="canidlabel">
         <property name="font">
          <font>
           <family>WenQuanYi Micro Hei</family>
@@ -1099,46 +1064,55 @@ border-color: rgba(100, 100, 130, 0.8);
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QRadioButton" name="gpibidradioButton">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+      <item row="1" column="2">
+       <widget class="QLabel" name="canbaudlabel">
         <property name="font">
          <font>
           <family>WenQuanYi Micro Hei</family>
           <pointsize>-1</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
          </font>
         </property>
         <property name="cursor">
          <cursorShape>BlankCursor</cursorShape>
         </property>
-        <property name="mouseTracking">
-         <bool>false</bool>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
         </property>
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string>000000</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QLabel" name="rs232baudlabel">
+        <property name="font">
+         <font>
+          <family>WenQuanYi Micro Hei</family>
+          <pointsize>-1</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
         </property>
         <property name="contextMenuPolicy">
          <enum>Qt::NoContextMenu</enum>
         </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
         <property name="text">
-         <string>GPIB ID</string>
+         <string>000000</string>
         </property>
-        <property name="checked">
-         <bool>false</bool>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QLabel" name="label_19">
+        <property name="text">
+         <string/>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">buttonGroup</string>
-        </attribute>
        </widget>
       </item>
       <item row="2" column="0">
@@ -1166,8 +1140,8 @@ border-color: rgba(100, 100, 130, 0.8);
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="canidlabel">
+      <item row="2" column="1">
+       <widget class="QLabel" name="canidvaluelabel">
         <property name="font">
          <font>
           <family>WenQuanYi Micro Hei</family>
@@ -1184,7 +1158,61 @@ border-color: rgba(100, 100, 130, 0.8);
          <number>0</number>
         </property>
         <property name="text">
-         <string>0</string>
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="canbaudvaluelabel">
+        <property name="font">
+         <font>
+          <family>WenQuanYi Micro Hei</family>
+          <pointsize>-1</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QLabel" name="rs232baudvaluelabel">
+        <property name="font">
+         <font>
+          <family>WenQuanYi Micro Hei</family>
+          <pointsize>-1</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QLabel" name="label_21">
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>

@@ -34,7 +34,7 @@ bool UartServerManager::startServer()
         // HardwareControl: Requires wiring support | SoftwareControl: Applicable only to written text
         m_uartServer ->setFlowControl(QSerialPort::NoFlowControl);
         // QSerialPort::Baud115200
-        m_uartServer->setBaudRate(QSerialPort::Baud115200);
+        m_uartServer->setBaudRate(intToBaudRate(ConfigManager::s_rs232BaudRate));
         m_uartServer->setPortName("/dev/ttyWCH27");
 
         if (m_uartServer->open(QIODevice::ReadWrite)) {
@@ -101,4 +101,30 @@ void UartServerManager::startLoopbackTest()
 
     m_testTimer.start();
     m_uartServer->write(testData);
+}
+
+void UartServerManager::changeBaudRate()
+{
+    if (m_uartServer && m_uartServer->setBaudRate(intToBaudRate(ConfigManager::s_rs232BaudRate))){
+        ConfigManager::setConfigValue("Device/RS232Baud",ConfigManager::s_rs232BaudRate);
+        emit baudrefresh();
+        return;
+    }
+
+    qCWarning(uart_server)<<"set RS232baudrate failed!";
+}
+
+QSerialPort::BaudRate UartServerManager::intToBaudRate(int baudRate)
+{
+    switch (baudRate) {
+        case 1200:   return QSerialPort::Baud1200;
+        case 2400:   return QSerialPort::Baud2400;
+        case 4800:   return QSerialPort::Baud4800;
+        case 9600:   return QSerialPort::Baud9600;
+        case 19200:  return QSerialPort::Baud19200;
+        case 38400:  return QSerialPort::Baud38400;
+        case 57600:  return QSerialPort::Baud57600;
+        case 115200: return QSerialPort::Baud115200;
+        default:     return QSerialPort::Baud115200;
+    }
 }

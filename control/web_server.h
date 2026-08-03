@@ -14,11 +14,13 @@ class WebServerManager : public QObject
 
 signals:
     void isRemote(quint8 reface);
+    void networkrefresh();
 
 public:
     explicit WebServerManager(QObject *parent = nullptr);
     ~WebServerManager();
 
+    void set_network(bool isstatic);
     bool startServer();
     Mainwindow* m_qmlbridge;
     std::shared_ptr<ScpiManager> m_scpiManager;

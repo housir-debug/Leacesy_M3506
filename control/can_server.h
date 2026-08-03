@@ -5,7 +5,7 @@
 #include <QLoggingCategory>
 #include "auxiliary/config_manager.h"
 
-Q_DECLARE_LOGGING_CATEGORY(can);
+Q_DECLARE_LOGGING_CATEGORY(can_server);
 
 class CanServerManager : public QObject
 {
@@ -13,6 +13,8 @@ class CanServerManager : public QObject
 
 signals:
     void isRemote(quint8 reface);
+    void baudrefresh();
+
     #define CHANNEL(n) void to_UartChannel##n(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
 
     CHANNEL_COUNT
@@ -20,6 +22,7 @@ signals:
 
 public:
     void sendFrame(quint8 ch,quint16 uart,const QByteArray &param);
+    void changebaudandid();
 
     explicit CanServerManager(QObject *parent = nullptr);
     ~CanServerManager();

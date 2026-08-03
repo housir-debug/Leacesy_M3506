@@ -395,6 +395,8 @@ QJsonArray Mainwindow::getAllChannelsData()
 }
 
 
+void Mainwindow::update_setting(){m_devicesetcard->responseUpdate();}
+
 Mainwindow::Mainwindow(QWidget *parent) : QWidget(parent), ui(new Ui::Mainwindow)
 {
     ui->setupUi(this);
@@ -453,6 +455,9 @@ Mainwindow::Mainwindow(QWidget *parent) : QWidget(parent), ui(new Ui::Mainwindow
 
     m_devicesetcard = new devicesetting(ui->settingframe->parentWidget());
     m_devicesetcard->setGeometry(ui->settingframe->geometry());
+    QObject::connect(m_devicesetcard,&devicesetting::set_network,this,&Mainwindow::set_network);
+    QObject::connect(m_devicesetcard,&devicesetting::set_canbaud,this,&Mainwindow::set_canbaud);
+    QObject::connect(m_devicesetcard,&devicesetting::set_RS232Baud,this,&Mainwindow::set_RS232Baud);
     delete ui->settingframe;
 
     m_setnmbkeycard = new numberkeypad(ui->settingkeyframe->parentWidget());

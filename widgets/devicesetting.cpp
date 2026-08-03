@@ -13,8 +13,9 @@ devicesetting::devicesetting(QWidget *parent) :
     ui->masklabel->setText(ConfigManager::s_SM);
     ui->maclabel->setText(ConfigManager::s_MAC);
     ui->gatelabel->setText(ConfigManager::s_Gateway);
-    ui->canidlabel->setText(QString::number(ConfigManager::s_CANid));
-    ui->gpibidlabel->setText(QString::number(ConfigManager::s_GPIBid));
+    ui->canidlabel->setText(QString::number(ConfigManager::s_CANid.load()));
+    ui->canbaudlabel->setText(QString::number(ConfigManager::s_canBaudRate));
+    ui->rs232baudlabel->setText(QString::number(ConfigManager::s_rs232BaudRate));
 
     if (ConfigManager::s_isDHCP){
         ui->dhcpradioButton->setChecked(true);
@@ -68,10 +69,16 @@ void devicesetting::on_canidradioButton_clicked()
     ui->canidradioButton->setChecked(true);
 }
 
-void devicesetting::on_gpibidradioButton_clicked()
+void devicesetting::on_canbaudradioButton_clicked()
 {
     m_setmode = 4;
-    ui->gpibidradioButton->setChecked(true);
+    ui->canbaudradioButton->setChecked(true);
+}
+
+void devicesetting::on_rs232baudradioButton_clicked()
+{
+    m_setmode = 5;
+    ui->rs232baudradioButton->setChecked(true);
 }
 
 
@@ -89,7 +96,7 @@ void devicesetting::on_dhcpradioButton_clicked()
     ui->iplabel->setText("---.---.---.---");
     ui->masklabel->setText("---.---.---.---");
     ui->gatelabel->setText("---.---.---.---");
-    ConfigManager::setinterfaces(false, "", "", "");
+    emit set_network(false);
 }
 
 void devicesetting::on_refreshpushButton_clicked()
@@ -119,28 +126,54 @@ void devicesetting::reenterUpdate()
     ui->ipvaluelabel->setText("");
     ui->maskvaluelabel->setText("");
     ui->gatevaluelabel->setText("");
-    ui->gpibvaluelabel->setText("");
     ui->canidvaluelabel->setText("");
+    ui->canbaudvaluelabel->setText("");
+    ui->rs232baudvaluelabel->setText("");
 }
 
 void devicesetting::setting(const QString &value)
 {
-    QString *fields[] = { &ConfigManager::s_IP, &ConfigManager::s_SM, &ConfigManager::s_Gateway };
-    QLabel *valueLabels[] = { ui->ipvaluelabel, ui->maskvaluelabel, ui->gatevaluelabel };
-    QLabel *displayLabels[] = { ui->iplabel, ui->masklabel, ui->gatelabel };
+    switch (m_setmode) {
+        case 0:case 1:case 2:{
+            QString *fields[] = { &ConfigManager::s_IP, &ConfigManager::s_SM, &ConfigManager::s_Gateway };
+            QLabel *valueLabels[] = { ui->ipvaluelabel, ui->maskvaluelabel, ui->gatevaluelabel };
+            valueLabels[m_setmode]->setText(value);
+            *fields[m_setmode] = value;
 
-    if (m_setmode < 3) {
-        valueLabels[m_setmode]->setText(value);
-        *fields[m_setmode] = value;
-
-        if (ConfigManager::s_IP != "---.---.---.---" && ConfigManager::s_SM != "---.---.---.---" && ConfigManager::s_Gateway != "---.---.---.---") {
-            ConfigManager::setinterfaces(true, ConfigManager::s_IP, ConfigManager::s_SM, ConfigManager::s_Gateway);
-            for (int i = 0; i < 3; i++) {displayLabels[i]->setText(*fields[i]);} // update show
+            if (ConfigManager::s_IP != "---.---.---.---" &&
+                ConfigManager::s_SM != "---.---.---.---" &&
+                ConfigManager::s_Gateway != "---.---.---.---") {
+                    emit set_network(true);
+            }
+            return;
         }
-    } else if (m_setmode == 3) {
-        ConfigManager::setConfigValue("Device/CANID", value);
-        ConfigManager::s_CANid = value.toUInt();
-        ui->canidvaluelabel->setText(value);
-        ui->canidlabel->setText(value);
+        case 3:
+            ui->canidvaluelabel->setText(value);
+            ConfigManager::s_CANid = value.toUInt();
+            if (ConfigManager::setConfigValue("Device/CANID",ConfigManager::s_CANid.load())){
+                ui->canidlabel->setText(QString::number(ConfigManager::s_CANid.load()));
+            }
+            return;
+        case 4:
+            ConfigManager::s_canBaudRate = value.toUInt();
+            ui->canbaudvaluelabel->setText(value);
+            emit set_canbaud();
+            return;
+        case 5:
+            ConfigManager::s_rs232BaudRate = value.toUInt();
+            ui->rs232baudvaluelabel->setText(value);
+            emit set_RS232Baud();
+            return;
+        default:return;
     }
+}
+
+void devicesetting::responseUpdate()
+{
+    ui->iplabel->setText(ConfigManager::s_IP);
+    ui->masklabel->setText(ConfigManager::s_SM);
+    ui->gatelabel->setText(ConfigManager::s_Gateway);
+    ui->canidlabel->setText(QString::number(ConfigManager::s_CANid.load()));
+    ui->canbaudlabel->setText(QString::number(ConfigManager::s_canBaudRate));
+    ui->rs232baudlabel->setText(QString::number(ConfigManager::s_rs232BaudRate));
 }

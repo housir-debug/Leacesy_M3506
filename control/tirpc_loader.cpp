@@ -16,7 +16,6 @@ bool TirpcDynamicLoader::load(){
                 m_pmap_getport = (pmap_getport_t)m_library.resolve("pmap_getport");
 
                 if (m_pmap_set && m_pmap_unset && m_pmap_getport) {
-                    qCDebug(libtripc)<<"[load]:Dynamic loading:"<<lib_names[i];
                     m_loaded = true;
                     return true;
                 }
