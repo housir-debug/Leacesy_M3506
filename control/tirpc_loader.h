@@ -22,7 +22,6 @@ private:
     typedef unsigned short (*pmap_getport_t)(struct sockaddr_in *, unsigned long, unsigned long, unsigned int);
 
     QLibrary m_library;
-    bool m_loaded{false};
     pmap_set_t m_pmap_set = nullptr;
     pmap_unset_t m_pmap_unset = nullptr;
     pmap_getport_t m_pmap_getport = nullptr;

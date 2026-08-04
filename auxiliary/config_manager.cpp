@@ -42,46 +42,42 @@ std::vector<UartConfig> configs = {
     {"/dev/ttyS1",    QSerialPort::Baud38400, 0x01},   // test
 };
 
-// log config
-QString ConfigManager::s_loglevel = "release"; // "release"
-bool ConfigManager::s_enablelogfile = false;
-// channel switch
-bool ConfigManager::s_enableCanMess    = false;
-bool ConfigManager::s_enableUartMess   = false;
-// control switch
-bool ConfigManager::s_enableUARTServer = false;
-bool ConfigManager::s_enableCANServer  = true;
-bool ConfigManager::s_enableLANServer  = true;
-bool ConfigManager::s_enableWEBServer  = true;
-bool ConfigManager::s_enableDisplay    = true;
-
 // global variable - Internal fixation
 QString ConfigManager::s_firmwareVersion = "1.0.0";
 QString ConfigManager::s_hardwareVersion = "1.0.0";
 QString ConfigManager::s_manufacturer = "Leacesy";
 
+// log config
+QString ConfigManager::s_loglevel = "info"; // "release"
+bool ConfigManager::s_enablelogfile = false;
+// channel switch
+bool ConfigManager::s_enableCanMess    = false;
+bool ConfigManager::s_enableUartMess   = false;
+// control switch
+bool ConfigManager::s_enableUARTServer = true;
+bool ConfigManager::s_enableCANServer  = true;
+bool ConfigManager::s_enableLANServer  = true;
+bool ConfigManager::s_enableDisplay    = true;
+
 std::atomic<int> ConfigManager::s_remoteSt{0};
 QSettings* ConfigManager::s_settings = nullptr;
 bool ConfigManager::init(const QString &configDir)
 {
-    if (getNetworkConfig()){
-        QString fullPath = configDir + "/instrument_config.ini";
-        if (QFile::exists(fullPath) && !s_settings) {
-            s_settings = new QSettings(fullPath, QSettings::IniFormat);
+    QString fullPath = configDir + "/instrument_config.ini";
 
-            s_serialNumber = s_settings->value("Device/SerialNumber").toString();
-            s_model = s_settings->value("Device/Model").toString();
-            s_CANid = s_settings->value("Device/CANID").toUInt();
-            s_canBaudRate = s_settings->value("Device/CANBaud").toUInt();
-            s_rs232BaudRate = s_settings->value("Device/RS232Baud").toUInt();
+    if (QFile::exists(fullPath) && getNetworkConfig()){
+        if (!s_settings){s_settings = new QSettings(fullPath, QSettings::IniFormat);}
 
-            return true;
-        }
+        s_serialNumber = s_settings->value("Device/SerialNumber").toString();
+        s_model = s_settings->value("Device/Model").toString();
+        s_CANid = s_settings->value("Device/CANID").toUInt();
+        s_canBaudRate = s_settings->value("Device/CANBaud").toUInt();
+        s_rs232BaudRate = s_settings->value("Device/RS232Baud").toUInt();
 
-        qCWarning(config) << "[init]:Cannot open config file for writing";
+        return true;
     }
 
-    // getNetworkConfig have print information
+    qCWarning(config)<<"[init]:Cannot open config file or read network config fail!";
     return false;
 }
 
@@ -99,12 +95,12 @@ bool ConfigManager::setConfigValue(const QString &key, const QVariant &value)
 }
 
 // global variable - config file
-QString ConfigManager::s_serialNumber = "SN-66004";
-QString ConfigManager::s_model = "66004";
+QString ConfigManager::s_serialNumber = "";
+QString ConfigManager::s_model = "";
 
-std::atomic<quint8> ConfigManager::s_CANid{0};
-int ConfigManager::s_rs232BaudRate = 115200;// 115200
-int ConfigManager::s_canBaudRate = 500000;// 500kbps
+std::atomic<quint32> ConfigManager::s_CANid{0};
+quint32 ConfigManager::s_rs232BaudRate = 115200;// 115200
+quint32 ConfigManager::s_canBaudRate = 500000;// 500kbps
 
 bool ConfigManager::getNetworkConfig() {
     static std::once_flag initFlag;

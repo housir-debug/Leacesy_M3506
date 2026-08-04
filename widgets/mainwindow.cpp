@@ -514,9 +514,9 @@ void Mainwindow::on_digitalmodepushButton_clicked(){ui->topstackedwidget->setCur
 
 void Mainwindow::on_batterymodepushButton_clicked(){ui->topstackedwidget->setCurrentIndex(0);m_initalpage = 0;}
 
-void Mainwindow::on_digitalsettingspushButton_clicked(){ui->topstackedwidget->setCurrentIndex(2);m_initalpage = 0;}
+void Mainwindow::on_digitalsettingspushButton_clicked(){m_devicesetcard->reenterUpdate();ui->topstackedwidget->setCurrentIndex(2);m_initalpage = 0;}
 
-void Mainwindow::on_batterysettingspushButton_clicked(){ui->topstackedwidget->setCurrentIndex(2);m_initalpage = 1;}
+void Mainwindow::on_batterysettingspushButton_clicked(){m_devicesetcard->reenterUpdate();ui->topstackedwidget->setCurrentIndex(2);m_initalpage = 1;}
 
 
 void Mainwindow::on_digitalrowsbackpushButton_clicked()
@@ -606,7 +606,7 @@ void Mainwindow::on_settingrowsbackpushButton_clicked(){ui->topstackedwidget->se
 
 void Mainwindow::on_functionrowsbackpushButton_clicked(){ui->topstackedwidget->setCurrentIndex(m_initalpage);}
 
-void Mainwindow::on_functionsettingspushButton_clicked(){ui->topstackedwidget->setCurrentIndex(2);}
+void Mainwindow::on_functionsettingspushButton_clicked(){m_devicesetcard->reenterUpdate();ui->topstackedwidget->setCurrentIndex(2);}
 
 void Mainwindow::on_functionallapplypushButton_clicked()
 {

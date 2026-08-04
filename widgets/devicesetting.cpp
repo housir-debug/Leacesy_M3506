@@ -91,12 +91,12 @@ void devicesetting::on_dhcpradioButton_clicked()
     ui->ipradioButton->setEnabled(false);
     ui->maskradioButton->setEnabled(false);
     ui->gateradioButton->setEnabled(false);
-    QTimer::singleShot(6000, ui->refreshpushButton,[btn = ui->refreshpushButton]() {btn->setEnabled(true);}); // 6s
-
     ui->iplabel->setText("---.---.---.---");
     ui->masklabel->setText("---.---.---.---");
     ui->gatelabel->setText("---.---.---.---");
+
     emit set_network(false);
+    QTimer::singleShot(8100, this,[this]() {on_refreshpushButton_clicked();ui->refreshpushButton->setEnabled(true);}); // 8.1s
 }
 
 void devicesetting::on_refreshpushButton_clicked()
@@ -120,16 +120,6 @@ void devicesetting::on_setstaticradioButton_clicked()
     ui->refreshpushButton->setEnabled(false);
 }
 
-
-void devicesetting::reenterUpdate()
-{
-    ui->ipvaluelabel->setText("");
-    ui->maskvaluelabel->setText("");
-    ui->gatevaluelabel->setText("");
-    ui->canidvaluelabel->setText("");
-    ui->canbaudvaluelabel->setText("");
-    ui->rs232baudvaluelabel->setText("");
-}
 
 void devicesetting::setting(const QString &value)
 {
@@ -176,4 +166,14 @@ void devicesetting::responseUpdate()
     ui->canidlabel->setText(QString::number(ConfigManager::s_CANid.load()));
     ui->canbaudlabel->setText(QString::number(ConfigManager::s_canBaudRate));
     ui->rs232baudlabel->setText(QString::number(ConfigManager::s_rs232BaudRate));
+}
+
+void devicesetting::reenterUpdate()
+{
+    ui->ipvaluelabel->setText("");
+    ui->maskvaluelabel->setText("");
+    ui->gatevaluelabel->setText("");
+    ui->canidvaluelabel->setText("");
+    ui->canbaudvaluelabel->setText("");
+    ui->rs232baudvaluelabel->setText("");
 }

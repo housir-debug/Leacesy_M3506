@@ -18,11 +18,10 @@ public:
 
     void setting(const QString &value);
     void responseUpdate();
+    void reenterUpdate();
 
 private:
     Ui::devicesetting *ui;
-
-    void reenterUpdate();
     int m_setmode{0};
 
 private slots:

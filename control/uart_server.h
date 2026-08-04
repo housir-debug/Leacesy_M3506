@@ -17,14 +17,11 @@ public:
 
     std::shared_ptr<ScpiManager> m_scpiManager{nullptr};
     void changeBaudRate();
-    bool startServer();
 
 private:
     void startLoopbackTest();
     QElapsedTimer m_testTimer;
 
-    QSerialPort::BaudRate intToBaudRate(int baudRate);
-    void handleReadyRead();
     QByteArray m_readbuffer;
     QByteArray m_responsebuffer;
 

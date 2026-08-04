@@ -24,6 +24,10 @@ extern std::vector<UartConfig> configs;
 
 class ConfigManager {
 public:
+    static QString s_firmwareVersion;
+    static QString s_hardwareVersion;
+    static QString s_manufacturer;
+
     static QString s_loglevel;
     static bool s_enablelogfile;
 
@@ -33,12 +37,7 @@ public:
     static bool s_enableUARTServer;
     static bool s_enableCANServer;
     static bool s_enableLANServer;
-    static bool s_enableWEBServer;
     static bool s_enableDisplay;
-
-    static QString s_firmwareVersion;
-    static QString s_hardwareVersion;
-    static QString s_manufacturer;
 
     static std::atomic<int> s_remoteSt;
     static bool init(const QString &configDir);
@@ -47,9 +46,9 @@ public:
     static QString s_serialNumber;
     static QString s_model;
 
-    static std::atomic<quint8> s_CANid;
-    static int s_rs232BaudRate;
-    static int s_canBaudRate;
+    static std::atomic<quint32> s_CANid;
+    static quint32 s_rs232BaudRate;
+    static quint32 s_canBaudRate;
 
     static bool getNetworkConfig();
     static QString s_Gateway;

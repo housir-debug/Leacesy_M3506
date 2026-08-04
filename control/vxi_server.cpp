@@ -1,13 +1,77 @@
 #include "auxiliary/vxinamespace.h"
 #include "tirpc_loader.h"
-#include "tcp_server.h"
+#include "vxi_server.h"
 #include <arpa/inet.h>
 #include <QTcpSocket>
 
-Q_LOGGING_CATEGORY(tcp, "TCP:")
+Q_LOGGING_CATEGORY(vxi_server, "VXI_SERVER:")
 
-TcpServerManager::TcpServerManager(QObject *parent):QObject(parent){}
-TcpServerManager::~TcpServerManager()
+VxiServerManager::VxiServerManager(QObject *parent):QObject(parent)
+{
+    m_serverThread = new QThread(this);
+    this->moveToThread(m_serverThread);
+
+    connect(m_serverThread, &QThread::started, this, [this]() {
+        m_tcpServer = new QTcpServer(this);
+        connect(m_tcpServer,&QTcpServer::newConnection,this,[this](){
+            QTcpSocket* client = m_tcpServer->nextPendingConnection();
+            if (m_clients.size() < 9) { // restrict connect number = 9
+                client->setObjectName(QString("%1:%2").arg(client->peerAddress().toString()).arg(client->peerPort()));
+                qCDebug(vxi_server)<<"[VxiServerManager]:New Connect-Client: "<<client->objectName();
+
+                connect(client, &QTcpSocket::errorOccurred,this, [client](QAbstractSocket::SocketError error){
+                    qCWarning(vxi_server)<<"[VxiServerManager]:("<< client->objectName()<<")"<<error<<client->errorString();
+                    }, Qt::DirectConnection);
+                connect(client, &QTcpSocket::disconnected,this, [this, client](){
+                    qCDebug(vxi_server)<<"[VxiServerManager]: "<<client->objectName()<<" disconnected";
+                    for (auto it = m_deviceLinks.begin(); it != m_deviceLinks.end(); ++it) {
+                        if (it->client == client) {
+                            m_deviceLinks.erase(it);
+                            break;
+                        }
+                    }
+
+                    m_clients.removeOne(client);
+                    client->deleteLater();
+                    }, Qt::DirectConnection);
+                connect(client, &QTcpSocket::readyRead,this, [this, client](){
+                    switch (ConfigManager::s_remoteSt.load()) {
+                        case 0:emit isRemote(3);// fall through
+                        case 3:processClientData(client);break;
+                        default:
+                            QByteArray errMsg = "Other instrument interfaces are currently in remote mode.";
+                            qCDebug(vxi_server)<<"[VxiServerManager]: "<<errMsg;
+                            client->write(errMsg);
+                    }
+
+                    return;
+                    }, Qt::DirectConnection);
+
+                m_clients.append(client);
+                return;
+            }
+
+            client->disconnectFromHost();
+            client->deleteLater();
+            }, Qt::DirectConnection);
+
+        if (m_tcpServer->listen(QHostAddress::Any, Vxi11::VXI_PORT)) {
+            if (TirpcDynamicLoader::instance().load()) {
+                TirpcDynamicLoader::instance().smart_pmap_set(
+                    Vxi11::DEVICE_CORE, // VXI-11 program
+                    1,                  // version
+                    IPPROTO_TCP,        // TCP protocol
+                    Vxi11::VXI_PORT     // Port
+                );
+            }
+        }
+    });
+
+    m_serverThread->setObjectName("VxiServer");
+    m_serverThread->start();
+}
+
+VxiServerManager::~VxiServerManager()
 {
     if (m_tcpServer) {
         for (QTcpSocket *client : qAsConst(m_clients)) {
@@ -30,103 +94,31 @@ TcpServerManager::~TcpServerManager()
     }
 }
 
-bool TcpServerManager::startServer()
-{
-    if (!m_serverThread && !m_tcpServer){
-        m_tcpServer = new QTcpServer(this);
-        m_serverThread = new QThread(this);
-        this->moveToThread(m_serverThread);
-        m_tcpServer->moveToThread(m_serverThread);
-
-        connect(m_serverThread, &QThread::started, this, [this]() {
-            connect(m_tcpServer,&QTcpServer::newConnection,this,[this](){
-                QTcpSocket* client = m_tcpServer->nextPendingConnection();
-                QString clientInfo = client->peerAddress().toString()+ ":"+ QString::number(client->peerPort());
-
-                if (m_clients.size() < 9) { // restrict connect number = 9
-                    connect(client, &QTcpSocket::disconnected,this, [this, client,clientInfo](){
-                        qCDebug(tcp)<<"[startServer]: "<<clientInfo<<" disconnected, Remain Connect-Clients: "<< m_clients.size()-1;
-                        for (auto it = m_deviceLinks.begin(); it != m_deviceLinks.end(); ++it) {
-                            if (it->client == client) {
-                                m_deviceLinks.erase(it);
-                                break;
-                            }
-                        }
-
-                        m_clients.removeOne(client);
-                        client->deleteLater();
-                    }, Qt::DirectConnection);
-                    connect(client, &QTcpSocket::errorOccurred,this, [client,clientInfo](QAbstractSocket::SocketError error){
-                        qCWarning(tcp)<<"[startServer]: "<<clientInfo<<" ERROR: "<< error << client->errorString();
-                    }, Qt::DirectConnection);
-
-                    connect(client, &QTcpSocket::readyRead,this, [this, client](){
-                        if (ConfigManager::s_remoteSt.load()==2 || ConfigManager::s_remoteSt.load()==0){
-                            if (ConfigManager::s_remoteSt.load()==0){emit isRemote(2);}
-                            processClientData(client);
-                        }else{
-                            QByteArray errMsg = "Other instrument interfaces are currently in remote mode.";
-                            qCDebug(tcp)<<"[startServer]: "<<errMsg;
-                            client->write(errMsg);
-                        }}, Qt::DirectConnection);
-
-                    qCDebug(tcp)<<"[startServer]:New Connect-Client: "<<clientInfo;
-                    client->setObjectName(clientInfo);
-                    m_clients.append(client);
-                    return;
-                }
-
-                qCDebug(tcp)<<"[startServer]:Clients 9 Refused-Clients: "<<clientInfo;
-                client->disconnectFromHost();
-                client->deleteLater();
-            }, Qt::DirectConnection);
-
-            if (m_tcpServer->listen(QHostAddress::Any, Vxi11::VXI_PORT)) {
-                if (TirpcDynamicLoader::instance().load()) {
-                    TirpcDynamicLoader::instance().smart_pmap_set(
-                        Vxi11::DEVICE_CORE, // VXI-11 program
-                        1,                  // version
-                        IPPROTO_TCP,        // TCP protocol
-                        Vxi11::VXI_PORT     // Port
-                    );
-                }
-            }
-        });
-
-        m_serverThread->setObjectName("VxiServer");
-        m_serverThread->start();
-        return true;
-    }
-
-    qCDebug(tcp)<<"[startServer]: already exist!";
-    return false;
-}
-
-void TcpServerManager::processClientData(QTcpSocket *client)
+void VxiServerManager::processClientData(QTcpSocket *client)
 {
     m_responsebuffer.clear();
     m_readbuffer.append(client->readAll());
 
     // SOCKET ASCll Define(0x00-0x7F)
     if (m_readbuffer.startsWith("*") || m_readbuffer.startsWith(":")) {
-        qCDebug(tcp)<<"[processClientData]:SOCKET SCPI-Request: "<<m_readbuffer;
+        qCDebug(vxi_server)<<"[processClientData]:SOCKET SCPI-Request: "<<m_readbuffer;
         m_responsebuffer = m_scpiManager->processCommand(m_readbuffer);
         if (!m_responsebuffer.isEmpty()){client->write(m_responsebuffer);}
-        qCDebug(tcp)<<"[processClientData]:SOCKET SCPI-Response: "<<m_responsebuffer;
+        qCDebug(vxi_server)<<"[processClientData]:SOCKET SCPI-Response: "<<m_responsebuffer;
 
         m_readbuffer.clear();
         return;
     // VXI-11 0x800000 + length
     }else if (m_readbuffer.size() > 44 && static_cast<quint8>(m_readbuffer[0]) == Vxi11::HEADER){
         const uchar* readAddress = reinterpret_cast<const uchar*>(m_readbuffer.constData());
-        qCDebug(tcp)<<"[processClientData]: VXI-Request: "<< m_readbuffer.toHex(' ');
+        qCDebug(vxi_server)<<"[processClientData]: VXI-Request: "<< m_readbuffer.toHex(' ');
         quint8 lengthB = static_cast<quint8>(m_readbuffer[3]);
 
         if (m_readbuffer.size() >= lengthB + 4){
             if(qFromBigEndian<quint32>(readAddress+8)==Vxi11::CALL && qFromBigEndian<quint32>(readAddress+16)==Vxi11::DEVICE_CORE){
                 quint32 xid = qFromBigEndian<quint32>(readAddress + 4);
                 quint32 procedure = qFromBigEndian<quint32>(readAddress + 24);
-                qCDebug(tcp)<<"[processClientData]:VXI-11 Procedure: "<<procedure<<" XID: "<<xid;
+                qCDebug(vxi_server)<<"[processClientData]:VXI-11 Procedure: "<<procedure<<" XID: "<<xid;
 
                 switch (procedure) {
                     case Vxi11::CREATE_LINK:           handleCreateLink      (client, xid);                  break;
@@ -144,7 +136,7 @@ void TcpServerManager::processClientData(QTcpSocket *client)
                     case Vxi11::DESTROY_LINK:          handleDestroyLink     (client, xid, readAddress);     break;
                     case Vxi11::CREATE_INTER_CHAN:     handleCreateIntrChan  (client, xid, readAddress);     break;
                     case Vxi11::DESTROY_INTER_CHAN:    handleDestroyIntrChan (client, xid, readAddress);     break;
-                    default:qCWarning(tcp)<<"[processClientData]:Undef VXI-Procedure: "<<procedure;
+                    default:qCWarning(vxi_server)<<"[processClientData]:Undef VXI-Procedure: "<<procedure;
                 }
 
                 m_readbuffer.remove(0,lengthB + 4); // delete process finish data.
@@ -153,24 +145,24 @@ void TcpServerManager::processClientData(QTcpSocket *client)
                 return; // finish.
             }
 
-            qCDebug(tcp)<<"[processClientData]: end/check format Error!";
+            qCDebug(vxi_server)<<"[processClientData]: end/check format Error!";
             m_readbuffer.clear(); // format error
         }
 
         return; // data not Complete. wait next information
     }
 
-    qCDebug(tcp)<<"[processClientData]: head format Error!";
+    qCDebug(vxi_server)<<"[processClientData]: head format Error!";
     m_readbuffer.clear();  // socket and format error
 }
 
 //---------------------------------------------------------------------------------
 
-void TcpServerManager::handleCreateLink(QTcpSocket* client,const quint32 xid)
+void VxiServerManager::handleCreateLink(QTcpSocket* client,const quint32 xid)
 {
     for (auto it = m_deviceLinks.begin(); it != m_deviceLinks.end(); ++it) {
         if (it->client->peerAddress() == client->peerAddress()) {
-            qCDebug(tcp)<<"[handleCreateLink]: existing Link: "<<it->id;
+            qCDebug(vxi_server)<<"[handleCreateLink]: existing Link: "<<it->id;
             buildfoundResponse(xid, Vxi11::CHANNEL_ALREADY_ESTABLISHED);
             client->write(m_responsebuffer);
             client->disconnectFromHost();
@@ -182,7 +174,7 @@ void TcpServerManager::handleCreateLink(QTcpSocket* client,const quint32 xid)
     link.client = client;
     link.id = m_nextLinkId++; // Assign the value first and then increment.
     m_deviceLinks.insert(link.id, link);
-    qCDebug(tcp)<<"[handleCreateLink]:Create VXI-Link: "<<link.id<<" Client: "<<client->objectName();
+    qCDebug(vxi_server)<<"[handleCreateLink]:Create VXI-Link: "<<link.id<<" Client: "<<client->objectName();
 
     buildfoundResponse(xid,Vxi11::NO_ERROR,12);
     QDataStream stream(&m_responsebuffer, QIODevice::Append);
@@ -192,10 +184,10 @@ void TcpServerManager::handleCreateLink(QTcpSocket* client,const quint32 xid)
     stream << quint32(2048);  // max_recv_size
 
     client->write(m_responsebuffer);
-    qCDebug(tcp)<<"[handleCreateLink]:LINK: "<<link.id<<" Response: "<<m_responsebuffer.toHex(' ');
+    qCDebug(vxi_server)<<"[handleCreateLink]:LINK: "<<link.id<<" Response: "<<m_responsebuffer.toHex(' ');
 }
 
-void TcpServerManager::handleDeviceWrite(QTcpSocket* client,const quint32 xid,const uchar* address)
+void VxiServerManager::handleDeviceWrite(QTcpSocket* client,const quint32 xid,const uchar* address)
 {
     quint8 lid = checkRequestlinkid(client,xid,address);
 
@@ -204,7 +196,7 @@ void TcpServerManager::handleDeviceWrite(QTcpSocket* client,const quint32 xid,co
 
         DeviceLink& link = m_deviceLinks[lid];
         QByteArray scpicmd = m_readbuffer.mid(64, cmdlen); // read scpi command
-        qCDebug(tcp)<<"[handleDeviceWrite]: SCPI-Command: "<<scpicmd;
+        qCDebug(vxi_server)<<"[handleDeviceWrite]: SCPI-Command: "<<scpicmd;
         link.VxiScpi_response = m_scpiManager->processCommand(scpicmd);
 
         buildfoundResponse(xid, Vxi11::NO_ERROR, 4);
@@ -213,17 +205,17 @@ void TcpServerManager::handleDeviceWrite(QTcpSocket* client,const quint32 xid,co
         stream << cmdlen; // write_size
 
         client->write(m_responsebuffer);
-        qCDebug(tcp)<<"[handleDeviceWrite]:LINK: "<<link.id<<" Response: "<<m_responsebuffer.toHex(' ');
+        qCDebug(vxi_server)<<"[handleDeviceWrite]:LINK: "<<link.id<<" Response: "<<m_responsebuffer.toHex(' ');
     }
 }
 
-void TcpServerManager::handleDeviceRead(QTcpSocket* client,const quint32 xid,const uchar* address)
+void VxiServerManager::handleDeviceRead(QTcpSocket* client,const quint32 xid,const uchar* address)
 {
     quint8 lid = checkRequestlinkid(client,xid,address);
 
     if (lid !=0) {
         DeviceLink& link = m_deviceLinks[lid];
-        qCDebug(tcp)<<"[handleDeviceRead]: SCPI-Response: "<<link.VxiScpi_response;
+        qCDebug(vxi_server)<<"[handleDeviceRead]: SCPI-Response: "<<link.VxiScpi_response;
 
         if (!link.VxiScpi_response.isEmpty()){
             buildfoundResponse(xid, Vxi11::NO_ERROR, 8 + link.VxiScpi_response.size());
@@ -233,12 +225,12 @@ void TcpServerManager::handleDeviceRead(QTcpSocket* client,const quint32 xid,con
             stream << link.VxiScpi_response;   // QDataStream will write the length prefix for QByteArray.
 
             client->write(m_responsebuffer);
-            qCDebug(tcp)<<"[handleDeviceRead]:LINK: "<<link.id<<" Response:"<<m_responsebuffer.toHex(' ');
+            qCDebug(vxi_server)<<"[handleDeviceRead]:LINK: "<<link.id<<" Response:"<<m_responsebuffer.toHex(' ');
         }
     }
 }
 
-void TcpServerManager::handleDeviceReadStb(QTcpSocket* client, const quint32 xid,const uchar* address)
+void VxiServerManager::handleDeviceReadStb(QTcpSocket* client, const quint32 xid,const uchar* address)
 {
     quint8 lid = checkRequestlinkid(client,xid,address);
 
@@ -253,23 +245,23 @@ void TcpServerManager::handleDeviceReadStb(QTcpSocket* client, const quint32 xid
         stream << link.VxiScpi_response;
 
         client->write(m_responsebuffer);
-        qCDebug(tcp)<<"[handleDeviceReadStb]:LINK: "<<link.id<<" Response: "<<m_responsebuffer.toHex(' ');
+        qCDebug(vxi_server)<<"[handleDeviceReadStb]:LINK: "<<link.id<<" Response: "<<m_responsebuffer.toHex(' ');
     }
 }
 
-void TcpServerManager::handleDeviceTrigger(QTcpSocket* client, const quint32 xid,const uchar* address)
+void VxiServerManager::handleDeviceTrigger(QTcpSocket* client, const quint32 xid,const uchar* address)
 {
     // Repeats the SCPI instruction. Not supported.
     quint8 lid = checkRequestlinkid(client,xid,address);
 
     if (lid !=0) {
         buildfoundResponse(xid, Vxi11::OPERATION_NOT_SUPPORTED);
-        qCDebug(tcp)<<"[handleDeviceTrigger]:DEVICE_TRIGGER";
+        qCDebug(vxi_server)<<"[handleDeviceTrigger]:DEVICE_TRIGGER";
         client->write(m_responsebuffer);
     }
 }
 
-void TcpServerManager::handleDeviceClear(QTcpSocket* client, const quint32 xid,const uchar* address)
+void VxiServerManager::handleDeviceClear(QTcpSocket* client, const quint32 xid,const uchar* address)
 {
     quint8 lid = checkRequestlinkid(client,xid,address);
 
@@ -278,90 +270,90 @@ void TcpServerManager::handleDeviceClear(QTcpSocket* client, const quint32 xid,c
         DeviceLink& link = m_deviceLinks[lid];
         link.VxiScpi_response.clear();
 
-        qCDebug(tcp)<<"[handleDeviceClear]:DEVICE_CLEAR";
+        qCDebug(vxi_server)<<"[handleDeviceClear]:DEVICE_CLEAR";
         buildfoundResponse(xid, Vxi11::NO_ERROR);
         client->write(m_responsebuffer);
     }
 }
 
-void TcpServerManager::handleDeviceRemote(QTcpSocket* client, const quint32 xid,const uchar* address)
+void VxiServerManager::handleDeviceRemote(QTcpSocket* client, const quint32 xid,const uchar* address)
 {
     quint8 lid = checkRequestlinkid(client,xid,address);
 
     if (lid !=0) {
-        qCDebug(tcp)<<"[handleDeviceRemote]:DEVICE_REMOTE";
+        qCDebug(vxi_server)<<"[handleDeviceRemote]:DEVICE_REMOTE";
         buildfoundResponse(xid, Vxi11::NO_ERROR);
         client->write(m_responsebuffer);
         emit isRemote(2);
     }
 }
 
-void TcpServerManager::handleDeviceLocal(QTcpSocket* client, const quint32 xid,const uchar* address)
+void VxiServerManager::handleDeviceLocal(QTcpSocket* client, const quint32 xid,const uchar* address)
 {
     quint8 lid = checkRequestlinkid(client,xid,address);
 
     if (lid !=0) {
-        qCDebug(tcp)<<"[handleDeviceLocal]:DEVICE_LOCAL";
+        qCDebug(vxi_server)<<"[handleDeviceLocal]:DEVICE_LOCAL";
         buildfoundResponse(xid, Vxi11::NO_ERROR);
         client->write(m_responsebuffer);
         emit isRemote(0);
     }
 }
 
-void TcpServerManager::handleDeviceLock(QTcpSocket* client, const quint32 xid,const uchar* address)
+void VxiServerManager::handleDeviceLock(QTcpSocket* client, const quint32 xid,const uchar* address)
 {
     // Natural mutual exclusivity, no need for additional exclusive
     quint8 lid = checkRequestlinkid(client,xid,address);
 
     if (lid !=0) {
-        qCDebug(tcp)<<"[handleDeviceLock]:DEVICE_LOCK";
+        qCDebug(vxi_server)<<"[handleDeviceLock]:DEVICE_LOCK";
         buildfoundResponse(xid, Vxi11::NO_ERROR);
         client->write(m_responsebuffer);
     }
 }
 
-void TcpServerManager::handleDeviceUnlock(QTcpSocket* client, const quint32 xid,const uchar* address)
+void VxiServerManager::handleDeviceUnlock(QTcpSocket* client, const quint32 xid,const uchar* address)
 {
     // Natural mutual exclusivity, no need for additional exclusive
     quint8 lid = checkRequestlinkid(client,xid,address);
 
     if (lid !=0) {
-        qCDebug(tcp)<<"[handleDeviceUnlock]:DEVICE_UNLOCK";
+        qCDebug(vxi_server)<<"[handleDeviceUnlock]:DEVICE_UNLOCK";
         buildfoundResponse(xid, Vxi11::NO_ERROR);
         client->write(m_responsebuffer);
     }
 }
 
-void TcpServerManager::handleDeviceEnableSrq(QTcpSocket* client, const quint32 xid,const uchar* address)
+void VxiServerManager::handleDeviceEnableSrq(QTcpSocket* client, const quint32 xid,const uchar* address)
 {
     // Srq .Not supported for the time being.
     quint8 lid = checkRequestlinkid(client,xid,address);
 
     if (lid !=0) {
         buildfoundResponse(xid, Vxi11::OPERATION_NOT_SUPPORTED);
-        qCDebug(tcp)<<"[handleDeviceEnableSrq]:DEVICE_SRQ";
+        qCDebug(vxi_server)<<"[handleDeviceEnableSrq]:DEVICE_SRQ";
         client->write(m_responsebuffer);
     }
 }
 
-void TcpServerManager::handleDeviceDocmd(QTcpSocket* client,const quint32 xid,const uchar* address)
+void VxiServerManager::handleDeviceDocmd(QTcpSocket* client,const quint32 xid,const uchar* address)
 {
     // No specific instructions provided. Not supported.
     quint8 lid = checkRequestlinkid(client,xid,address);
 
     if (lid !=0) {
         buildfoundResponse(xid, Vxi11::OPERATION_NOT_SUPPORTED);
-        qCDebug(tcp)<<"[handleDeviceDocmd]:DEVICE_DOCMD";
+        qCDebug(vxi_server)<<"[handleDeviceDocmd]:DEVICE_DOCMD";
         client->write(m_responsebuffer);
     }
 }
 
-void TcpServerManager::handleDestroyLink(QTcpSocket* client,const quint32 xid,const uchar* address)
+void VxiServerManager::handleDestroyLink(QTcpSocket* client,const quint32 xid,const uchar* address)
 {
     quint8 lid = checkRequestlinkid(client,xid,address);
 
     if (lid !=0) {
-        qCDebug(tcp)<<"[handleDestroyLink]:DESTROY_LINK";
+        qCDebug(vxi_server)<<"[handleDestroyLink]:DESTROY_LINK";
         // disconnect -> remove m_deviceLinks[lid]
         buildfoundResponse(xid, Vxi11::NO_ERROR);
         client->write(m_responsebuffer);
@@ -370,31 +362,31 @@ void TcpServerManager::handleDestroyLink(QTcpSocket* client,const quint32 xid,co
     }
 }
 
-void TcpServerManager::handleCreateIntrChan(QTcpSocket* client, const quint32 xid,const uchar* address)
+void VxiServerManager::handleCreateIntrChan(QTcpSocket* client, const quint32 xid,const uchar* address)
 {
     // Srq .Not supported for the time being.
     quint8 lid = checkRequestlinkid(client,xid,address);
 
     if (lid !=0) {
-        qCDebug(tcp)<<"[handleCreateIntrChan]:CREATE_INTR_CHAN";
+        qCDebug(vxi_server)<<"[handleCreateIntrChan]:CREATE_INTR_CHAN";
         buildfoundResponse(xid, Vxi11::OPERATION_NOT_SUPPORTED);
         client->write(m_responsebuffer);
     }
 }
 
-void TcpServerManager::handleDestroyIntrChan(QTcpSocket* client, const quint32 xid,const uchar* address)
+void VxiServerManager::handleDestroyIntrChan(QTcpSocket* client, const quint32 xid,const uchar* address)
 {
     // Srq .Not supported for the time being.
     quint8 lid = checkRequestlinkid(client,xid,address);
 
     if (lid !=0) {
-        qCDebug(tcp)<<"[handleDestroyIntrChan]:DESTROY_INTR_CHAN";
+        qCDebug(vxi_server)<<"[handleDestroyIntrChan]:DESTROY_INTR_CHAN";
         buildfoundResponse(xid, Vxi11::OPERATION_NOT_SUPPORTED);
         client->write(m_responsebuffer);
     }
 }
 
-int TcpServerManager::checkRequestlinkid(QTcpSocket* client,const quint32 xid,const uchar* address)
+int VxiServerManager::checkRequestlinkid(QTcpSocket* client,const quint32 xid,const uchar* address)
 {
     quint8 lid = qFromBigEndian<quint32>(address + 44);
     if (m_deviceLinks.contains(lid) && m_deviceLinks[lid].client == client) {
@@ -406,7 +398,7 @@ int TcpServerManager::checkRequestlinkid(QTcpSocket* client,const quint32 xid,co
     return 0;
 }
 
-void TcpServerManager::buildfoundResponse(quint32 xid,quint32 error,quint32 extraleng)
+void VxiServerManager::buildfoundResponse(quint32 xid,quint32 error,quint32 extraleng)
 {
     QDataStream stream(&m_responsebuffer, QIODevice::WriteOnly);
     stream.setByteOrder(QDataStream::BigEndian);

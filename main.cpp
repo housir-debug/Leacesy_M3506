@@ -7,7 +7,7 @@
 #include <QGraphicsProxyWidget>
 #include "auxiliary/simple_logger.h"
 #include "channel/uart_channel.h"
-#include "control/tcp_server.h"
+#include "control/vxi_server.h"
 #include "control/web_server.h"
 #include "control/can_server.h"
 #include "control/uart_server.h"
@@ -56,25 +56,69 @@ int main(int argc, char *argv[])
     // load config
     const QString configPath = QDir(QApplication::applicationDirPath()).filePath("..");
     if (!QDir(configPath).exists() || !ConfigManager::init(configPath)) {
-        qCWarning(application) << "Application initialization failed!";
+        qCCritical(application) << "Application initialization failed!";
         return 1;
     }
 
     // setting log config and batterymodel create
     loggermanage(ConfigManager::s_loglevel, configPath);
     QObject::connect(&app, &QApplication::aboutToQuit, &shutdownLogger);
-    std::shared_ptr<BatteryModelManager> BatteryModel_share = std::make_shared<BatteryModelManager>(configPath);
+
+    // CAN Server create
+    std::unique_ptr<CanServerManager> canServer;
+    if (ConfigManager::s_enableCANServer){canServer = std::make_unique<CanServerManager>();}
+
+    // UART Server create and SCPI parser
+    std::unique_ptr<UartServerManager> uartServer;
+    std::shared_ptr<ScpiManager> Scpi_share = std::make_shared<ScpiManager>();
+    if (ConfigManager::s_enableUARTServer){uartServer = std::make_unique<UartServerManager>();uartServer->m_scpiManager = Scpi_share;}
+
+    // GPIB server create
+    /*Not necessary for the time being.*/
+
+    // LAN Server create
+    std::unique_ptr<VxiServerManager> vxiServer;
+    if (ConfigManager::s_enableLANServer){vxiServer = std::make_unique<VxiServerManager>();vxiServer->m_scpiManager = Scpi_share;}
 
     // screen show
     QGraphicsScene scene;
     QGraphicsView view(&scene);
     std::unique_ptr<test> testview;
-    std::unique_ptr<Mainwindow> mainwindow;
+    std::shared_ptr<Mainwindow> show_share;
+    std::unique_ptr<WebServerManager> webServer;
+    std::shared_ptr<BatteryModelManager> BatteryModel_share;
     if (ConfigManager::s_enableDisplay){
-        mainwindow = std::make_unique<Mainwindow>();
-        mainwindow->m_modelManager = BatteryModel_share;
+        BatteryModel_share = std::make_shared<BatteryModelManager>(configPath);
 
-        QGraphicsProxyWidget* proxy = scene.addWidget(mainwindow.get());
+        show_share = std::make_shared<Mainwindow>();
+        show_share->m_modelManager = BatteryModel_share;
+
+        webServer = std::make_unique<WebServerManager>();
+        webServer->m_BatteryManager = BatteryModel_share;
+        webServer->m_scpiManager = Scpi_share;
+        webServer->m_qmlbridge = show_share;
+
+        QObject::connect(show_share.get(),&Mainwindow::set_network,webServer.get(),&WebServerManager::set_network,Qt::QueuedConnection);
+        QObject::connect(webServer.get(),&WebServerManager::isRemote,show_share.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+        QObject::connect(webServer.get(),&WebServerManager::networkrefresh,show_share.get(),&Mainwindow::update_setting,Qt::QueuedConnection);
+
+        if (ConfigManager::s_enableCANServer){
+            QObject::connect(canServer.get(),&CanServerManager::isRemote,show_share.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+            QObject::connect(show_share.get(),&Mainwindow::set_canbaud,canServer.get(),&CanServerManager::changebaudandid,Qt::QueuedConnection);
+            QObject::connect(canServer.get(),&CanServerManager::baudrefresh,show_share.get(),&Mainwindow::update_setting,Qt::QueuedConnection);
+        }
+
+        if (ConfigManager::s_enableUARTServer){
+            QObject::connect(uartServer.get(),&UartServerManager::isRemote,show_share.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+            QObject::connect(show_share.get(),&Mainwindow::set_RS232Baud,uartServer.get(),&UartServerManager::changeBaudRate,Qt::QueuedConnection);
+            QObject::connect(uartServer.get(),&UartServerManager::baudrefresh,show_share.get(),&Mainwindow::update_setting,Qt::QueuedConnection);
+        }
+
+        if (ConfigManager::s_enableLANServer){
+            QObject::connect(vxiServer.get(),&VxiServerManager::isRemote,show_share.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
+        }
+
+        QGraphicsProxyWidget* proxy = scene.addWidget(show_share.get());
         proxy->setFocusPolicy(Qt::NoFocus);
         proxy->setRotation(0);
 
@@ -87,7 +131,7 @@ int main(int argc, char *argv[])
         //view.rotate(0);
         view.show();
 
-        //mainwindow->show();
+        //show_share->show();
 
         //testview = std::make_unique<test>();
         //testview->show();
@@ -96,27 +140,13 @@ int main(int argc, char *argv[])
     // can channel create
     /*Not necessary for the time being.*/
 
-    // CAN Server create
-    std::unique_ptr<CanServerManager> canServer;
-    if (ConfigManager::s_enableCANServer){
-        canServer = std::make_unique<CanServerManager>();
-        if (!canServer->startServer()) {return 1;}
-
-        if (ConfigManager::s_enableDisplay){
-            QObject::connect(canServer.get(),&CanServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
-            QObject::connect(mainwindow.get(),&Mainwindow::set_canbaud,canServer.get(),&CanServerManager::changebaudandid,Qt::QueuedConnection);
-            QObject::connect(canServer.get(),&CanServerManager::baudrefresh,mainwindow.get(),&Mainwindow::update_setting,Qt::QueuedConnection);
-        }
-    }
-
-    // SCPI parser and uart channel create
-    std::shared_ptr<ScpiManager> Scpi_share = std::make_shared<ScpiManager>();
+    // uart channel create
     std::vector<std::unique_ptr<UartChannelManager>> Channel_list;
     if (ConfigManager::s_enableUartMess){
         // config form config_manager
         for (const auto& config : configs) {
             auto channel = std::make_unique<UartChannelManager>();
-            if (!channel->initSerialPort(config.channel, config.port, config.baudRate)) {return 1;}
+            channel->initUartchannel(config.channel, config.port, config.baudRate);
             QObject::connect(Scpi_share.get(),scpi_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
             QObject::connect(Scpi_share.get(),scpi_rst_signal[config.channel-1],channel.get(),&UartChannelManager::sendInitCommand,Qt::QueuedConnection);
 
@@ -126,20 +156,20 @@ int main(int argc, char *argv[])
             }
 
             if (ConfigManager::s_enableDisplay){
-                QObject::connect(channel.get(),&UartChannelManager::CH_svChanged,mainwindow.get(),&Mainwindow::update_SoftVer,Qt::QueuedConnection);
-                QObject::connect(channel.get(),&UartChannelManager::CH_hvChanged,mainwindow.get(),&Mainwindow::update_HardVer,Qt::QueuedConnection);
-                QObject::connect(channel.get(),&UartChannelManager::CH_VoltageChanged,mainwindow.get(),&Mainwindow::update_Voltage,Qt::QueuedConnection);
-                QObject::connect(channel.get(),&UartChannelManager::CH_CurrentAndUnitChanged,mainwindow.get(),&Mainwindow::update_CurrentAndUnit,Qt::QueuedConnection);
-                QObject::connect(channel.get(),&UartChannelManager::CH_RangeChanged,mainwindow.get(),&Mainwindow::update_Range,Qt::QueuedConnection);
-                QObject::connect(channel.get(),&UartChannelManager::CH_StatusChanged,mainwindow.get(),&Mainwindow::update_Status,Qt::QueuedConnection);
-                QObject::connect(channel.get(),&UartChannelManager::CH_cvChanged,mainwindow.get(),&Mainwindow::update_Cv,Qt::QueuedConnection);
-                QObject::connect(channel.get(),&UartChannelManager::CH_ccChanged,mainwindow.get(),&Mainwindow::update_Cc,Qt::QueuedConnection);
-                QObject::connect(channel.get(),&UartChannelManager::CH_ovpChanged,mainwindow.get(),&Mainwindow::update_Ovp,Qt::QueuedConnection);
-                QObject::connect(channel.get(),&UartChannelManager::CH_isOutputChanged,mainwindow.get(),&Mainwindow::update_IsOutput,Qt::QueuedConnection);
-                QObject::connect(channel.get(),&UartChannelManager::CH_impChanged,mainwindow.get(),&Mainwindow::update_Imp,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_svChanged,show_share.get(),&Mainwindow::update_SoftVer,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_hvChanged,show_share.get(),&Mainwindow::update_HardVer,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_VoltageChanged,show_share.get(),&Mainwindow::update_Voltage,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_CurrentAndUnitChanged,show_share.get(),&Mainwindow::update_CurrentAndUnit,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_RangeChanged,show_share.get(),&Mainwindow::update_Range,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_StatusChanged,show_share.get(),&Mainwindow::update_Status,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_cvChanged,show_share.get(),&Mainwindow::update_Cv,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_ccChanged,show_share.get(),&Mainwindow::update_Cc,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_ovpChanged,show_share.get(),&Mainwindow::update_Ovp,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_isOutputChanged,show_share.get(),&Mainwindow::update_IsOutput,Qt::QueuedConnection);
+                QObject::connect(channel.get(),&UartChannelManager::CH_impChanged,show_share.get(),&Mainwindow::update_Imp,Qt::QueuedConnection);
 
                 /* screen view slot function */
-                QObject::connect(mainwindow.get(),qml_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
+                QObject::connect(show_share.get(),qml_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
             }
 
             channel->m_scpiManager = Scpi_share;
@@ -147,53 +177,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (ConfigManager::s_enableDisplay){mainwindow->update_cardtest();}
-    //if (ConfigManager::s_enableDisplay){mainwindow->update_showcard();}
-
-    // UART Server create
-    std::unique_ptr<UartServerManager> uartServer;
-    if (ConfigManager::s_enableUARTServer){
-        uartServer = std::make_unique<UartServerManager>();
-        if (!uartServer->startServer()) {return 1;}
-        uartServer->m_scpiManager = Scpi_share;
-
-        if (ConfigManager::s_enableDisplay){
-            QObject::connect(uartServer.get(),&UartServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
-            QObject::connect(mainwindow.get(),&Mainwindow::set_RS232Baud,uartServer.get(),&UartServerManager::changeBaudRate,Qt::QueuedConnection);
-            QObject::connect(uartServer.get(),&UartServerManager::baudrefresh,mainwindow.get(),&Mainwindow::update_setting,Qt::QueuedConnection);
-        }
-    }
-
-    // LAN Server create
-    std::unique_ptr<WebServerManager> webServer;
-    if (ConfigManager::s_enableWEBServer){
-        webServer = std::make_unique<WebServerManager>();
-        if (!webServer->startServer()) {return 1;}
-
-        webServer->m_BatteryManager = BatteryModel_share;
-        webServer->m_qmlbridge = mainwindow.get();
-        webServer->m_scpiManager = Scpi_share;
-
-        if (ConfigManager::s_enableDisplay){
-            QObject::connect(mainwindow.get(),&Mainwindow::set_network,webServer.get(),&WebServerManager::set_network,Qt::QueuedConnection);
-            QObject::connect(webServer.get(),&WebServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
-            QObject::connect(webServer.get(),&WebServerManager::networkrefresh,mainwindow.get(),&Mainwindow::update_setting,Qt::QueuedConnection);
-        }
-    }
-
-    std::unique_ptr<TcpServerManager> vxiServer;
-    if (ConfigManager::s_enableLANServer){
-        vxiServer = std::make_unique<TcpServerManager>();
-        if (!vxiServer->startServer()) {return 1;}
-        vxiServer->m_scpiManager = Scpi_share;
-
-        if (ConfigManager::s_enableDisplay){
-            QObject::connect(vxiServer.get(),&TcpServerManager::isRemote,mainwindow.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
-        }
-    }
-
-    // GPIB server create
-    /*Not necessary for the time being.*/
+    if (ConfigManager::s_enableDisplay){QTimer::singleShot(36, show_share.get(), &Mainwindow::update_cardtest);}
+    //if (ConfigManager::s_enableDisplay){QTimer::singleShot(36, show_share.get(), &Mainwindow::update_showcard);}
 
     //QTimer::singleShot(9000, &app, &QGuiApplication::quit); // 9s
     return app.exec();

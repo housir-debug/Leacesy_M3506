@@ -26,7 +26,6 @@ public:
 
     explicit CanServerManager(QObject *parent = nullptr);
     ~CanServerManager();
-    bool startServer();
 
 private:
     void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param);
@@ -34,11 +33,12 @@ private:
     void processFrame(const QByteArray &data);
 
     int m_socketFd{-1};
+    QString m_interface{"can0"};
     quint8 m_calibrate_step{0};
 
     QQueue<can_frame> m_sendQueue;
-    QHash<quint32, quint16> m_canToUart;
     QHash<quint16, quint32> m_uartToCan;
+    static const QHash<quint32, quint16> m_canToUart;
 
     QSocketNotifier *m_readNotifier{nullptr};
     QSocketNotifier *m_writeNotifier{nullptr};

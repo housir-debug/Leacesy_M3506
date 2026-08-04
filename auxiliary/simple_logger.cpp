@@ -92,8 +92,8 @@ void loggermanage(const QString &loglevel,const QString &parentPath) {
     // Critical / Fatal = Program failure, forced output
     if (loglevel == "release"){rules = "*.debug=false\n*.info=false\n*.warning=false";}
     else if (loglevel == "debug"){rules = "*.debug=true\n*.info=true\n*.warning=true";}
-    else if (loglevel == "self"){rules = "*.debug=false\n*.info=false\n*.warning=false"
-            "UART_BRIDGE:.debug=false\nUART_SERVER:.debug=false\n";}
+    else if (loglevel == "self"){rules = "*.debug=false\n*.info=false\n*.warning=false\n"
+            "SCPI:.debug=true\n";}
     QLoggingCategory::setFilterRules(rules);
 
     if (ConfigManager::s_enablelogfile){

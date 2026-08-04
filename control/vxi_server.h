@@ -2,7 +2,7 @@
 #include <QTcpServer>
 #include "auxiliary/scpi_handle.h"
 
-Q_DECLARE_LOGGING_CATEGORY(tcp)
+Q_DECLARE_LOGGING_CATEGORY(vxi_server)
 
 struct DeviceLink {
     quint32 id;
@@ -12,7 +12,7 @@ struct DeviceLink {
     DeviceLink(): id(0),client(nullptr){}
 };
 
-class TcpServerManager : public QObject
+class VxiServerManager : public QObject
 {
     Q_OBJECT
 
@@ -20,11 +20,10 @@ signals:
     void isRemote(quint8 reface);
 
 public:
-    explicit TcpServerManager(QObject *parent = nullptr);
-    ~TcpServerManager();
+    explicit VxiServerManager(QObject *parent = nullptr);
+    ~VxiServerManager();
 
     std::shared_ptr<ScpiManager> m_scpiManager{nullptr};
-    bool startServer();
 
 private:
     void processClientData      (QTcpSocket* client);

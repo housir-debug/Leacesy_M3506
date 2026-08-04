@@ -36,9 +36,10 @@ signals:
 public:
     void writeFrame(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
     std::shared_ptr<ScpiManager> m_scpiManager{nullptr};
+
+    void initUartchannel(quint8 ch, const QString &portName,qint32 baudRate);
     void sendInitCommand();
 
-    bool initSerialPort(quint8 ch, const QString &portName,qint32 baudRate);
     explicit UartChannelManager(QObject *parent = nullptr);
     ~UartChannelManager();
 
