@@ -23,7 +23,7 @@ bool TirpcDynamicLoader::load(){
             }
         }
 
-        qCWarning(libtripc)<<"[load]:Dynamic load failed!:";
+        qCCritical(libtripc)<<"[load]:Dynamic load failed!:";
         return false;
     }();
 

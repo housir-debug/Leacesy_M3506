@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
 
         show_share = std::make_shared<Mainwindow>();
         show_share->m_modelManager = BatteryModel_share;
+        show_share->load_BatteryModel();
 
         webServer = std::make_unique<WebServerManager>();
         webServer->m_BatteryManager = BatteryModel_share;
@@ -178,7 +179,6 @@ int main(int argc, char *argv[])
     }
 
     if (ConfigManager::s_enableDisplay){QTimer::singleShot(36, show_share.get(), &Mainwindow::update_cardtest);}
-    //if (ConfigManager::s_enableDisplay){QTimer::singleShot(36, show_share.get(), &Mainwindow::update_showcard);}
 
     //QTimer::singleShot(9000, &app, &QGuiApplication::quit); // 9s
     return app.exec();

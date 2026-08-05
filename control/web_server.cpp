@@ -282,11 +282,11 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
                 return;
             }
 
-            qCWarning(web_server)<<"[startServer]: m_wsServer listen failed!";
+            qCCritical(web_server)<<"[startServer]: m_wsServer listen failed!";
             return;
         }
 
-        qCWarning(web_server)<<"[startServer]: m_httpServer listen failed!";
+        qCCritical(web_server)<<"[startServer]: m_httpServer listen failed!";
     });
 
     m_serverThread->setObjectName("WebServer");

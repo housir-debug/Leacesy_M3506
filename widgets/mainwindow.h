@@ -32,8 +32,6 @@ private:
 
     QMap<int,digitalcard*> m_digitalcards;
     QMap<int,batterycard*> m_batterycards;
-    void add_digitalcard(int neededPages,const QList<int>& channels);
-    void add_batterycard(int neededPages,const QList<int>& channels);
 
     QMap<int,QString> m_ChsoftVer;
     QMap<int,QString> m_ChhardVer;
@@ -49,8 +47,6 @@ private:
 
 public:
     void update_cardtest();
-    void update_showcard();
-
     void update_SoftVer(int ch,const QString &ver);
     void update_HardVer(int ch,const QString &ver);
     void update_IsOutput(int ch,bool status);

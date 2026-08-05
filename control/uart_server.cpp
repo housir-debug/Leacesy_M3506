@@ -76,8 +76,8 @@ UartServerManager::UartServerManager(QObject *parent): QObject(parent)
             return;
         }
 
-        qCDebug(uart_server)<<"[UartServerManager]:already exist!";
-    });
+        qCCritical(uart_server)<<"[UartServerManager]:QSerialPort openning failed!";
+        });
 
     m_serverThread->setObjectName("UartServer");
     m_serverThread->start();

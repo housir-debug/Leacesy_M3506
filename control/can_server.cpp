@@ -37,7 +37,7 @@ bool CanServerManager::createSocket(const QString &interface)
 {
     m_socketFd = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (m_socketFd < 0) {
-        qCWarning(can_server)<<"[createSocket]:Failed to create CAN socket: "<<strerror(errno);
+        qCCritical(can_server)<<"[createSocket]:Failed to create CAN socket: "<<strerror(errno);
         return false;
     }
 
@@ -46,7 +46,7 @@ bool CanServerManager::createSocket(const QString &interface)
     ifr.ifr_name[IFNAMSIZ - 1] = '\0';
 
     if (ioctl(m_socketFd, SIOCGIFINDEX, &ifr) < 0) {
-        qCWarning(can_server)<<"[createSocket]:Failed to get interface index: "<<strerror(errno);
+        qCCritical(can_server)<<"[createSocket]:Failed to get interface index: "<<strerror(errno);
         close(m_socketFd);
         m_socketFd = -1;
         return false;
@@ -57,7 +57,7 @@ bool CanServerManager::createSocket(const QString &interface)
     addr.can_ifindex = ifr.ifr_ifindex;
 
     if (bind(m_socketFd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-        qCWarning(can_server)<<"[createSocket]:Failed to bind socket: "<<strerror(errno);
+        qCCritical(can_server)<<"[createSocket]:Failed to bind socket: "<<strerror(errno);
         close(m_socketFd);
         m_socketFd = -1;
         return false;
@@ -66,7 +66,7 @@ bool CanServerManager::createSocket(const QString &interface)
     // Set non-blocking mode
     int flags = fcntl(m_socketFd, F_GETFL, 0);
     if (fcntl(m_socketFd, F_SETFL, flags | O_NONBLOCK) < 0) {
-        qCWarning(can_server)<<"[createSocket]:Failed to set non-blocking mode: "<<strerror(errno);
+        qCCritical(can_server)<<"[createSocket]:Failed to set non-blocking mode: "<<strerror(errno);
         close(m_socketFd);
         m_socketFd = -1;
         return false;
@@ -112,7 +112,7 @@ CanServerManager::CanServerManager(QObject *parent): QObject(parent)
 
         for (const QString &cmd : qAsConst(commands)) {
             if (system(cmd.toUtf8().constData()) != 0) {
-                qCWarning(can_server)<<"[CanServerManager]:Command failed: "<<cmd;
+                qCCritical(can_server)<<"[CanServerManager]:Command failed: "<<cmd;
                 return;
             }
         }
@@ -170,10 +170,7 @@ CanServerManager::CanServerManager(QObject *parent): QObject(parent)
                 }}, Qt::DirectConnection);
 
             return;
-        }
-
-        qCWarning(can_server)<<"[CanServerManager]:Command failed createsocket!";
-    });
+        }});
 
     m_serverThread->setObjectName("CanServer");
     m_serverThread->start();

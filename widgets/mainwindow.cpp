@@ -14,61 +14,61 @@ void Mainwindow::update_cardtest()
     channels = {3, 1, 4,2,8,9,24,15,32,12,18};
     //for (int i = 1; i <= 36; i++) {channels.append(i);}
     std::sort(channels.begin(), channels.end());
+    int neededPages = (channels.size() + 5) / 6;  // Round up
 
-    int totalChannels = channels.size();
-    int neededPages = (totalChannels + 5) / 6;  // Round up
+    bool nexten = 0 < neededPages - 1;
+    QString pageid = QString("%1 / %2").arg(1).arg(neededPages);
 
-    add_digitalcard(neededPages,channels);
-    add_batterycard(neededPages,channels);
-}
+    ui->digitalstackedWidget->setCurrentIndex(0);
+    ui->digitalrowslabelpushButton->setText(pageid);
+    ui->digitalrowsbackpushButton->setEnabled(false);
+    ui->digitalrowsnextpushButton->setEnabled(nexten);
 
-void Mainwindow::update_showcard()
-{
-    if (m_ChsoftVer.size() != 0 && m_ChsoftVer.size() == m_ChhardVer.size()){
-        QList<int> channels = m_ChsoftVer.keys();
-        std::sort(channels.begin(), channels.end());
+    ui->batterystackedWidget->setCurrentIndex(0);
+    ui->batteryrowslabelpushButton->setText(pageid);
+    ui->batteryrowsbackpushButton->setEnabled(false);
+    ui->batteryrowsnextpushButton->setEnabled(nexten);
 
-        int totalChannels = channels.size();
-        int neededPages = (totalChannels + 5) / 6;  // Round up
-
-        add_digitalcard(neededPages,channels);
-        add_batterycard(neededPages,channels);
-        return;
-    }
-
-    qCDebug(widget)<<"[update_showcard]:sfverSize: "<<m_ChsoftVer.size()<<"hfversize: "<<m_ChhardVer.size();
-}
-
-void Mainwindow::add_digitalcard(int neededPages,const QList<int>& channels)
-{
     while (ui->digitalstackedWidget->count() < neededPages) {
         QWidget* page = new QWidget();
         QFrame* frame = new QFrame(page);
+        frame->setGeometry(0, 0, 1280, 320);
 
         QHBoxLayout* layout = new QHBoxLayout(frame);
         layout->setContentsMargins(2, 2, 2, 2);
         layout->setSpacing(2);
 
-        frame->setGeometry(0, 0, 1280, 320);
         frame->setLayout(layout);
-
         ui->digitalstackedWidget->addWidget(page);
+    }
+
+    while (ui->batterystackedWidget->count() < neededPages) {
+        QWidget* page = new QWidget();
+        QFrame* frame = new QFrame(page);
+        frame->setGeometry(0, 0, 1280, 320);
+
+        QHBoxLayout* layout = new QHBoxLayout(frame);
+        layout->setContentsMargins(2, 2, 2, 2);
+        layout->setSpacing(2);
+
+        frame->setLayout(layout);
+        ui->batterystackedWidget->addWidget(page);
     }
 
     for (int idx = 0; idx < channels.size(); idx++) {
         int ch = channels[idx]; // 1-36
         int pageIndex = idx / 6;
 
-        QWidget* page = ui->digitalstackedWidget->widget(pageIndex);
-        QFrame* frame = page->findChild<QFrame*>();
-        digitalcard* card = new digitalcard(frame);
-        card->setChannel(ch);
+        QWidget* digitalpage = ui->digitalstackedWidget->widget(pageIndex);
+        QFrame* digitalframe = digitalpage->findChild<QFrame*>();
+        QHBoxLayout* digitallayout = qobject_cast<QHBoxLayout*>(digitalframe->layout());
+        digitalcard* digitcard = new digitalcard(this);
 
-        connect(card, &digitalcard::clicked, this, [this](quint8 ch, bool switchs) {
+        connect(digitcard, &digitalcard::clicked, this, [this](quint8 ch, bool switchs) {
             quint8 func = switchs ? 0x01 : 0x00;
             to_Channel(ch, 0x01, func, "");
-        });
-        connect(card, &digitalcard::longPressed, this, [this](quint8 ch) {
+            });
+        connect(digitcard, &digitalcard::longPressed, this, [this](quint8 ch) {
             m_initalpage = 0;
             m_functioncCh = ch;
 
@@ -77,20 +77,21 @@ void Mainwindow::add_digitalcard(int neededPages,const QList<int>& channels)
             m_vercard->setChHWVersion(m_ChhardVer.value(ch));
 
             m_chstatuscard->setChtatus("0000000000000000");
-            int range = m_digitalcards[ch]->getChRange();
+            digitalcard* card = m_digitalcards[ch];
 
+            int range = card->getChRange();
             m_funcdigitalcard->setChannel(ch);
             m_funcdigitalcard->setChannelRange(range);
-            m_funcdigitalcard->setVoltage(m_digitalcards[ch]->getChVoltage());
-            m_funcdigitalcard->setCurrent(m_digitalcards[ch]->getChCurrent());
-            m_funcdigitalcard->setCurrentUnit(m_digitalcards[ch]->getChunit());
-            m_funcdigitalcard->setCvValue(m_digitalcards[ch]->getChCvValue());
-            m_funcdigitalcard->setCcValue(m_digitalcards[ch]->getChCcValue());
-            m_funcdigitalcard->setOvpValue(m_digitalcards[ch]->getChOvpValue());
-            m_funcdigitalcard->setChannelState(m_digitalcards[ch]->getChstatus());
-            m_funcdigitalcard->setCVChecked(m_digitalcards[ch]->getChCVChecked());
-            m_funcdigitalcard->setCCChecked(m_digitalcards[ch]->getChCCChecked());
-            m_funcdigitalcard->setOVPChecked(m_digitalcards[ch]->getChOVPChecked());
+            m_funcdigitalcard->setVoltage(card->getChVoltage());
+            m_funcdigitalcard->setCurrent(card->getChCurrent());
+            m_funcdigitalcard->setCurrentUnit(card->getChunit());
+            m_funcdigitalcard->setCvValue(card->getChCvValue());
+            m_funcdigitalcard->setCcValue(card->getChCcValue());
+            m_funcdigitalcard->setOvpValue(card->getChOvpValue());
+            m_funcdigitalcard->setChannelState(card->getChstatus());
+            m_funcdigitalcard->setCVChecked(card->getChCVChecked());
+            m_funcdigitalcard->setCCChecked(card->getChCCChecked());
+            m_funcdigitalcard->setOVPChecked(card->getChOVPChecked());
 
             m_functioncsetmode = 0;
             ui->cvradioButton->setChecked(true);
@@ -101,50 +102,22 @@ void Mainwindow::add_digitalcard(int neededPages,const QList<int>& channels)
 
             ui->functionstackedWidget->setCurrentIndex(0); // = m_initalpage
             ui->topstackedwidget->setCurrentIndex(3);
-        });
+            });
 
-        QHBoxLayout* layout = qobject_cast<QHBoxLayout*>(frame->layout());
-        layout->addWidget(card);
+        digitcard->setChannel(ch);
+        m_digitalcards[ch] = digitcard;
+        digitallayout->addWidget(digitcard);
 
-        m_digitalcards[ch] = card;
-    }
+        QWidget* batterypage = ui->batterystackedWidget->widget(pageIndex);
+        QFrame* batteryframe = batterypage->findChild<QFrame*>();
+        QHBoxLayout* batterylayout = qobject_cast<QHBoxLayout*>(batteryframe->layout());
+        batterycard* battercard = new batterycard(this);
 
-    ui->digitalstackedWidget->setCurrentIndex(0);
-    ui->digitalrowsbackpushButton->setEnabled(false);
-    ui->digitalrowsnextpushButton->setEnabled(0 < neededPages - 1);
-    ui->digitalrowslabelpushButton->setText(QString("%1 / %2").arg(1).arg(neededPages));
-}
-
-void Mainwindow::add_batterycard(int neededPages,const QList<int>& channels)
-{
-    while (ui->batterystackedWidget->count() < neededPages) {
-        QWidget* page = new QWidget();
-        QFrame* frame = new QFrame(page);
-
-        QHBoxLayout* layout = new QHBoxLayout(frame);
-        layout->setContentsMargins(2, 2, 2, 2);
-        layout->setSpacing(2);
-
-        frame->setGeometry(0, 0, 1280, 320);
-        frame->setLayout(layout);
-
-        ui->batterystackedWidget->addWidget(page);
-    }
-
-    for (int idx = 0; idx < channels.size(); idx++) {
-        int ch = channels[idx];
-        int pageIndex = idx / 6;
-
-        QWidget* page = ui->batterystackedWidget->widget(pageIndex);
-        QFrame* frame = page->findChild<QFrame*>();
-        batterycard* card = new batterycard(frame);
-        card->setChannel(ch);
-
-        connect(card, &batterycard::clicked, this, [this](quint8 ch, bool switchs) {
+        connect(battercard, &batterycard::clicked, this, [this](quint8 ch, bool switchs) {
             quint8 func = switchs ? 0x01 : 0x00;
             to_Channel(ch, 0x01, func, "");
-        });
-        connect(card, &batterycard::longPressed, this, [this](quint8 ch) {
+            });
+        connect(battercard, &batterycard::longPressed, this, [this](quint8 ch) {
             m_initalpage = 1;
             m_functioncCh = ch;
 
@@ -153,15 +126,16 @@ void Mainwindow::add_batterycard(int neededPages,const QList<int>& channels)
             m_vercard->setChHWVersion(m_ChhardVer.value(ch));
 
             m_chstatuscard->setChtatus("0000000000000000");
-            QString modelname = m_batterycards[ch]->getChmodelname();
+            batterycard* card = m_batterycards[ch];
 
             m_funcbatterycard->setChannel(ch);
+            QString modelname = card->getChmodelname();
             m_funcbatterycard->setModelValue(modelname);
-            m_funcbatterycard->setSocValue(m_batterycards[ch]->getChSOCvalue());
-            m_funcbatterycard->setOcvValue(m_batterycards[ch]->getChOcvvalue());
-            m_funcbatterycard->setEsrValue(m_batterycards[ch]->getChEsrvalue());
-            m_funcbatterycard->setCapValue(m_batterycards[ch]->getChCapvalue());
-            m_funcbatterycard->setChannelState(m_batterycards[ch]->getChstatus());
+            m_funcbatterycard->setSocValue(card->getChSOCvalue());
+            m_funcbatterycard->setOcvValue(card->getChOcvvalue());
+            m_funcbatterycard->setEsrValue(card->getChEsrvalue());
+            m_funcbatterycard->setCapValue(card->getChCapvalue());
+            m_funcbatterycard->setChannelState(card->getChstatus());
 
             m_functioncsetmode = 0;
             ui->socradioButton->setChecked(true);
@@ -171,25 +145,169 @@ void Mainwindow::add_batterycard(int neededPages,const QList<int>& channels)
 
             ui->functionstackedWidget->setCurrentIndex(1); // = m_initalpage
             ui->topstackedwidget->setCurrentIndex(3);  // functionpage
-        });
+            });
 
-        QHBoxLayout* layout = qobject_cast<QHBoxLayout*>(frame->layout());
-        layout->addWidget(card);
-
-        m_batterycards[ch] = card;
+        battercard->setChannel(ch);
+        m_batterycards[ch] = battercard;
+        batterylayout->addWidget(battercard);
     }
-
-    ui->batterystackedWidget->setCurrentIndex(0);
-    ui->batteryrowsbackpushButton->setEnabled(false);
-    ui->batteryrowsnextpushButton->setEnabled(0 < neededPages - 1);
-    ui->batteryrowslabelpushButton->setText(QString("%1 / %2").arg(1).arg(neededPages));
 }
 
 // update digital card information
 
-void Mainwindow::update_SoftVer(int ch,const QString &ver){m_ChsoftVer[ch] = ver;}
+void Mainwindow::update_SoftVer(int ch,const QString &ver){
+    m_ChsoftVer[ch] = ver; // test
 
-void Mainwindow::update_HardVer(int ch,const QString &ver){m_ChhardVer[ch] = ver;}
+    /*if (!m_ChsoftVer.contains(ch)){
+        digitalcard* card = new digitalcard(this);
+        m_ChsoftVer[ch] = ver;
+
+        connect(card, &digitalcard::clicked, this, [this](quint8 ch, bool switchs) {
+            quint8 func = switchs ? 0x01 : 0x00;
+            to_Channel(ch, 0x01, func, "");
+            });
+        connect(card, &digitalcard::longPressed, this, [this](quint8 ch) {
+            m_initalpage = 0;
+            m_functioncCh = ch;
+
+            m_vercard->setChannelName(ch);
+            m_vercard->setChSWVersion(m_ChsoftVer.value(ch));
+            m_vercard->setChHWVersion(m_ChhardVer.value(ch));
+
+            m_chstatuscard->setChtatus("0000000000000000");
+            digitalcard* card = m_digitalcards[ch];
+
+            int range = card->getChRange();
+            m_funcdigitalcard->setChannel(ch);
+            m_funcdigitalcard->setChannelRange(range);
+            m_funcdigitalcard->setVoltage(card->getChVoltage());
+            m_funcdigitalcard->setCurrent(card->getChCurrent());
+            m_funcdigitalcard->setCurrentUnit(card->getChunit());
+            m_funcdigitalcard->setCvValue(card->getChCvValue());
+            m_funcdigitalcard->setCcValue(card->getChCcValue());
+            m_funcdigitalcard->setOvpValue(card->getChOvpValue());
+            m_funcdigitalcard->setChannelState(card->getChstatus());
+            m_funcdigitalcard->setCVChecked(card->getChCVChecked());
+            m_funcdigitalcard->setCCChecked(card->getChCCChecked());
+            m_funcdigitalcard->setOVPChecked(card->getChOVPChecked());
+
+            m_functioncsetmode = 0;
+            ui->cvradioButton->setChecked(true);
+            ui->cvvaluelabel->setText("");
+            ui->ccvaluelabel->setText("");
+            ui->ovpvaluelabel->setText("");
+            ui->functionunitpushButton->setText(m_range.value(range));
+
+            ui->functionstackedWidget->setCurrentIndex(0); // = m_initalpage
+            ui->topstackedwidget->setCurrentIndex(3);
+            });
+
+        card->setChannel(ch);
+        m_digitalcards[ch] = card;
+
+        QWidget* page = nullptr;
+        QFrame* frame = nullptr;
+        QHBoxLayout* layout = nullptr;
+        int neededPages = (m_ChsoftVer.size() + 5) / 6;  // Round up
+
+        if (ui->digitalstackedWidget->count() < neededPages) {
+            page = new QWidget();
+            frame = new QFrame(page);
+            frame->setGeometry(0, 0, 1280, 320);
+
+            layout = new QHBoxLayout(frame);
+            layout->setContentsMargins(2, 2, 2, 2);
+            layout->setSpacing(2);
+
+            frame->setLayout(layout);
+            ui->digitalstackedWidget->addWidget(page);
+        }else{
+            page = ui->digitalstackedWidget->widget(neededPages - 1); // index
+            frame = page->findChild<QFrame*>();
+            layout = qobject_cast<QHBoxLayout*>(frame->layout());
+        }
+
+        layout->addWidget(card);
+        ui->digitalstackedWidget->setCurrentIndex(0);
+        ui->digitalrowsbackpushButton->setEnabled(false);
+        ui->digitalrowsnextpushButton->setEnabled(0 < neededPages - 1);
+        ui->digitalrowslabelpushButton->setText(QString("%1 / %2").arg(1).arg(neededPages));
+    }*/
+}
+
+void Mainwindow::update_HardVer(int ch,const QString &ver){
+    m_ChhardVer[ch] = ver;
+
+    /*if (!m_ChhardVer.contains(ch)){
+        batterycard* card = new batterycard(this);
+        m_ChhardVer[ch] = ver;
+
+        connect(card, &batterycard::clicked, this, [this](quint8 ch, bool switchs) {
+            quint8 func = switchs ? 0x01 : 0x00;
+            to_Channel(ch, 0x01, func, "");
+            });
+        connect(card, &batterycard::longPressed, this, [this](quint8 ch) {
+            m_initalpage = 1;
+            m_functioncCh = ch;
+
+            m_vercard->setChannelName(ch);
+            m_vercard->setChSWVersion(m_ChsoftVer.value(ch));
+            m_vercard->setChHWVersion(m_ChhardVer.value(ch));
+
+            m_chstatuscard->setChtatus("0000000000000000");
+            batterycard* card = m_batterycards[ch];
+
+            m_funcbatterycard->setChannel(ch);
+            QString modelname = card->getChmodelname();
+            m_funcbatterycard->setModelValue(modelname);
+            m_funcbatterycard->setSocValue(card->getChSOCvalue());
+            m_funcbatterycard->setOcvValue(card->getChOcvvalue());
+            m_funcbatterycard->setEsrValue(card->getChEsrvalue());
+            m_funcbatterycard->setCapValue(card->getChCapvalue());
+            m_funcbatterycard->setChannelState(card->getChstatus());
+
+            m_functioncsetmode = 0;
+            ui->socradioButton->setChecked(true);
+            ui->socvaluelabel->setText("");
+            ui->capvaluelabel->setText("");
+            ui->functionmodelpushButton->setText(modelname);
+
+            ui->functionstackedWidget->setCurrentIndex(1); // = m_initalpage
+            ui->topstackedwidget->setCurrentIndex(3);  // functionpage
+            });
+
+        card->setChannel(ch);
+        m_batterycards[ch] = card;
+
+        QWidget* page = nullptr;
+        QFrame* frame = nullptr;
+        QHBoxLayout* layout = nullptr;
+        int neededPages = (m_ChhardVer.size() + 5) / 6;  // Round up
+
+        if (ui->batterystackedWidget->count() < neededPages) {
+            page = new QWidget();
+            frame = new QFrame(page);
+            frame->setGeometry(0, 0, 1280, 320);
+
+            layout = new QHBoxLayout(frame);
+            layout->setContentsMargins(2, 2, 2, 2);
+            layout->setSpacing(2);
+
+            frame->setLayout(layout);
+            ui->batterystackedWidget->addWidget(page);
+        }else{
+            page = ui->batterystackedWidget->widget(neededPages - 1);
+            frame = page->findChild<QFrame*>();
+            layout = qobject_cast<QHBoxLayout*>(frame->layout());
+        }
+
+        layout->addWidget(card);
+        ui->batterystackedWidget->setCurrentIndex(0);
+        ui->batteryrowsbackpushButton->setEnabled(false);
+        ui->batteryrowsnextpushButton->setEnabled(0 < neededPages - 1);
+        ui->batteryrowslabelpushButton->setText(QString("%1 / %2").arg(1).arg(neededPages));
+    }*/
+}
 
 void Mainwindow::update_IsOutput(int ch,bool status){
     if (m_digitalcards.contains(ch)) {
