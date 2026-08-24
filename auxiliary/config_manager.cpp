@@ -103,65 +103,59 @@ quint32 ConfigManager::s_rs232BaudRate = 115200;// 115200
 quint32 ConfigManager::s_canBaudRate = 500000;// 500kbps
 
 bool ConfigManager::getNetworkConfig() {
-    static std::once_flag initFlag;
-
     const auto interfaces = QNetworkInterface::allInterfaces();
     for (const QNetworkInterface& iface : qAsConst(interfaces)) {
         if (iface.name() == "eth0") {
-            std::call_once(initFlag, [&]() {
+            s_MAC = iface.hardwareAddress();
+            QFile file("/etc/network/interfaces");
+            if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QTextStream in(&file);
+                QString line = in.readLine(); // get frist rows of headline
+
                 s_isDHCP = false;
-                s_MAC = iface.hardwareAddress();
-                QFile file("/etc/network/interfaces");
-                if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                    QTextStream in(&file);
-                    QString line = in.readLine(); // get frist rows of headline
-
-                    while (!in.atEnd()) {
-                        line = in.readLine().trimmed(); // Remove first and end spaces
-                        if (line.startsWith("iface eth0") && line.contains("dhcp")) {
-                            s_isDHCP = true;
-                            break; // if static, Avoid printing
-                        }
+                while (!in.atEnd()) {
+                    line = in.readLine().trimmed(); // Remove first and end spaces
+                    if (line.startsWith("iface eth0") && line.contains("dhcp")) {
+                        s_isDHCP = true;
+                        break; // if static, Avoid printing
                     }
-
-                    return;
                 }
 
-                qCWarning(config) << "[getNetworkConfig]:/etc/network/interfaces opening failed!";
-                return;
-            });
-
-            s_IP = s_SM = s_Gateway = "---.---.---.---";
-            const auto entries = iface.addressEntries();
-            for (const QNetworkAddressEntry& entry : qAsConst(entries)) {
-                if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
-                    s_SM = entry.netmask().toString();
-                    s_IP = entry.ip().toString();
-                    break;
+                s_IP = s_SM = s_Gateway = "---.---.---.---";
+                const auto entries = iface.addressEntries();
+                for (const QNetworkAddressEntry& entry : qAsConst(entries)) {
+                    if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
+                        s_SM = entry.netmask().toString();
+                        s_IP = entry.ip().toString();
+                        break;
+                    }
                 }
-            }
 
-            QFile gatefile("/proc/net/route");
-            if (gatefile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-               QTextStream gatein(&gatefile);
-               QString gateline = gatein.readLine(); // get frist rows of headline
+                QFile gatefile("/proc/net/route");
+                if (gatefile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                   QTextStream gatein(&gatefile);
+                   QString gateline = gatein.readLine(); // get frist rows of headline
 
-               while (!gatein.atEnd()) {
-                   gateline = gatein.readLine();
-                   QStringList fields = gateline.trimmed().split('\t', Qt::SkipEmptyParts);
-                   if (fields.size() >= 3 && fields[0] == "eth0" && fields[1] == "00000000") {
-                       bool ok; quint32 gw = fields[2].toUInt(&ok, 16);
-                       if (ok) {
-                           s_Gateway = QHostAddress(qFromBigEndian(gw)).toString();
-                           break;
+                   while (!gatein.atEnd()) {
+                       gateline = gatein.readLine();
+                       QStringList fields = gateline.trimmed().split('\t', Qt::SkipEmptyParts);
+                       if (fields.size() >= 3 && fields[0] == "eth0" && fields[1] == "00000000") {
+                           bool ok; quint32 gw = fields[2].toUInt(&ok, 16);
+                           if (ok) {
+                               s_Gateway = QHostAddress(qFromBigEndian(gw)).toString();
+                               break;
+                           }
                        }
                    }
-               }
 
-               return true;
+                   return true;
+                }
+
+                qCWarning(config) << "[getNetworkConfig]:/proc/net/route opening failed!";
+                return false;
             }
 
-            qCWarning(config) << "[getNetworkConfig]:/proc/net/route opening failed!";
+            qCWarning(config) << "[getNetworkConfig]:/etc/network/interfaces opening failed!";
             return false;
         }
     }

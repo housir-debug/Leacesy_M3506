@@ -99,6 +99,8 @@ int main(int argc, char *argv[])
         webServer->m_scpiManager = Scpi_share;
         webServer->m_qmlbridge = show_share;
 
+        QObject::connect(Scpi_share.get(),&ScpiManager::networkrefresh,show_share.get(),&Mainwindow::update_setting,Qt::QueuedConnection);
+
         QObject::connect(show_share.get(),&Mainwindow::set_network,webServer.get(),&WebServerManager::set_network,Qt::QueuedConnection);
         QObject::connect(webServer.get(),&WebServerManager::isRemote,show_share.get(),&Mainwindow::update_remotemodel,Qt::QueuedConnection);
         QObject::connect(webServer.get(),&WebServerManager::networkrefresh,show_share.get(),&Mainwindow::update_setting,Qt::QueuedConnection);

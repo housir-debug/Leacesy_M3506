@@ -23,6 +23,8 @@ class ScpiManager : public QObject {
     Q_OBJECT
 
 signals:
+    void networkrefresh();
+
     // to C++ model control
     #define CHANNEL(n) \
         void to_UartChannel##n(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi); \
@@ -32,6 +34,13 @@ signals:
     #undef CHANNEL
 
 private:   // auto inline
+    static scpi_result_t SCPI_NETIPADress(scpi_t* context){return SET_NETWork(context,1,true);};
+    static scpi_result_t SCPI_NETSUBNetmask(scpi_t* context){return SET_NETWork(context,2,true);};
+    static scpi_result_t SCPI_NETGATeway(scpi_t* context){return SET_NETWork(context,3,true);};
+    static scpi_result_t SCPI_NETDHCP(scpi_t* context){return SET_NETWork(context,0,false);};
+    static scpi_result_t SET_NETWork(scpi_t* context,int staticmode,bool isstatic);
+    static scpi_result_t SCPI_NETInform(scpi_t* context);
+
     int32_t m_querymode{0};
     static scpi_result_t SCPI_Query(scpi_t* context);
     // --- Output -------------------------------------------------------------------------------

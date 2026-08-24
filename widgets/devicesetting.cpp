@@ -91,12 +91,11 @@ void devicesetting::on_dhcpradioButton_clicked()
     ui->ipradioButton->setEnabled(false);
     ui->maskradioButton->setEnabled(false);
     ui->gateradioButton->setEnabled(false);
+    emit set_network(false);
+
     ui->iplabel->setText("---.---.---.---");
     ui->masklabel->setText("---.---.---.---");
     ui->gatelabel->setText("---.---.---.---");
-
-    emit set_network(false);
-    QTimer::singleShot(8100, this,[this]() {on_refreshpushButton_clicked();ui->refreshpushButton->setEnabled(true);}); // 8.1s
 }
 
 void devicesetting::on_refreshpushButton_clicked()
@@ -160,12 +159,15 @@ void devicesetting::setting(const QString &value)
 
 void devicesetting::responseUpdate()
 {
-    ui->iplabel->setText(ConfigManager::s_IP);
-    ui->masklabel->setText(ConfigManager::s_SM);
-    ui->gatelabel->setText(ConfigManager::s_Gateway);
     ui->canidlabel->setText(QString::number(ConfigManager::s_CANid.load()));
     ui->canbaudlabel->setText(QString::number(ConfigManager::s_canBaudRate));
     ui->rs232baudlabel->setText(QString::number(ConfigManager::s_rs232BaudRate));
+
+    if (ConfigManager::s_isDHCP){
+        QTimer::singleShot(8100, this,[this]() {on_refreshpushButton_clicked();ui->refreshpushButton->setEnabled(true);}); // 8.1s
+    }else{
+        on_refreshpushButton_clicked();ui->refreshpushButton->setEnabled(false);
+    }
 }
 
 void devicesetting::reenterUpdate()
