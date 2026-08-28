@@ -46,10 +46,8 @@ std::vector<UartConfig> configs = {
 QString ConfigManager::s_firmwareVersion = "1.0.0";
 QString ConfigManager::s_hardwareVersion = "1.0.0";
 QString ConfigManager::s_manufacturer = "Leacesy";
-
 // log config
 QString ConfigManager::s_loglevel = "info"; // "release"
-bool ConfigManager::s_enablelogfile = false;
 // channel switch
 bool ConfigManager::s_enableCanMess    = false;
 bool ConfigManager::s_enableUartMess   = false;
@@ -58,9 +56,10 @@ bool ConfigManager::s_enableUARTServer = true;
 bool ConfigManager::s_enableCANServer  = true;
 bool ConfigManager::s_enableLANServer  = true;
 bool ConfigManager::s_enableDisplay    = true;
-
+//
 std::atomic<int> ConfigManager::s_remoteSt{0};
 QSettings* ConfigManager::s_settings = nullptr;
+
 bool ConfigManager::init(const QString &configDir)
 {
     QString fullPath = configDir + "/instrument_config.ini";
@@ -80,7 +79,6 @@ bool ConfigManager::init(const QString &configDir)
     qCWarning(config)<<"[init]:Cannot open config file or read network config fail!";
     return false;
 }
-
 bool ConfigManager::setConfigValue(const QString &key, const QVariant &value)
 {
     if (s_settings) {

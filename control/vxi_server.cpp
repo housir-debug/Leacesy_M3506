@@ -42,10 +42,7 @@ VxiServerManager::VxiServerManager(QObject *parent):QObject(parent)
                             QByteArray errMsg = "Other instrument interfaces are currently in remote mode.";
                             qCDebug(vxi_server)<<"[VxiServerManager]: "<<errMsg;
                             client->write(errMsg);
-                    }
-
-                    return;
-                    }, Qt::DirectConnection);
+                    }}, Qt::DirectConnection);
 
                 m_clients.append(client);
                 return;

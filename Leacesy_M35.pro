@@ -16,7 +16,6 @@ LIBS += -L$$PWD/thirdparty/scpi/lib -lscpi -lm
 HEADERS += \
     auxiliary/battery_model.h \
     auxiliary/scpi_handle.h \
-    auxiliary/simple_logger.h \
     auxiliary/config_manager.h \
     auxiliary/vxinamespace.h \
     channel/can_channel.h \
@@ -39,7 +38,6 @@ HEADERS += \
 SOURCES += \
     auxiliary/battery_model.cpp \
     auxiliary/scpi_handle.cpp \
-    auxiliary/simple_logger.cpp \
     auxiliary/config_manager.cpp \
     channel/can_channel.cpp \
     channel/uart_channel.cpp \

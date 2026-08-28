@@ -29,7 +29,6 @@ public:
     static QString s_manufacturer;
 
     static QString s_loglevel;
-    static bool s_enablelogfile;
 
     static bool s_enableCanMess;
     static bool s_enableUartMess;

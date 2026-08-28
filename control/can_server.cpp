@@ -11,29 +11,32 @@ void CanServerManager::changebaudandid()
 {
     static const QList<int> validBaudRates = {10000, 20000, 50000, 100000, 125000, 250000, 500000, 800000, 1000000};
 
-    if (validBaudRates.contains(ConfigManager::s_canBaudRate)) {
-        QStringList commands;
-
-        commands << QString("ip link set %1 down").arg(m_interface);
-        commands << QString("ip link set %1 txqueuelen 1000").arg(m_interface);
-        //commands << QString("ip link set %1 type can bitrate 500000 restart-ms 18 dbitrate 2000000 fd on loopback on").arg(interface);
-        commands << QString("ip link set %1 type can bitrate %2 restart-ms 18 fd off loopback on").arg(m_interface).arg(ConfigManager::s_canBaudRate);
-        commands << QString("ip link set %1 up").arg(m_interface);
-
-        for (const QString &cmd : qAsConst(commands)) {
-            if (system(cmd.toUtf8().constData()) != 0) {
-                qCWarning(can_server)<<"[changebaudandid]:Command failed: "<<cmd;
-                return;
-            }
-        }
-
+    if (validBaudRates.contains(ConfigManager::s_canBaudRate) && OpeningCanN()) {
         ConfigManager::setConfigValue("Device/CANBaud",ConfigManager::s_canBaudRate);
         emit baudrefresh();
     }
 }
 
+bool CanServerManager::OpeningCanN()
+{
+    QStringList commands;
+    commands << QString("ip link set %1 down").arg(m_interface);
+    commands << QString("ip link set %1 txqueuelen 1000").arg(m_interface);
+    //commands << QString("ip link set %1 type can bitrate 500000 restart-ms 18 dbitrate 2000000 fd on loopback on").arg(interface);
+    commands << QString("ip link set %1 type can bitrate %2 restart-ms 18 fd off loopback on").arg(m_interface).arg(ConfigManager::s_canBaudRate);
+    commands << QString("ip link set %1 up").arg(m_interface);
 
-bool CanServerManager::createSocket(const QString &interface)
+    for (const QString &cmd : qAsConst(commands)) {
+        if (system(cmd.toUtf8().constData()) != 0) {
+            qCCritical(can_server)<<"[OpeningCanN]:Command failed: "<<cmd;
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool CanServerManager::createSocket()
 {
     m_socketFd = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (m_socketFd < 0) {
@@ -42,7 +45,7 @@ bool CanServerManager::createSocket(const QString &interface)
     }
 
     struct ifreq ifr;
-    strncpy(ifr.ifr_name, interface.toUtf8().constData(), IFNAMSIZ - 1);
+    strncpy(ifr.ifr_name, m_interface.toUtf8().constData(), IFNAMSIZ - 1);
     ifr.ifr_name[IFNAMSIZ - 1] = '\0';
 
     if (ioctl(m_socketFd, SIOCGIFINDEX, &ifr) < 0) {
@@ -103,21 +106,7 @@ CanServerManager::CanServerManager(QObject *parent): QObject(parent)
             m_uartToCan[it.value()] = it.key();
         }
 
-        QStringList commands;
-        commands << QString("ip link set %1 down").arg(m_interface);
-        commands << QString("ip link set %1 txqueuelen 1000").arg(m_interface);
-        //commands << QString("ip link set %1 type can bitrate 500000 restart-ms 18 dbitrate 2000000 fd on loopback on").arg(interface);
-        commands << QString("ip link set %1 type can bitrate %2 restart-ms 18 fd off loopback on").arg(m_interface).arg(ConfigManager::s_canBaudRate);
-        commands << QString("ip link set %1 up").arg(m_interface);
-
-        for (const QString &cmd : qAsConst(commands)) {
-            if (system(cmd.toUtf8().constData()) != 0) {
-                qCCritical(can_server)<<"[CanServerManager]:Command failed: "<<cmd;
-                return;
-            }
-        }
-
-        if (createSocket(m_interface)) {
+        if (OpeningCanN() && createSocket()) {
             connect(m_readNotifier, &QSocketNotifier::activated,this, [this](){
                 m_readNotifier->setEnabled(false);
                 struct can_frame frame;
@@ -125,27 +114,23 @@ CanServerManager::CanServerManager(QObject *parent): QObject(parent)
                 while (true) {
                     ssize_t nbytes = read(m_socketFd, &frame, sizeof(frame));
 
-                    if (nbytes == sizeof(frame) && frame.can_id == ConfigManager::s_CANid.load()) { // always 16Bytes
-                        QByteArray data(reinterpret_cast<const char*>(frame.data), frame.can_dlc);
-                        qCDebug(can_server)<<"[CanServerManager]:Received Data: "<<data.toHex();
+                    if (nbytes == sizeof(frame)) { // always 16Bytes
+                        if(frame.can_id == 0 || frame.can_id == ConfigManager::s_CANid.load()){
+                            QByteArray data(reinterpret_cast<const char*>(frame.data), frame.can_dlc);
+                            qCDebug(can_server)<<"[CanServerManager]:Received Data: "<<data.toHex();
 
-                        switch (ConfigManager::s_remoteSt.load()) {
-                            case 0:emit isRemote(1);// fall through
-                            case 1:processFrame(data);break;
-                            default:
-                                qCDebug(can_server)<<"[CanServerManager]: remoteMode[!=can-1]: "<<ConfigManager::s_remoteSt.load();
-                                quint8 channel = static_cast<quint8>(data[0]);
-                                sendFrame(channel,0xffff,"");
+                            switch (ConfigManager::s_remoteSt.load()) {
+                                case 0:emit isRemote(1);// fall through
+                                case 1:processFrame(data); return;
+                                default:
+                                    qCDebug(can_server)<<"[CanServerManager]: remoteMode[!=can-1]: "<<ConfigManager::s_remoteSt.load();
+                                    quint8 channel = static_cast<quint8>(data[0]);
+                                    sendFrame(channel,0xffff,"");
+                            }
                         }
-
-                        return;
                     } else if (nbytes < 0) {
                         qCWarning(can_server)<<"[CanServerManager]:Read error: "<<strerror(errno);
-                        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                            // Data processing completed
-                            m_readNotifier->setEnabled(true);
-                            return;
-                        }
+                        if (errno == EAGAIN || errno == EWOULDBLOCK) {m_readNotifier->setEnabled(true);}
                     }
                 }}, Qt::DirectConnection);
             connect(m_writeNotifier, &QSocketNotifier::activated,this, [this](){
@@ -161,11 +146,7 @@ CanServerManager::CanServerManager(QObject *parent): QObject(parent)
                         qCDebug(can_server)<<"[CanServerManager]:Sent Data: "<<data.toHex()<<", QueueRemain: "<<m_sendQueue.size();
                     } else if (sent < 0) {
                         qCWarning(can_server)<<"[CanServerManager]:Write error: "<<strerror(errno);
-                        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                            // sending buffer is full. Please try again later.
-                            m_writeNotifier->setEnabled(true);
-                            return;
-                        }
+                        if (errno == EAGAIN || errno == EWOULDBLOCK) {m_writeNotifier->setEnabled(true);}
                     }
                 }}, Qt::DirectConnection);
 

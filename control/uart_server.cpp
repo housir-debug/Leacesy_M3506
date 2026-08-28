@@ -68,10 +68,7 @@ UartServerManager::UartServerManager(QObject *parent): QObject(parent)
                         QByteArray errMsg = "Other instrument interfaces are currently in remote mode.";
                         qCDebug(uart_server)<<"[UartServerManager]: "<<errMsg;
                         m_uartServer->write(errMsg);
-                }
-
-                return;
-                }, Qt::DirectConnection);
+                }}, Qt::DirectConnection);
 
             return;
         }

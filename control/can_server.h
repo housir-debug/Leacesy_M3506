@@ -28,8 +28,10 @@ public:
     ~CanServerManager();
 
 private:
+    bool OpeningCanN();
+    bool createSocket();
+
     void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param);
-    bool createSocket(const QString &interface);
     void processFrame(const QByteArray &data);
 
     int m_socketFd{-1};

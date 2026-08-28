@@ -5,7 +5,6 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGraphicsProxyWidget>
-#include "auxiliary/simple_logger.h"
 #include "channel/uart_channel.h"
 #include "control/vxi_server.h"
 #include "control/web_server.h"
@@ -44,6 +43,17 @@ std::vector<ScpiRSTSign_toUartCh> scpi_rst_signal = {
     #undef CHANNEL
 };
 
+void loggermanage(const QString &loglevel) {
+    QString rules;
+
+    // Critical / Fatal = Program failure, forced output
+    if (loglevel == "release"){rules = "*.debug=false\n*.info=false\n*.warning=false";}
+    else if (loglevel == "debug"){rules = "*.debug=true\n*.info=true\n*.warning=true";}
+    else if (loglevel == "self"){rules = "*.debug=false\n*.info=false\n*.warning=false\n"
+            "SCPI:.debug=true\n";}
+
+    QLoggingCategory::setFilterRules(rules);
+}
 
 int main(int argc, char *argv[])
 {
@@ -60,9 +70,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // setting log config and batterymodel create
-    loggermanage(ConfigManager::s_loglevel, configPath);
-    QObject::connect(&app, &QApplication::aboutToQuit, &shutdownLogger);
+    // setting log config
+    loggermanage(ConfigManager::s_loglevel);
 
     // CAN Server create
     std::unique_ptr<CanServerManager> canServer;
