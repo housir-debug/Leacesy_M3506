@@ -120,8 +120,8 @@ CanServerManager::CanServerManager(QObject *parent): QObject(parent)
                             qCDebug(can_server)<<"[CanServerManager]:Received Data: "<<data.toHex();
 
                             switch (ConfigManager::s_remoteSt.load()) {
-                                case 0:emit isRemote(1);// fall through
-                                case 1:processFrame(data); return;
+                                case InterSt::LOCAL:emit isRemote(1);// fall through
+                                case InterSt::CAN:processFrame(data); return;
                                 default:
                                     qCDebug(can_server)<<"[CanServerManager]: remoteMode[!=can-1]: "<<ConfigManager::s_remoteSt.load();
                                     quint8 channel = static_cast<quint8>(data[0]);

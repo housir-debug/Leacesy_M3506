@@ -17,6 +17,7 @@ HEADERS += \
     auxiliary/battery_model.h \
     auxiliary/scpi_handle.h \
     auxiliary/config_manager.h \
+    auxiliary/uartProtocol.h \
     auxiliary/vxinamespace.h \
     channel/can_channel.h \
     channel/uart_channel.h \

@@ -62,3 +62,11 @@ private:
     Q_DISABLE_COPY(ConfigManager)   // Prohibition of copying
     static QSettings* s_settings;
 };
+
+namespace InterSt {
+    constexpr int LOCAL      = 0x00;
+    constexpr int CAN        = 0x01;
+    constexpr int RS232      = 0x02;
+    constexpr int LAN_VXI    = 0x03;
+    constexpr int LAN_WEB    = 0x04;
+}

@@ -249,8 +249,8 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
                             QString type = obj["type"].toString();
                             if (m_webRoutes.contains(type)) {
                                 switch (ConfigManager::s_remoteSt.load()) {
-                                    case 0:emit isRemote(4);// fall through
-                                    case 4:m_webRoutes[type](socket,obj);break;
+                                    case InterSt::LOCAL:emit isRemote(4);// fall through
+                                    case InterSt::LAN_WEB:m_webRoutes[type](socket,obj);break;
                                     default:QJsonObject response;
                                             response["type"] = "scpi_response";
                                             response["result"] = "Other interfaces of the instrument are currently in operation";
