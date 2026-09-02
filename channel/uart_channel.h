@@ -53,9 +53,6 @@ private:
     void handleCalibratecmd      (quint8 func,quint16 scpiIdentify);
     void handleCalibrationcmd    (quint8 func,quint16 scpiIdentify);
     void handleTriggercmd        (quint8 func,quint16 scpiIdentify);
-    void handleISPcmd            (quint8 func,quint16 scpiIdentify);
-    void handleSNcmd             (quint8 func,quint16 scpiIdentify);
-    void handleIDcmd             (quint8 func,quint16 scpiIdentify);
     void handleErrorcmd          (quint8 func);
 
 private:
@@ -76,8 +73,5 @@ private:
 
     static QThread* getWorkerThread(quint32 channel);
     static const QVector<Command> m_initCommands;
-    static constexpr quint8 HEADER_HIGH = 0xAA;
-    static constexpr quint8 HEADER_LOW = 0x55;
-    static constexpr quint8 END_MARKER = 0xEE;
 };
 

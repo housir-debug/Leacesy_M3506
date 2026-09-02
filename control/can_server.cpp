@@ -120,7 +120,7 @@ CanServerManager::CanServerManager(QObject *parent): QObject(parent)
                             qCDebug(can_server)<<"[CanServerManager]:Received Data: "<<data.toHex();
 
                             switch (ConfigManager::s_remoteSt.load()) {
-                                case InterSt::LOCAL:emit isRemote(1);// fall through
+                                case InterSt::LOCAL:emit isRemote(InterSt::CAN);// fall through
                                 case InterSt::CAN:processFrame(data); return;
                                 default:
                                     qCDebug(can_server)<<"[CanServerManager]: remoteMode[!=can-1]: "<<ConfigManager::s_remoteSt.load();

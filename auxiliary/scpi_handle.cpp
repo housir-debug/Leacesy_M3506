@@ -126,15 +126,15 @@ scpi_result_t ScpiManager::SCPI_Query(scpi_t* context){
     auto* self = static_cast<ScpiManager*>(context->user_context);
 
     switch (self->m_querymode){ // Only query ,not response. Read -> response
-        case 0: return sendQueryCmd(context,0x04,0x81);//CURR
-        case 1: return sendQueryCmd(context,0x04,0x86);//DVM
-        case 2: return sendQueryCmd(context,0x04,0x80);//VOLT
-        case 3: return sendQueryCmd(context,0x04,0x82);//SCUR
-        case 4: return sendQueryCmd(context,0x04,0x83);//BTMP
-        case 5: return sendQueryCmd(context,0x04,0x84);//HTMP
-        case 6: return sendQueryCmd(context,0x04,0x8a);//TMP1
-        case 7: return sendQueryCmd(context,0x04,0x8b);//TMP2
-        case 8: return sendQueryCmd(context,0x04,0x8d);//TMP3
+        case 0: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASCURR);
+        case 1: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASDVM);
+        case 2: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASVOLT);
+        case 3: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASSCUR);
+        case 4: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASBTMP);
+        case 5: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASHTMP);
+        case 6: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASTMP1);
+        case 7: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASTMP2);
+        case 8: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASTMP3);
         default:return SCPI_RES_ERR;
     }
 }
@@ -143,9 +143,9 @@ scpi_result_t ScpiManager::SCPI_Query(scpi_t* context){
 scpi_result_t ScpiManager::SCPI_OutputState(scpi_t* context) {
     scpi_bool_t OpenOut;
     if(SCPI_ParamBool(context, &OpenOut,true)){
+        quint8 func = OpenOut ? JV6xxx::Output::SET_OUTPSTATUS_ON : JV6xxx::Output::SET_OUTPSTATUS_OFF;
         qCDebug(scpi)<<"[SCPI_OutputState]:SCPI_Output OpenOut: "<<OpenOut;
-        quint8 func = OpenOut ? 0x01 : 0x00;
-        return sendQueryCmd(context,0x01,func,"");
+        return sendQueryCmd(context,JV6xxx::OUTPUT,func,"");
     }
 
     return SCPI_RES_ERR;
@@ -160,9 +160,7 @@ scpi_result_t ScpiManager::SCPI_MeasureFunc(scpi_t* context) {
         QByteArray data(1, static_cast<quint8>(choice));
         self->m_querymode = choice;
         switch (choice){
-            case 0: return sendQueryCmd(context,0x04,0x10,data);
-            case 1: return sendQueryCmd(context,0x04,0x10,data);
-            case 2: return sendQueryCmd(context,0x04,0x10,data);
+            case 0: case 1: case 2: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSFUNC,data);
             default:return SCPI_RES_OK;
         }
     }
@@ -179,7 +177,7 @@ scpi_result_t ScpiManager::SCPI_CalibrateStep(scpi_t* context) {
             QByteArray data(4, 0);
             qCDebug(scpi) <<"[SCPI_CalibrateStep]:step: "<<step<<" param: "<<parameter;
             qToBigEndian(parameter, reinterpret_cast<uint8_t*>(data.data()));
-            return sendQueryCmd(context,0x07,step,data);
+            return sendQueryCmd(context,JV6xxx::CALIBRATION,step,data);
         }
     }
 
@@ -190,7 +188,7 @@ scpi_result_t ScpiManager::SCPI_CalibrateStepQ(scpi_t* context) {
     int value;
     if (SCPI_ParamInt(context, &value, true)) {
         qCDebug(scpi) <<"[SCPI_CalibrateStepQ]:Step Value: "<< value;
-        return sendQueryCmd(context,0x07,value);
+        return sendQueryCmd(context,JV6xxx::CALIBRATION,value);
     }
 
     return SCPI_RES_ERR;

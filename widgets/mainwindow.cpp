@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "auxiliary/uartProtocol.h"
 #include <QTimer>
 #include <QtCore>
 
@@ -65,8 +66,8 @@ void Mainwindow::update_cardtest()
         digitalcard* digitcard = new digitalcard(this);
 
         connect(digitcard, &digitalcard::clicked, this, [this](quint8 ch, bool switchs) {
-            quint8 func = switchs ? 0x01 : 0x00;
-            to_Channel(ch, 0x01, func, "");
+            quint8 func = switchs ? JV6xxx::Output::SET_OUTPSTATUS_ON : JV6xxx::Output::SET_OUTPSTATUS_OFF;
+            to_Channel(ch,JV6xxx::OUTPUT, func, "");
             });
         connect(digitcard, &digitalcard::longPressed, this, [this](quint8 ch) {
             m_initalpage = 0;
@@ -114,8 +115,8 @@ void Mainwindow::update_cardtest()
         batterycard* battercard = new batterycard(this);
 
         connect(battercard, &batterycard::clicked, this, [this](quint8 ch, bool switchs) {
-            quint8 func = switchs ? 0x01 : 0x00;
-            to_Channel(ch, 0x01, func, "");
+            quint8 func = switchs ? JV6xxx::Output::SET_OUTPSTATUS_ON : JV6xxx::Output::SET_OUTPSTATUS_OFF;
+            to_Channel(ch,JV6xxx::OUTPUT, func, "");
             });
         connect(battercard, &batterycard::longPressed, this, [this](quint8 ch) {
             m_initalpage = 1;
@@ -163,8 +164,8 @@ void Mainwindow::update_SoftVer(int ch,const QString &ver){
         m_ChsoftVer[ch] = ver;
 
         connect(card, &digitalcard::clicked, this, [this](quint8 ch, bool switchs) {
-            quint8 func = switchs ? 0x01 : 0x00;
-            to_Channel(ch, 0x01, func, "");
+            quint8 func = switchs ? JV6xxx::Output::SET_OUTPSTATUS_ON : JV6xxx::Output::SET_OUTPSTATUS_OFF;
+            to_Channel(ch,JV6xxx::OUTPUT, func, "");
             });
         connect(card, &digitalcard::longPressed, this, [this](quint8 ch) {
             m_initalpage = 0;
@@ -243,8 +244,8 @@ void Mainwindow::update_HardVer(int ch,const QString &ver){
         m_ChhardVer[ch] = ver;
 
         connect(card, &batterycard::clicked, this, [this](quint8 ch, bool switchs) {
-            quint8 func = switchs ? 0x01 : 0x00;
-            to_Channel(ch, 0x01, func, "");
+            quint8 func = switchs ? JV6xxx::Output::SET_OUTPSTATUS_ON : JV6xxx::Output::SET_OUTPSTATUS_OFF;
+            to_Channel(ch, JV6xxx::OUTPUT, func, "");
             });
         connect(card, &batterycard::longPressed, this, [this](quint8 ch) {
             m_initalpage = 1;
@@ -339,11 +340,11 @@ void Mainwindow::update_Voltage(int ch,float voltage){
         QByteArray data(4,0);float value;
         value = m_batterycards[ch]->getcurrentOCV();
         qToBigEndian(value, reinterpret_cast<uint8_t*>(data.data()));
-        to_Channel(ch,0x02, 0x00, data);
+        to_Channel(ch,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURVOLT, data);
 
         value = m_batterycards[ch]->getcurrentESR();
         qToBigEndian(value, reinterpret_cast<uint8_t*>(data.data()));
-        to_Channel(ch,0x02, 0x02, data);
+        to_Channel(ch,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURIMP, data);
     }
 }
 
@@ -532,16 +533,16 @@ Mainwindow::Mainwindow(QWidget *parent) : QWidget(parent), ui(new Ui::Mainwindow
     m_funcdigitalcard = new digitalcard(ui->functiondigitalframe->parentWidget());
     m_funcdigitalcard->setGeometry(ui->functiondigitalframe->geometry());
     QObject::connect(m_funcdigitalcard, &digitalcard::clicked, this, [this](quint8 ch,bool switchs) {
-        quint8 func = switchs ? 0x01 : 0x00;
-        to_Channel(ch, 0x01, func, "");
+        quint8 func = switchs ? JV6xxx::Output::SET_OUTPSTATUS_ON : JV6xxx::Output::SET_OUTPSTATUS_OFF;
+        to_Channel(ch,JV6xxx::OUTPUT, func, "");
     });
     delete ui->functiondigitalframe;
 
     m_funcbatterycard = new batterycard(ui->functionbatteryframe->parentWidget());
     m_funcbatterycard->setGeometry(ui->functionbatteryframe->geometry());
     QObject::connect(m_funcbatterycard,&batterycard::clicked, this, [this](quint8 ch,bool switchs) {
-        quint8 func = switchs ? 0x01 : 0x00;
-        to_Channel(ch, 0x01, func, "");
+        quint8 func = switchs ? JV6xxx::Output::SET_OUTPSTATUS_ON : JV6xxx::Output::SET_OUTPSTATUS_OFF;
+        to_Channel(ch,JV6xxx::OUTPUT, func, "");
     });
     delete ui->functionbatteryframe;
 
@@ -555,7 +556,7 @@ Mainwindow::Mainwindow(QWidget *parent) : QWidget(parent), ui(new Ui::Mainwindow
                 // model: 0 - CV ; 1 - CC ; 3 - OVP;
                 QByteArray data(4,0);
                 qToBigEndian(val, reinterpret_cast<uint8_t*>(data.data()));
-                return to_Channel(m_functioncCh,0x02, m_functioncsetmode, data);
+                return to_Channel(m_functioncCh,JV6xxx::SETTING, m_functioncsetmode, data);
             }else if (m_functioncsetmode == 0){
                 ui->socvaluelabel->setText(value);
                 m_funcbatterycard->setSocValue(val);
@@ -620,8 +621,8 @@ void Mainwindow::allONrefresh()
     static bool allOn{false};
 
     allOn = !allOn;
-    quint8 func = allOn?0x01:0x00;
-    to_Channel( 0, 0x01, func, "");
+    quint8 func = allOn?JV6xxx::Output::SET_OUTPSTATUS_ON : JV6xxx::Output::SET_OUTPSTATUS_OFF;
+    to_Channel(0,JV6xxx::OUTPUT, func, "");
     ui->digitalallONpushButton->setText(allOn? "All - OFF" : "All - ON");
     ui->batteryallONpushButton->setText(allOn? "All - OFF" : "All - ON");
 }
@@ -693,7 +694,7 @@ void Mainwindow::on_digitalallunitpushButton_clicked()
     range = it.key();
     QString newunit = "All - " + it.value();
     ui->digitalallunitpushButton->setText(newunit);
-    to_Channel(0,0x04, 0x0E, QByteArray(1, char(it.key())));
+    to_Channel(0,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE, QByteArray(1, char(it.key())));
 }
 
 void Mainwindow::on_batteryallONpushButton_clicked(){allONrefresh();}
@@ -734,17 +735,17 @@ void Mainwindow::on_functionallapplypushButton_clicked()
         if (ui->cvvaluelabel->text() != ""){
             float val = ui->cvvaluelabel->text().toFloat();
             qToBigEndian(val, reinterpret_cast<uint8_t*>(data.data()));
-            to_Channel(0,0x02, 0, data);
+            to_Channel(0,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURVOLT, data);
         }
         if (ui->ccvaluelabel->text() != ""){
             float val = ui->ccvaluelabel->text().toFloat();
             qToBigEndian(val, reinterpret_cast<uint8_t*>(data.data()));
-            to_Channel(0,0x02, 1, data);
+            to_Channel(0,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURCURR, data);
         }
         if (ui->ovpvaluelabel->text() != ""){
             float val = ui->ovpvaluelabel->text().toFloat();
             qToBigEndian(val, reinterpret_cast<uint8_t*>(data.data()));
-            to_Channel(0,0x02, 3, data);
+            to_Channel(0,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURVOLT_PROT, data);
         }
     }else{
         if (ui->socvaluelabel->text() != ""){
@@ -775,7 +776,7 @@ void Mainwindow::on_functionunitpushButton_clicked()
 
     auto it = m_range.upperBound(range);
     if (it == m_range.end()) {it = m_range.begin();}
-    to_Channel(m_functioncCh,0x04, 0x0E, QByteArray(1, char(it.key())));
+    to_Channel(m_functioncCh,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_SENSCURR_RANGE, QByteArray(1, char(it.key())));
 }
 
 

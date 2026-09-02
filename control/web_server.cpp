@@ -249,7 +249,7 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
                             QString type = obj["type"].toString();
                             if (m_webRoutes.contains(type)) {
                                 switch (ConfigManager::s_remoteSt.load()) {
-                                    case InterSt::LOCAL:emit isRemote(4);// fall through
+                                    case InterSt::LOCAL:emit isRemote(InterSt::LAN_WEB);// fall through
                                     case InterSt::LAN_WEB:m_webRoutes[type](socket,obj);break;
                                     default:QJsonObject response;
                                             response["type"] = "scpi_response";

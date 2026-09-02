@@ -36,7 +36,7 @@ VxiServerManager::VxiServerManager(QObject *parent):QObject(parent)
                     }, Qt::DirectConnection);
                 connect(client, &QTcpSocket::readyRead,this, [this, client](){
                     switch (ConfigManager::s_remoteSt.load()) {
-                        case InterSt::LOCAL:emit isRemote(3);// fall through
+                        case InterSt::LOCAL:emit isRemote(InterSt::LAN_VXI);// fall through
                         case InterSt::LAN_VXI:processClientData(client);break;
                         default:
                             QByteArray errMsg = "Other instrument interfaces are currently in remote mode.";

@@ -55,7 +55,7 @@ UartServerManager::UartServerManager(QObject *parent): QObject(parent)
                 }*/
 
                 switch (ConfigManager::s_remoteSt.load()) {
-                    case InterSt::LOCAL:emit isRemote(2);// fall through
+                    case InterSt::LOCAL:emit isRemote(InterSt::RS232);// fall through
                     case InterSt::RS232:
                         m_readbuffer = m_uartServer->readAll();
                         qCDebug(uart_server)<<"[UartServerManager]:UartServer SCPI-Commend: "<< m_readbuffer;

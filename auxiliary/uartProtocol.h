@@ -128,9 +128,9 @@ namespace JV6xxx {
         constexpr quint8 SET_SENSCURR_RANGE          = 0x0E;
         constexpr quint8 SET_SENSAVER                = 0x0F;
         constexpr quint8 SET_SENSFUNC                = 0x10;
+        constexpr quint8 SET_SENSSWE_POIN            = 0x1D;
         constexpr quint8 SET_SENSSWE_TINT            = 0x1E;
         constexpr quint8 SET_SENSCURR_RANGE_TIM      = 0x1F;
-        constexpr quint8 SET_SENSSWE_POIN            = 0x1D;
         constexpr quint8 SET_SENSSWE_OFFS_POIN       = 0x23;
     }
 
