@@ -311,70 +311,79 @@ void Mainwindow::update_HardVer(int ch,const QString &ver){
 }
 
 void Mainwindow::update_IsOutput(int ch,bool status){
-    if (m_digitalcards.contains(ch)) {
-        m_digitalcards[ch]->setChannelState(status && m_initalpage == 0);
+    auto itDigital = m_digitalcards.find(ch);
+    if (itDigital != m_digitalcards.end()) {
+        itDigital.value()->setChannelState(status && m_initalpage == WidgetIndex::Digital);
     }
 
-    if (m_batterycards.contains(ch)){
-        m_batterycards[ch]->setChannelState(status && m_initalpage == 1);
-        m_batterycards[ch]->startupdateValue();
+    auto itbattery = m_batterycards.find(ch);
+    if (itbattery != m_batterycards.end()) {
+        itbattery.value()->setChannelState(status && m_initalpage == WidgetIndex::Battery);
+        itbattery.value()->startupdateValue();
     }
 
-    if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh){
-        m_funcdigitalcard->setChannelState(status && m_initalpage == 0);
-        m_funcbatterycard->setChannelState(status && m_initalpage == 1);
+    if (ui->topstackedwidget->currentIndex() == WidgetIndex::Function && ch == m_functioncCh){
+        m_funcdigitalcard->setChannelState(status && m_initalpage == WidgetIndex::Digital);
+        m_funcbatterycard->setChannelState(status && m_initalpage == WidgetIndex::Battery);
         m_funcbatterycard->startupdateValue();
     }
 }
 
 void Mainwindow::update_Voltage(int ch,float voltage){
-    if (m_initalpage == 0 && m_digitalcards.contains(ch)) {
-        m_digitalcards[ch]->setVoltage(voltage);
+    auto itDigital = m_digitalcards.find(ch);
+    if (m_initalpage == WidgetIndex::Digital && itDigital != m_digitalcards.end()) {
+        itDigital.value()->setVoltage(voltage);
 
-        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh){
+        if (ui->topstackedwidget->currentIndex() == WidgetIndex::Function && ch == m_functioncCh){
             m_funcdigitalcard->setVoltage(voltage);
         }
     }
 
-    if (m_batterycards.contains(ch) && m_batterycards[ch]->getChstatus()){
+    auto itbattery = m_batterycards.find(ch);
+    if (itbattery != m_batterycards.end() && itbattery.value()->getChstatus()){
         QByteArray data(4,0);float value;
-        value = m_batterycards[ch]->getcurrentOCV();
+        value = itbattery.value()->getcurrentOCV();
         qToBigEndian(value, reinterpret_cast<uint8_t*>(data.data()));
         to_Channel(ch,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURVOLT, data);
 
-        value = m_batterycards[ch]->getcurrentESR();
+        value = itbattery.value()->getcurrentESR();
         qToBigEndian(value, reinterpret_cast<uint8_t*>(data.data()));
         to_Channel(ch,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURIMP, data);
     }
 }
 
 void Mainwindow::update_CurrentAndUnit(int ch,float current){
-    if (m_initalpage == 0 && m_digitalcards.contains(ch)) {
+    auto itDigital = m_digitalcards.find(ch);
+    if (m_initalpage == WidgetIndex::Digital && itDigital != m_digitalcards.end()) {
         QString newUnit = (qAbs(current) < 1e-4) ? "mA" : "A";
-        m_digitalcards[ch]->setCurrent(current);
-        m_digitalcards[ch]->setCurrentUnit(newUnit);
+        itDigital.value()->setCurrent(current);
+        itDigital.value()->setCurrentUnit(newUnit);
 
-        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh){
+        if (ui->topstackedwidget->currentIndex() == WidgetIndex::Function && ch == m_functioncCh){
             m_funcdigitalcard->setCurrent(current);
             m_funcdigitalcard->setCurrentUnit(newUnit);
         }
     }
 
-    if (m_batterycards.contains(ch) && m_batterycards[ch]->getChstatus()){
-        m_batterycards[ch]->updateSocValue(current);
+    auto itbattery = m_batterycards.find(ch);
+    if (itbattery != m_batterycards.end() && itbattery.value()->getChstatus()){
+        itbattery.value()->updateSocValue(current);
 
-        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh){
+        if (ui->topstackedwidget->currentIndex() == WidgetIndex::Function && ch == m_functioncCh){
             m_funcbatterycard->updateSocValue(current);
         }
     }
 }
 
 void Mainwindow::update_Cv(int ch,float cv){
-    if (m_digitalcards.contains(ch)){m_digitalcards[ch]->setCvValue(cv);}
-    if (m_batterycards.contains(ch)){m_batterycards[ch]->setOcvValue(cv);}
+    auto itDigital = m_digitalcards.find(ch);
+    if (itDigital != m_digitalcards.end()){itDigital.value()->setCvValue(cv);}
 
-    if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh){
-        if (m_initalpage == 0){
+    auto itbattery = m_batterycards.find(ch);
+    if (itbattery != m_batterycards.end()){itbattery.value()->setOcvValue(cv);}
+
+    if (ui->topstackedwidget->currentIndex() == WidgetIndex::Function && ch == m_functioncCh){
+        if (m_initalpage == WidgetIndex::Digital){
             ui->cvvaluelabel->setText(QString::number(cv, 'f', 3));
             m_funcdigitalcard->setCvValue(cv);
         }else{
@@ -385,10 +394,11 @@ void Mainwindow::update_Cv(int ch,float cv){
 
 
 void Mainwindow::update_Cc(int ch,float cc){
-    if (m_digitalcards.contains(ch)) {
-        m_digitalcards[ch]->setCcValue(cc);
+    auto itDigital = m_digitalcards.find(ch);
+    if (m_initalpage == WidgetIndex::Digital && itDigital != m_digitalcards.end()) {
+        itDigital.value()->setCcValue(cc);
 
-        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh && m_initalpage == 0){
+        if (ui->topstackedwidget->currentIndex() == WidgetIndex::Function && ch == m_functioncCh){
             ui->ccvaluelabel->setText(QString::number(cc, 'f', 3));
             m_funcdigitalcard->setCcValue(cc);
         }
@@ -396,22 +406,23 @@ void Mainwindow::update_Cc(int ch,float cc){
 }
 
 void Mainwindow::update_Ovp(int ch,float ovp){
-    if (m_digitalcards.contains(ch)) {
-        m_digitalcards[ch]->setOvpValue(ovp);
+    auto itDigital = m_digitalcards.find(ch);
+    if (m_initalpage == WidgetIndex::Digital && itDigital != m_digitalcards.end()) {
+        itDigital.value()->setOvpValue(ovp);
 
-        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh && m_initalpage == 0){
+        if (ui->topstackedwidget->currentIndex() == WidgetIndex::Function && ch == m_functioncCh){
             ui->ovpvaluelabel->setText(QString::number(ovp, 'f', 3));
             m_funcdigitalcard->setOvpValue(ovp);
         }
     }
 }
 
-void Mainwindow::update_Range(int ch,int range)
-{
-    if (m_initalpage == 0 && m_digitalcards.contains(ch)) {
-        m_digitalcards[ch]->setChannelRange(range);
+void Mainwindow::update_Range(int ch,int range){
+    auto itDigital = m_digitalcards.find(ch);
+    if (m_initalpage == WidgetIndex::Digital && itDigital != m_digitalcards.end()) {
+        itDigital.value()->setChannelRange(range);
 
-        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh){
+        if (ui->topstackedwidget->currentIndex() == WidgetIndex::Function && ch == m_functioncCh){
             QString unit = m_range.contains(range) ? m_range[range] : "";
             ui->functionunitpushButton->setText(unit);
             m_funcdigitalcard->setChannelRange(range);
@@ -420,23 +431,24 @@ void Mainwindow::update_Range(int ch,int range)
 }
 
 void Mainwindow::update_Status(int ch,quint16 status){
-    if (m_digitalcards.contains(ch)) {
+    auto itDigital = m_digitalcards.find(ch);
+    if (itDigital != m_digitalcards.end()) {
         QString binaryStr = QString("%1").arg(status, 16, 2, QLatin1Char('0'));
 
         bool cv  = binaryStr.at(14) == "1";
         bool cc  = binaryStr.at(13) == "1";
         bool ovp = binaryStr.at(11) == "1";
 
-        if (m_initalpage == 0){
-            m_digitalcards[ch]->setCVChecked(cv);
-            m_digitalcards[ch]->setCCChecked(cc);
-            m_digitalcards[ch]->setOVPChecked(ovp);
+        if (m_initalpage == WidgetIndex::Digital){
+            itDigital.value()->setCVChecked(cv);
+            itDigital.value()->setCCChecked(cc);
+            itDigital.value()->setOVPChecked(ovp);
         }
 
-        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh){
+        if (ui->topstackedwidget->currentIndex() == WidgetIndex::Function && ch == m_functioncCh){
             m_chstatuscard->setChtatus(binaryStr);
 
-            if (m_initalpage == 0){
+            if (m_initalpage == WidgetIndex::Digital){
                 m_funcdigitalcard->setCVChecked(cv);
                 m_funcdigitalcard->setCCChecked(cc);
                 m_funcdigitalcard->setOVPChecked(ovp);
@@ -447,10 +459,11 @@ void Mainwindow::update_Status(int ch,quint16 status){
 
 
 void Mainwindow::update_Imp(int ch,float imp){
-    if (m_batterycards.contains(ch)){
-        m_batterycards[ch]->setEsrValue(imp);
+    auto itbattery = m_batterycards.find(ch);
+    if (m_initalpage == WidgetIndex::Battery && itbattery != m_batterycards.end()){
+        itbattery.value()->setEsrValue(imp);
 
-        if (ui->topstackedwidget->currentIndex() == 3 && ch == m_functioncCh && m_initalpage == 1){
+        if (ui->topstackedwidget->currentIndex() == WidgetIndex::Function && ch == m_functioncCh){
             m_funcbatterycard->setEsrValue(imp);
         }
     }
@@ -458,7 +471,7 @@ void Mainwindow::update_Imp(int ch,float imp){
 
 void Mainwindow::update_remotemodel(int reface){
     if (ConfigManager::s_remoteSt.load() != reface){
-        if (reface == 0){m_remoteOverlay->hide();} else{m_remoteOverlay->show();}
+        if (reface == InterSt::LOCAL){m_remoteOverlay->hide();} else{m_remoteOverlay->show();}
         ConfigManager::s_remoteSt.store(reface);
     }
 }
@@ -552,7 +565,7 @@ Mainwindow::Mainwindow(QWidget *parent) : QWidget(parent), ui(new Ui::Mainwindow
         if (!value.isEmpty()){
             float val = value.toFloat();
 
-            if (m_initalpage == 0){
+            if (m_initalpage == WidgetIndex::Digital){
                 // model: 0 - CV ; 1 - CC ; 3 - OVP;
                 QByteArray data(4,0);
                 qToBigEndian(val, reinterpret_cast<uint8_t*>(data.data()));
@@ -589,7 +602,7 @@ Mainwindow::Mainwindow(QWidget *parent) : QWidget(parent), ui(new Ui::Mainwindow
     // remote over page
 
     m_remoteOverlay = new remoteoverlay(this);
-    connect(m_remoteOverlay, &remoteoverlay::exitRemote, this, []() {ConfigManager::s_remoteSt.store(0);});
+    connect(m_remoteOverlay, &remoteoverlay::exitRemote, this, []() {ConfigManager::s_remoteSt.store(InterSt::LOCAL);});
 }
 
 Mainwindow::~Mainwindow()

@@ -621,10 +621,10 @@ const scpi_unit_def_t ScpiManager::m_scpi_units[] = {
 
 ScpiManager::ScpiManager(QObject *parent) : QObject(parent) {
     // QByteArray <- QString
-    m_idnManufacturer = ConfigManager::s_manufacturer.toUtf8();
+    m_idnManufacturer = Device::Manufacturer;
     m_idnModel        = ConfigManager::s_model.toUtf8();
     m_idnSerialNumber = ConfigManager::s_serialNumber.toUtf8();
-    m_idnVersion      = ConfigManager::s_firmwareVersion.toUtf8();
+    m_idnVersion      = Device::SoftVer;
 
     m_interface.flush   = staticFlush;
     m_interface.reset   = staticReset;

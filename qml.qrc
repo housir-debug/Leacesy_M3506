@@ -1,4 +1,7 @@
 <RCC>
+    <qresource prefix="/fonts">
+        <file>wqy-microhei.ttc</file>
+    </qresource>
     <qresource prefix="/web">
         <file>web/index.html</file>
         <file>web/channels.html</file>

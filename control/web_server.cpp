@@ -114,8 +114,8 @@ void WebServerManager::setupHTTPRoutes()
         QJsonObject response;
         response["model"] = ConfigManager::s_model;
         response["serial"] = ConfigManager::s_serialNumber;
-        response["software"] = ConfigManager::s_firmwareVersion;
-        response["hardware"] = ConfigManager::s_hardwareVersion;
+        response["software"] = Device::SoftVer;
+        response["hardware"] = Device::HardVer;
 
         QByteArray jsonData = QJsonDocument(response).toJson();
         sendHttpResponse(client, jsonData, "application/json");

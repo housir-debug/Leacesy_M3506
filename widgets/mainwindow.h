@@ -119,3 +119,9 @@ private slots:
     void on_functionmodelpushButton_clicked();
 };
 
+namespace WidgetIndex {
+    constexpr int Digital      = 0x00;
+    constexpr int Battery      = 0x01;
+    constexpr int Settings     = 0x02;
+    constexpr int Function     = 0x03;
+}

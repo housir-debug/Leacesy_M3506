@@ -24,11 +24,8 @@ extern std::vector<UartConfig> configs;
 
 class ConfigManager {
 public:
-    static QString s_firmwareVersion;
-    static QString s_hardwareVersion;
-    static QString s_manufacturer;
-
     static QString s_loglevel;
+    static std::atomic<int> s_remoteSt;
 
     static bool s_enableCanMess;
     static bool s_enableUartMess;
@@ -38,7 +35,6 @@ public:
     static bool s_enableLANServer;
     static bool s_enableDisplay;
 
-    static std::atomic<int> s_remoteSt;
     static bool init(const QString &configDir);
     static bool setConfigValue(const QString &key, const QVariant &value);
 
@@ -69,4 +65,10 @@ namespace InterSt {
     constexpr int RS232      = 0x02;
     constexpr int LAN_VXI    = 0x03;
     constexpr int LAN_WEB    = 0x04;
+}
+
+namespace Device {
+    constexpr const char* SoftVer           = "1.0.0";
+    constexpr const char* HardVer           = "1.0.0";
+    constexpr const char* Manufacturer      = "Leacesy";
 }

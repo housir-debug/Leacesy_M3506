@@ -42,12 +42,10 @@ std::vector<UartConfig> configs = {
     {"/dev/ttyS1",    QSerialPort::Baud38400, 0x01},   // test
 };
 
-// global variable - Internal fixation
-QString ConfigManager::s_firmwareVersion = "1.0.0";
-QString ConfigManager::s_hardwareVersion = "1.0.0";
-QString ConfigManager::s_manufacturer = "Leacesy";
 // log config
 QString ConfigManager::s_loglevel = "info"; // "release"
+std::atomic<int> ConfigManager::s_remoteSt{0};
+QSettings* ConfigManager::s_settings = nullptr;
 // channel switch
 bool ConfigManager::s_enableCanMess    = false;
 bool ConfigManager::s_enableUartMess   = false;
@@ -56,9 +54,6 @@ bool ConfigManager::s_enableUARTServer = true;
 bool ConfigManager::s_enableCANServer  = true;
 bool ConfigManager::s_enableLANServer  = true;
 bool ConfigManager::s_enableDisplay    = true;
-//
-std::atomic<int> ConfigManager::s_remoteSt{0};
-QSettings* ConfigManager::s_settings = nullptr;
 
 bool ConfigManager::init(const QString &configDir)
 {

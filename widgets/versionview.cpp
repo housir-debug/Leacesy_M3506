@@ -8,8 +8,8 @@ versionview::versionview(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->deswvaluelabel->setText(ConfigManager::s_firmwareVersion);
-    ui->dehwvaluelabel->setText(ConfigManager::s_hardwareVersion);
+    ui->deswvaluelabel->setText(Device::SoftVer);
+    ui->dehwvaluelabel->setText(Device::HardVer);
 }
 
 versionview::~versionview()

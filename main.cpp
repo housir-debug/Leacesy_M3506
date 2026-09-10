@@ -2,6 +2,7 @@
 #include <QThread>
 #include <QWidget>
 #include <QApplication>
+#include <QFontDatabase>
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGraphicsProxyWidget>
@@ -62,6 +63,16 @@ int main(int argc, char *argv[])
     QApplication::setOverrideCursor(Qt::BlankCursor);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     // QApplication::setAttribute(Qt::AA_EnableHighDpiScaling); -* Warning: It will deform.
+
+    int fontId = QFontDatabase::addApplicationFont(":/fonts/wqy-microhei.ttc");
+    if (fontId != -1) {
+        QStringList families = QFontDatabase::applicationFontFamilies(fontId);
+        qCDebug(application) << "Loaded font:" << families;
+        if (!families.isEmpty()) {
+            QFont font(families.at(0));
+            app.setFont(font);
+        }
+    }
 
     // load config
     const QString configPath = QDir(QApplication::applicationDirPath()).filePath("..");

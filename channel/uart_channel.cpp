@@ -11,7 +11,6 @@ UartChannelManager::~UartChannelManager()
 
 Q_LOGGING_CATEGORY(uart_channel, "UART_CHANNEL:")
 
-
 QThread* UartChannelManager::getWorkerThread(quint32 channel) {
     static constexpr int THREAD_COUNT = 4;
     static QThread threads[THREAD_COUNT];
@@ -113,8 +112,8 @@ const QVector<Command> UartChannelManager::m_initCommands = {
 void UartChannelManager::writeFrame(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi) {
     if (m_waitR) {
         QTimer::singleShot(18, this, [this, cmd, func, param, isScpi] { // 18 ms
-            m_waitR = false;
             writeFrame(cmd, func, param, isScpi);
+            m_waitR = false;
         });
 
         return;
