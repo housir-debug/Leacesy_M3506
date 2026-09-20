@@ -69,7 +69,8 @@ FORMS += \
     widgets/test.ui \
     widgets/versionview.ui
 
-RESOURCES += qml.qrc
+RESOURCES += \
+    master.qrc
 
 DISTFILES += auxiliary/instrument_config.ini
 

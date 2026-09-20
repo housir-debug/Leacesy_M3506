@@ -121,18 +121,20 @@ CanServerManager::CanServerManager(QObject *parent): QObject(parent)
 
                             switch (ConfigManager::s_remoteSt.load()) {
                                 case InterSt::LOCAL:emit isRemote(InterSt::CAN);// fall through
-                                case InterSt::CAN:processFrame(data); return;
+                                case InterSt::CAN:processFrame(data); break;
                                 default:
                                     qCDebug(can_server)<<"[CanServerManager]: remoteMode[!=can-1]: "<<ConfigManager::s_remoteSt.load();
                                     quint8 channel = static_cast<quint8>(data[0]);
-                                    sendFrame(channel,0xffff,"");
+                                    sendFrame(channel,0xffff,""); break;
                             }
                         }
-                    } else if (nbytes < 0) {
-                        qCWarning(can_server)<<"[CanServerManager]:Read error: "<<strerror(errno);
-                        if (errno == EAGAIN || errno == EWOULDBLOCK) {m_readNotifier->setEnabled(true);}
                     }
-                }}, Qt::DirectConnection);
+
+                    qCWarning(can_server)<<"[CanServerManager]:Read error: "<<strerror(errno);
+                }
+
+                m_readNotifier->setEnabled(true);
+            }, Qt::DirectConnection);
             connect(m_writeNotifier, &QSocketNotifier::activated,this, [this](){
                 m_writeNotifier->setEnabled(false);
 
@@ -144,11 +146,13 @@ CanServerManager::CanServerManager(QObject *parent): QObject(parent)
                         m_sendQueue.dequeue();
                         QByteArray data(reinterpret_cast<const char*>(frame.data), frame.can_dlc);
                         qCDebug(can_server)<<"[CanServerManager]:Sent Data: "<<data.toHex()<<", QueueRemain: "<<m_sendQueue.size();
-                    } else if (sent < 0) {
-                        qCWarning(can_server)<<"[CanServerManager]:Write error: "<<strerror(errno);
-                        if (errno == EAGAIN || errno == EWOULDBLOCK) {m_writeNotifier->setEnabled(true);}
+                        break;
                     }
-                }}, Qt::DirectConnection);
+
+                    qCWarning(can_server)<<"[CanServerManager]:Write error: "<<strerror(errno);
+                }
+                m_writeNotifier->setEnabled(true);
+            }, Qt::DirectConnection);
 
             return;
         }});
