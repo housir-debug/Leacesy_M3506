@@ -76,21 +76,21 @@ void WebServerManager::sendHttpResponse(QTcpSocket *client, const QByteArray &co
 
 const QHash<QString, QString> WebServerManager::m_staticFiles =
 {
-    {"/",                     ":/web/web/index.html"},
-    {"/index.html",           ":/web/web/index.html"},
-    {"/channels.html",        ":/web/web/channels.html"},
-    {"/import.html",          ":/web/web/import.html"},
-    {"/js/index.js",          ":/web/web/js/index.js"},
-    {"/js/channels.js",       ":/web/web/js/channels.js"},
-    {"/js/import.js",         ":/web/web/js/import.js"},
-    {"/js/header.js",         ":/web/web/js/header.js"},
-    {"/css/style.css",        ":/web/web/css/style.css"},
-    {"/css/index.css",        ":/web/web/css/index.css"},
-    {"/css/channels.css",     ":/web/web/css/channels.css"},
-    {"/css/import.css",       ":/web/web/css/import.css"},
-    {"/css/global.css",       ":/web/web/css/global.css"},
-    {"/icon/leacesylogo.png", ":/web/web/icon/leacesylogo.png"},
-    {"/icon/leacesyicon.png", ":/web/web/icon/leacesyicon.png"}
+    {"/",                     ":/web/html/index.html"},
+    {"/index.html",           ":/web/html/index.html"},
+    {"/channels.html",        ":/web/html/channels.html"},
+    {"/import.html",          ":/web/html/import.html"},
+    {"/js/index.js",          ":/web/js/index.js"},
+    {"/js/channels.js",       ":/web/js/channels.js"},
+    {"/js/import.js",         ":/web/js/import.js"},
+    {"/js/header.js",         ":/web/js/header.js"},
+    {"/css/style.css",        ":/web/css/style.css"},
+    {"/css/index.css",        ":/web/css/index.css"},
+    {"/css/channels.css",     ":/web/css/channels.css"},
+    {"/css/import.css",       ":/web/css/import.css"},
+    {"/css/global.css",       ":/web/css/global.css"},
+    {"/icon/leacesylogo.png", ":/web/icon/leacesylogo.png"},
+    {"/icon/leacesyicon.png", ":/web/icon/leacesyicon.png"}
 };
 
 const QHash<QString, QString> WebServerManager::m_mimeTypes =

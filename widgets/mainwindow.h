@@ -3,13 +3,13 @@
 #include <QLoggingCategory>
 #include "auxiliary/battery_model.h"
 #include "auxiliary/config_manager.h"
-#include "digitalcard.h"
-#include "batterycard.h"
-#include "versionview.h"
-#include "chstatusview.h"
-#include "numberkeypad.h"
-#include "devicesetting.h"
-#include "remoteoverlay.h"
+#include "component/digitalcard.h"
+#include "component/batterycard.h"
+#include "component/versionview.h"
+#include "component/chstatusview.h"
+#include "component/numberkeypad.h"
+#include "interaction/devicesetting.h"
+#include "component/remoteoverlay.h"
 
 Q_DECLARE_LOGGING_CATEGORY(widget)
 

@@ -272,11 +272,17 @@ QPushButton:pressed {
               <string notr="true"/>
              </property>
              <property name="text">
-              <string>Settings</string>
+              <string/>
              </property>
              <property name="icon">
-              <iconset resource="../qml.qrc">
-               <normaloff>:/web/web/icon/settings.png</normaloff>:/web/web/icon/settings.png</iconset>
+              <iconset resource="../resources/master.qrc">
+               <normaloff>:/web/icon/settings.png</normaloff>:/web/icon/settings.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
              </property>
             </widget>
            </item>
@@ -295,11 +301,17 @@ QPushButton:pressed {
               <string notr="true"/>
              </property>
              <property name="text">
-              <string>battery</string>
+              <string/>
              </property>
              <property name="icon">
-              <iconset resource="../qml.qrc">
-               <normaloff>:/web/web/icon/battery.png</normaloff>:/web/web/icon/battery.png</iconset>
+              <iconset resource="../resources/master.qrc">
+               <normaloff>:/web/icon/battery.png</normaloff>:/web/icon/battery.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
              </property>
              <property name="checkable">
               <bool>false</bool>
@@ -700,11 +712,17 @@ QPushButton:pressed {
               <string notr="true"/>
              </property>
              <property name="text">
-              <string>Settings</string>
+              <string/>
              </property>
              <property name="icon">
-              <iconset resource="../qml.qrc">
-               <normaloff>:/web/web/icon/settings.png</normaloff>:/web/web/icon/settings.png</iconset>
+              <iconset resource="../resources/master.qrc">
+               <normaloff>:/web/icon/settings.png</normaloff>:/web/icon/settings.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
              </property>
             </widget>
            </item>
@@ -723,11 +741,17 @@ QPushButton:pressed {
               <string notr="true"/>
              </property>
              <property name="text">
-              <string>digital</string>
+              <string/>
              </property>
              <property name="icon">
-              <iconset resource="../qml.qrc">
-               <normaloff>:/web/web/icon/promotion.png</normaloff>:/web/web/icon/promotion.png</iconset>
+              <iconset resource="../resources/master.qrc">
+               <normaloff>:/web/icon/promotion.png</normaloff>:/web/icon/promotion.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
              </property>
              <property name="checkable">
               <bool>false</bool>
@@ -1447,7 +1471,7 @@ QPushButton:pressed {
               <string>Settings</string>
              </property>
              <property name="icon">
-              <iconset resource="../qml.qrc">
+              <iconset>
                <normaloff>:/web/web/icon/settings.png</normaloff>:/web/web/icon/settings.png</iconset>
              </property>
             </widget>
@@ -2657,10 +2681,7 @@ QLabel {
   </layout>
  </widget>
  <resources>
-  <include location="../qml.qrc"/>
+  <include location="../resources/master.qrc"/>
  </resources>
  <connections/>
- <buttongroups>
-  <buttongroup name="settingbuttonGroup"/>
- </buttongroups>
 </ui>

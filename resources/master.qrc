@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/fonts">
+        <file>wqy-microhei.ttc</file>
+    </qresource>
+    <qresource prefix="/web">
+        <file>html/index.html</file>
+        <file>html/channels.html</file>
+        <file>html/import.html</file>
+        <file>css/style.css</file>
+        <file>css/index.css</file>
+        <file>css/channels.css</file>
+        <file>css/global.css</file>
+        <file>css/import.css</file>
+        <file>js/index.js</file>
+        <file>js/channels.js</file>
+        <file>js/import.js</file>
+        <file>js/header.js</file>
+        <file>icon/settings.png</file>
+        <file>icon/battery.png</file>
+        <file>icon/promotion.png</file>
+        <file>icon/leacesyicon.png</file>
+        <file>icon/leacesylogo.png</file>
+    </qresource>
+</RCC>

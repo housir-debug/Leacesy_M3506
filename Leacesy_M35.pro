@@ -26,15 +26,15 @@ HEADERS += \
     control/vxi_server.h \
     control/web_server.h \
     control/uart_server.h \
-    widgets/batterycard.h \
-    widgets/chstatusview.h \
-    widgets/devicesetting.h \
-    widgets/digitalcard.h \
+    widgets/component/batterycard.h \
+    widgets/component/chstatusview.h \
+    widgets/interaction/devicesetting.h \
+    widgets/component/digitalcard.h \
     widgets/mainwindow.h \
-    widgets/numberkeypad.h \
-    widgets/remoteoverlay.h \
+    widgets/component/numberkeypad.h \
+    widgets/component/remoteoverlay.h \
     widgets/test.h \
-    widgets/versionview.h
+    widgets/component/versionview.h
 
 SOURCES += \
     auxiliary/battery_model.cpp \
@@ -48,29 +48,28 @@ SOURCES += \
     control/web_server.cpp \
     control/uart_server.cpp \
     main.cpp \
-    widgets/batterycard.cpp \
-    widgets/chstatusview.cpp \
-    widgets/devicesetting.cpp \
-    widgets/digitalcard.cpp \
+    widgets/component/batterycard.cpp \
+    widgets/component/chstatusview.cpp \
+    widgets/interaction/devicesetting.cpp \
+    widgets/component/digitalcard.cpp \
     widgets/mainwindow.cpp \
-    widgets/numberkeypad.cpp \
-    widgets/remoteoverlay.cpp \
+    widgets/component/numberkeypad.cpp \
+    widgets/component/remoteoverlay.cpp \
     widgets/test.cpp \
-    widgets/versionview.cpp
+    widgets/component/versionview.cpp
 
 FORMS += \
-    widgets/batterycard.ui \
-    widgets/chstatusview.ui \
-    widgets/devicesetting.ui \
-    widgets/digitalcard.ui \
+    widgets/component/batterycard.ui \
+    widgets/component/chstatusview.ui \
+    widgets/interaction/devicesetting.ui \
+    widgets/component/digitalcard.ui \
     widgets/mainwindow.ui \
-    widgets/numberkeypad.ui \
-    widgets/remoteoverlay.ui \
+    widgets/component/numberkeypad.ui \
+    widgets/component/remoteoverlay.ui \
     widgets/test.ui \
-    widgets/versionview.ui
+    widgets/component/versionview.ui
 
-RESOURCES += \
-    master.qrc
+RESOURCES += resources/master.qrc
 
 DISTFILES += auxiliary/instrument_config.ini
 

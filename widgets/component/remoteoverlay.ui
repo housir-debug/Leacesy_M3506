@@ -82,7 +82,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="../qml.qrc">:/web/web/icon/leacesyicon.png</pixmap>
+      <pixmap resource="../resources/master.qrc">:/web/icon/leacesyicon.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -169,7 +169,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../qml.qrc"/>
+  <include location="../resources/master.qrc"/>
  </resources>
  <connections/>
 </ui>
