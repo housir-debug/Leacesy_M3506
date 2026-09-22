@@ -21,6 +21,7 @@ numberkeypad::numberkeypad(QWidget *parent) :
         m_longPressTimer->stop();
         m_isPressed = false;
     });
+
     connect(m_longPressTimer, &QTimer::timeout, this, [this]{
         if (m_isPressed && !m_longPressTriggered) {
             m_longPressTriggered = true;
@@ -37,20 +38,6 @@ numberkeypad::~numberkeypad()
 QString numberkeypad::getvalue() const{return ui->displayfield->text();}
 
 void numberkeypad::setValue(const QString &value){ui->displayfield->setText(value);}
-
-void numberkeypad::on_deletebtn_clicked()
-{
-    QString current = ui->displayfield->text();
-
-    if (!current.isEmpty()){
-        int pos = ui->displayfield->cursorPosition();
-        if (pos < 0 || pos > current.length()) {pos = current.length();}
-
-        current.remove(pos - 1, 1);
-        ui->displayfield->setText(current);
-        ui->displayfield->setCursorPosition(pos - 1);
-    }
-}
 
 void numberkeypad::on_btn0_clicked(){insertText("0");}
 
@@ -76,6 +63,20 @@ void numberkeypad::on_btndot_clicked(){insertText(".");}
 
 void numberkeypad::on_btnenter_clicked(){insertText("↵");}
 
+void numberkeypad::on_deletebtn_clicked()
+{
+    QString current = ui->displayfield->text();
+
+    if (!current.isEmpty()){
+        int pos = ui->displayfield->cursorPosition();
+        if (pos < 0 || pos > current.length()) {pos = current.length();}
+
+        current.remove(pos - 1, 1);
+        ui->displayfield->setText(current);
+        ui->displayfield->setCursorPosition(pos - 1);
+    }
+}
+
 void numberkeypad::insertText(const QString &text)
 {
     QString current = ui->displayfield->text();
@@ -92,4 +93,3 @@ void numberkeypad::insertText(const QString &text)
         ui->displayfield->clear();
     }
 }
-

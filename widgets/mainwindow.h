@@ -3,8 +3,7 @@
 #include <QLoggingCategory>
 #include "auxiliary/battery_model.h"
 #include "auxiliary/config_manager.h"
-#include "component/digitalcard.h"
-#include "component/batterycard.h"
+#include "component/channelcard.h"
 #include "component/versionview.h"
 #include "component/chstatusview.h"
 #include "component/numberkeypad.h"
@@ -21,32 +20,21 @@ class Mainwindow : public QWidget
 
 private:
     Ui::Mainwindow *ui;
-    versionview* m_vercard;
     chstatusview* m_chstatuscard;
-    digitalcard* m_funcdigitalcard;
-    batterycard* m_funcbatterycard;
     numberkeypad* m_funcnmbkeycard;
-    devicesetting* m_devicesetcard;
+    channelcard* m_funcchcard;
     numberkeypad* m_setnmbkeycard;
     remoteoverlay* m_remoteOverlay;
 
-    QMap<int,digitalcard*> m_digitalcards;
-    QMap<int,batterycard*> m_batterycards;
-
-    QMap<int,QString> m_ChsoftVer;
-    QMap<int,QString> m_ChhardVer;
-    QMap<int,QString> m_range = {
-        {0x00, "A"},
-        {0x01, "mA"},
-        {0x10, "Auto"},
-    };
-
+    bool m_channelbattery{false};
     int m_functioncsetmode{0};
-    int m_functioncCh{0};
-    int m_initalpage{0};
+    QMap<int,QString> m_range;
+    QMap<QString, int> m_rangeReverse;
+    QMap<int,channelcard*> m_channels;
 
 public:
     void update_cardtest();
+    channelcard* create_chcard(int ch);
     void update_SoftVer(int ch,const QString &ver);
     void update_HardVer(int ch,const QString &ver);
     void update_IsOutput(int ch,bool status);
@@ -83,23 +71,14 @@ signals:
 
 private slots:
     void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param);
-    void allONrefresh();
 
     // digital / battery to switchs cards
     void on_digitalsettingspushButton_clicked();
-    void on_batterysettingspushButton_clicked();
     void on_digitalmodepushButton_clicked();
-    void on_batterymodepushButton_clicked();
-
     void on_digitalrowsbackpushButton_clicked();
     void on_digitalrowsnextpushButton_clicked();
-    void on_batteryrowsbackpushButton_clicked();
-    void on_batteryrowsnextpushButton_clicked();
-
     void on_digitalallONpushButton_clicked();
     void on_digitalallunitpushButton_clicked();
-    void on_batteryallONpushButton_clicked();
-    void on_batteryallmodelpushButton_clicked();
 
     // setting page switchs
     void on_settingrowsbackpushButton_clicked();
@@ -120,8 +99,12 @@ private slots:
 };
 
 namespace WidgetIndex {
+    constexpr int Channel      = 0x00;
+    constexpr int Settings     = 0x01;
+    constexpr int Function     = 0x02;
+}
+
+namespace Chindex {
     constexpr int Digital      = 0x00;
     constexpr int Battery      = 0x01;
-    constexpr int Settings     = 0x02;
-    constexpr int Function     = 0x03;
 }

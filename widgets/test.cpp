@@ -1,8 +1,8 @@
 #include "test.h"
 #include "ui_test.h"
-#include "digitalcard.h"
-#include "batterycard.h"
-#include "numberkeypad.h"
+#include "component/digitalcard.h"
+#include "component/batterycard.h"
+#include "component/numberkeypad.h"
 #include <QDebug>
 
 test::test(QWidget *parent) :

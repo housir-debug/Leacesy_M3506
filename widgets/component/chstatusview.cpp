@@ -3,8 +3,7 @@
 #include <QStyle>
 #include <QDebug>
 
-chstatusview::chstatusview(QWidget *parent) :
-    QFrame(parent),
+chstatusview::chstatusview(QWidget *parent) :QFrame(parent),
     ui(new Ui::chstatusview)
 {
     ui->setupUi(this);

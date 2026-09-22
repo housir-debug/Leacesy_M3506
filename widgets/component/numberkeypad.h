@@ -25,7 +25,6 @@ signals:
     void valueEntered(const QString &value);
 
 private slots:
-    void on_deletebtn_clicked();
     void on_btn0_clicked();
     void on_btn1_clicked();
     void on_btn2_clicked();
@@ -38,6 +37,7 @@ private slots:
     void on_btn9_clicked();
     void on_btndot_clicked();
     void on_btnenter_clicked();
+    void on_deletebtn_clicked();
     void insertText(const QString &text);
 };
 

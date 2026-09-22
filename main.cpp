@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (ConfigManager::s_enableDisplay){QTimer::singleShot(36, show_share.get(), &Mainwindow::update_cardtest);}
+    //if (ConfigManager::s_enableDisplay){QTimer::singleShot(36, show_share.get(), &Mainwindow::update_cardtest);}
 
     //QTimer::singleShot(9000, &app, &QGuiApplication::quit); // 9s
     return app.exec();

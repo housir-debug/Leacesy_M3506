@@ -26,15 +26,15 @@ HEADERS += \
     control/vxi_server.h \
     control/web_server.h \
     control/uart_server.h \
-    widgets/component/batterycard.h \
+    widgets/component/channelcard.h \
     widgets/component/chstatusview.h \
-    widgets/interaction/devicesetting.h \
-    widgets/component/digitalcard.h \
+    widgets/interaction/channelpage.h \
+    widgets/interaction/channelsetting.h \
+    widgets/interaction/devicesetpage.h \
     widgets/mainwindow.h \
     widgets/component/numberkeypad.h \
     widgets/component/remoteoverlay.h \
-    widgets/test.h \
-    widgets/component/versionview.h
+    widgets/test.h
 
 SOURCES += \
     auxiliary/battery_model.cpp \
@@ -48,26 +48,26 @@ SOURCES += \
     control/web_server.cpp \
     control/uart_server.cpp \
     main.cpp \
-    widgets/component/batterycard.cpp \
+    widgets/component/channelcard.cpp \
     widgets/component/chstatusview.cpp \
-    widgets/interaction/devicesetting.cpp \
-    widgets/component/digitalcard.cpp \
+    widgets/interaction/channelpage.cpp \
+    widgets/interaction/channelsetting.cpp \
+    widgets/interaction/devicesetpage.cpp \
     widgets/mainwindow.cpp \
     widgets/component/numberkeypad.cpp \
     widgets/component/remoteoverlay.cpp \
-    widgets/test.cpp \
-    widgets/component/versionview.cpp
+    widgets/test.cpp
 
 FORMS += \
-    widgets/component/batterycard.ui \
+    widgets/component/channelcard.ui \
     widgets/component/chstatusview.ui \
-    widgets/interaction/devicesetting.ui \
-    widgets/component/digitalcard.ui \
+    widgets/interaction/channelpage.ui \
+    widgets/interaction/channelsetting.ui \
+    widgets/interaction/devicesetpage.ui \
     widgets/mainwindow.ui \
     widgets/component/numberkeypad.ui \
     widgets/component/remoteoverlay.ui \
-    widgets/test.ui \
-    widgets/component/versionview.ui
+    widgets/test.ui
 
 RESOURCES += resources/master.qrc
 
