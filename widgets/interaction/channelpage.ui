@@ -51,7 +51,6 @@
 
 #topnaviga_frame,#botnaviga_frame{
 	background: qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 #172847,stop:1 #0E1B33);
-    border-bottom: 1px solid #243B66;
 }
 
 QPushButton{
@@ -166,7 +165,7 @@ QProgressBar::chunk {
      <property name="lineWidth">
       <number>0</number>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,18,2">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,10,2">
       <property name="spacing">
        <number>9</number>
       </property>

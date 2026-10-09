@@ -40,7 +40,6 @@ private:
 
     QMap<int,QString> m_range;
     QMap<QString, int> m_rangeReverse;
-    // 可以用一个公共类实现
     void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param);
 
 signals:

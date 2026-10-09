@@ -85,7 +85,7 @@ devicesetpage::~devicesetpage()
     delete ui;
 }
 
-void devicesetpage::on_back_pushButton_clicked(){emit jump_back();}
+void devicesetpage::on_back_pushButton_clicked(){emit backRequested();}
 
 void devicesetpage::on_dhcp_pushButton_clicked()
 {

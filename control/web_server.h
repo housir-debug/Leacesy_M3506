@@ -1,7 +1,7 @@
 #pragma once
 #include "auxiliary/scpi_handle.h"
 #include "auxiliary/battery_model.h"
-#include "widgets/mainwindow.h"
+#include "widgets/interaction/channelpage.h"
 #include <QWebSocketServer>
 #include <QLoggingCategory>
 #include <QTcpServer>
@@ -21,7 +21,7 @@ public:
     ~WebServerManager();
 
     void set_network(bool isstatic);
-    std::shared_ptr<Mainwindow> m_qmlbridge;
+    std::shared_ptr<channelpage> m_qmlbridge;
     std::shared_ptr<ScpiManager> m_scpiManager;
     std::shared_ptr<BatteryModelManager> m_BatteryManager;
 

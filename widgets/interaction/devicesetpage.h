@@ -20,7 +20,7 @@ private:
     int m_setmode{0};
 
 signals:
-    void jump_back();
+    void backRequested();
     void set_network(bool isstatic);
     void set_canbaud();
     void set_RS232Baud();
