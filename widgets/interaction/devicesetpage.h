@@ -1,6 +1,5 @@
 #pragma once
 #include <QWidget>
-#include "../component/numberkeypad.h"
 
 namespace Ui {class devicesetpage;}
 
@@ -15,7 +14,6 @@ public:
     void responseUpdate();
 
 private:
-    numberkeypad* m_setnmbkeycard;
     Ui::devicesetpage *ui;
     int m_setmode{0};
 

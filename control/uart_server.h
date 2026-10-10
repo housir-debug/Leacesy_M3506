@@ -1,5 +1,5 @@
 #pragma once
-#include "auxiliary/scpi_handle.h"
+#include "scpi_handle.h"
 
 Q_DECLARE_LOGGING_CATEGORY(uart_server)
 

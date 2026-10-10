@@ -1,5 +1,6 @@
 #include "channelsetting.h"
 #include "ui_channelsetting.h"
+#include "auxiliary/channelbus.h"
 #include "auxiliary/uartProtocol.h"
 
 channelsetting::channelsetting(QWidget *parent) :
@@ -9,40 +10,45 @@ channelsetting::channelsetting(QWidget *parent) :
     ui->setupUi(this);
     //ui->model_comboBox->addItems(m_modelManager->getAvailableModels());
 
-    connect(ui->onoff_comboBox, &QComboBox::currentTextChanged,this,[this](const QString &text){
+    QObject::connect(ui->onoff_comboBox, &QComboBox::currentTextChanged,this,[this](const QString &text){
         if (text == "OFF"){ // 1-off outputed==true
-            to_Channel(0,JV6xxx::OUTPUT,JV6xxx::Output::SET_OUTPSTATUS_OFF,"");
+            ChannelBus::instance()->ChannelBus::instance()->to_Channel(0,JV6xxx::OUTPUT,JV6xxx::Output::SET_OUTPSTATUS_OFF,"");
             ui->onoff_comboBox->setProperty("Outputed",false);
         }else{
-            to_Channel(0,JV6xxx::OUTPUT,JV6xxx::Output::SET_OUTPSTATUS_ON,"");
+            ChannelBus::instance()->to_Channel(0,JV6xxx::OUTPUT,JV6xxx::Output::SET_OUTPSTATUS_ON,"");
             ui->onoff_comboBox->setProperty("Outputed",true);
         }
 
+        on_allFO_pushButton_clicked();
         ui->onoff_comboBox->style()->unpolish(ui->onoff_comboBox);
         ui->onoff_comboBox->style()->polish(ui->onoff_comboBox);
         });
-    connect(ui->unit_comboBox, &QComboBox::currentTextChanged,this, [this](const QString &text){
+    QObject::connect(ui->unit_comboBox, &QComboBox::currentTextChanged,this, [this](const QString &text){
+        on_allFO_pushButton_clicked();
+
         if(text == "A"){
-            to_Channel(0,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1, 0x00));
+            ChannelBus::instance()->to_Channel(0,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1, 0x00));
         }else if(text == "mA"){
-            to_Channel(0,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1, 0x01));
+            ChannelBus::instance()->to_Channel(0,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1, 0x01));
         }else{
-            to_Channel(0,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1, 0x10));
+            ChannelBus::instance()->to_Channel(0,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1, 0x10));
         }});
-    connect(ui->model_comboBox, &QComboBox::currentTextChanged,this,[this](const QString &text){
+    QObject::connect(ui->model_comboBox, &QComboBox::currentTextChanged,this,[this](const QString &text){
+        on_allFO_pushButton_clicked();
+
         for (int i = 1; i <= 36; ++i) {
             auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
             if (btn && btn->isChecked()){
                 emit to_chModel(i,text);
             }
         }
-    });
+        });
 
-    m_setnmbkeycard = new numberkeypad(ui->keyframe->parentWidget());
-    m_setnmbkeycard->setGeometry(ui->keyframe->geometry());
-    QObject::connect(m_setnmbkeycard, &numberkeypad::valueEntered, this, [this](const QString &value) {
+    QObject::connect(ui->keyframe, &numberkeypad::valueEntered, this, [this](const QString &value) {
         if (!value.isEmpty()){
+            on_allFO_pushButton_clicked();
             float val = value.toFloat();
+            qDebug()<<"shuru:"<<value;
 
             switch (m_setmode) {
                 case channelSet_mode::cv:return sendModecmd(val,JV6xxx::Setting::SET_SOURVOLT);
@@ -67,7 +73,6 @@ channelsetting::channelsetting(QWidget *parent) :
                 default:return;
             }
         }});
-    delete ui->keyframe;
 }
 
 channelsetting::~channelsetting()
@@ -82,25 +87,12 @@ void channelsetting::sendModecmd(float val,quint8 func){
     for (int i = 1; i <= 36; ++i) {
         auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
         if (btn && btn->isChecked()){
-            to_Channel(i,JV6xxx::SETTING,func, data);
+            ChannelBus::instance()->to_Channel(i,JV6xxx::SETTING,func, data);
         }
     }
 }
 
-void channelsetting::to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param){
-    // Single channel send
-    switch(channel) {
-        case 0:
-            #define CHANNEL(n) emit to_UartChannel##n(cmd, func, param,false);
-            CHANNEL_COUNT
-            #undef CHANNEL
-            return;
-        #define CHANNEL(n) case n: return emit to_UartChannel##n(cmd, func, param,false);
-        CHANNEL_COUNT
-        #undef CHANNEL
-        default:return;
-    }
-}
+
 
 
 void channelsetting::on_back_pushButton_clicked(){emit backRequested();}
@@ -110,7 +102,7 @@ void channelsetting::on_allNO_pushButton_clicked(){setAllChannelsChecked(true);}
 void channelsetting::setAllChannelsChecked(bool checked){
     for (int i = 1; i <= 36; ++i) {
         auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
-        if (btn){
+        if (btn && btn->isEnabled()){
             btn->setChecked(checked);
         }
     }

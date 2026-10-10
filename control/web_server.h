@@ -1,5 +1,5 @@
 #pragma once
-#include "auxiliary/scpi_handle.h"
+#include "scpi_handle.h"
 #include "auxiliary/battery_model.h"
 #include "widgets/interaction/channelpage.h"
 #include <QWebSocketServer>

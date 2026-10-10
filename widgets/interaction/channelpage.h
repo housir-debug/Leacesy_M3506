@@ -1,6 +1,5 @@
 #pragma once
 #include <QWidget>
-#include "auxiliary/config_manager.h"
 #include "../component/channelcard.h"
 
 namespace Ui {class channelpage;}
@@ -9,17 +8,39 @@ class channelpage : public QWidget
 {
     Q_OBJECT
 
+private:
+    Ui::channelpage *ui;
+    QMap<int,channelcard*> m_channels;
+
+    QMap<int,QString> m_range;
+    QMap<QString, int> m_rangeReverse;
+
+signals:
+    void jump_chsetpage();
+    void jump_devicesetpage();
+
+private slots:
+    void on_setDe_pushButton_clicked();
+    void on_setCh_pushButton_clicked();
+    void on_dig_pushButton_clicked();
+    void on_batt_pushButton_clicked();
+    void on_stat_pushButton_clicked();
+    void on_ver_pushButton_clicked();
+    void on_pre_pushButton_clicked();
+    void on_next_pushButton_clicked();
+    void to_channelpage(int newindex);
+
 public:
     explicit channelpage(QWidget *parent = nullptr);
     ~channelpage();
 
-    QJsonArray getAllChannelsData();
+    /* create channel card */
     void update_cardtest();
-
     void update_SoftVer(int ch,const QString &ver);
     void update_HardVer(int ch,const QString &ver);
     channelcard* create_chcard(int ch);
 
+    /* update card style */
     void update_IsOutput(int ch,bool status);
     void update_Voltage(int ch,float voltage);
     void update_CurrentAndUnit(int ch,float current);
@@ -30,38 +51,18 @@ public:
     void update_Range(int ch,int range);
     void update_Status(int ch,quint16 status);
 
+    /* web or main call function */
     bool load_BatteryModel();
+    QJsonArray getAllChannelsData();
+
     QStringList m_currentModelList;
     std::shared_ptr<BatteryModelManager> m_modelManager{nullptr};
-
-private:
-    Ui::channelpage *ui;
-    QMap<int,channelcard*> m_channels;
-
-    QMap<int,QString> m_range;
-    QMap<QString, int> m_rangeReverse;
-    void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param);
-
-signals:
-    #define CHANNEL(n) void to_UartChannel##n(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
-
-    CHANNEL_COUNT
-    #undef CHANNEL
-
-    void jump_chsetpage();
-    void jump_devicesetpage();
-
-private slots:
-    void on_set_pushButton_clicked();
-    void on_ver_pushButton_clicked();
-    void on_batt_pushButton_clicked();
-    void on_dig_pushButton_clicked();
-    void on_pre_pushButton_clicked();
-    void on_next_pushButton_clicked();
 };
 
-namespace Chindex {
-    constexpr int Digital      = 0x00;
-    constexpr int Battery      = 0x01;
-    constexpr int Version      = 0x02;
+namespace ChPageCard {
+// (1138,316) 220*5=1100 1138-1100=38 38/6=6-2
+    constexpr int PageCard     = 0x05;
+    constexpr int CardSpace    = 0x06;
+    constexpr int TBMargin     = 0x02;
+    constexpr int RLMargin     = 0x07;
 }

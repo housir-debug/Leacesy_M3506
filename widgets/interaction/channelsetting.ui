@@ -45,48 +45,84 @@
     background-color: #0A1220;
 }
 
-QPushButton {
+#channelsetting QComboBox {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                 stop:0 #1A2D50, stop:1 #142442);
     border: 1px solid #304b82;
-    border-radius: 9px;
+    border-radius: 6px;
     color: #9CB8E8;
     font-size: 14px;
     font-weight: bold;
 }
-QPushButton:hover {
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #243c69, stop:1 #1c325b);
-    border-color: #4269ad;
-    color: #E6EDF7;
+#channelsetting QComboBox:disabled {
+    background: #111928;
+    border: 1px solid #202b40;
+    color: #445470;
 }
-QPushButton:pressed {
+#channelsetting QComboBox::drop-down {
+    background: transparent;
+}
+
+#channelsetting QComboBox QAbstractItemView {
+    background-color: #142442;
+    border: 1px solid #304b82;
+    border-radius: 9px;
+    font-weight: bold;
+	font-size: 14px;
+	color: #9CB8E8;
+    /*padding: 6px;*/
+    outline: none;
+    selection-background-color: #2A4A7A;
+    selection-color: #FFFFFF;
+}
+#channelsetting QComboBox QAbstractItemView::item {
+    background: transparent;
+ 	border-radius: 6px;
+	color: #9CB8E8;
+	min-height: 27px;
+    padding: 2px 8px;
+}
+#channelsetting QComboBox QAbstractItemView::item:selected {
+    background-color: #2A4A7A;
+    color: #FFFFFF;
+}
+
+#channelsetting QPushButton {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #1A2D50, stop:1 #142442);
+    border: 1px solid #304b82;
+    border-radius: 9px;
+    font-weight: bold;
+	font-size: 14px;
+	color: #9CB8E8;
+}
+#channelsetting QPushButton:pressed {
     background: #195c3c;
     border-color: #37b677;
     color: #ffffff;
 }
-QPushButton:disabled {
+#channelsetting QPushButton:disabled {
     background: #111928;
     border: 1px solid #202b40;
     color: #445470;
 }
 
-#frame_5, #frame_6 {
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #172847, stop:1 #0E1B33);
+#page_label {
+    background: transparent;
+    border: none;
+	font-weight: bold;
+	font-size: 18px;
+	color: #E6EDF7;
+}
+#frame_5,
+#frame_6 {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #172847, stop:1 #0E1B33);
  	border-radius: 12px;
     border: none;
 }
-#page_label {
-    color: #E6EDF7;
-    font-size: 22px;
-    font-weight: bold;
-    background: transparent;
-    border: none;
-    padding-left: 12px;
-}
 
-#chselectframe {
+#chselectframe,
+#frame_3,
+#keyframe {
     background-color: #101C30;
     border: 1px solid #1E2E4A; 
     border-radius: 16px;
@@ -94,80 +130,19 @@ QPushButton:disabled {
 #chselectframe QPushButton {
     color: #808090;
 }
-#chselectframe QPushButton:checked {
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #2A4A7A, stop:1 #1E3A62);
+#frame_3 QPushButton:checked,#chselectframe QPushButton:checked {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #2A4A7A, stop:1 #1E3A62);
     border: 1px solid #4269ad;
     color: #FFFFFF;
 }
-#chselectframe QPushButton:checked:hover {
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #33588C, stop:1 #254674);
-    border-color: #5A82C8;
-}
 
-#frame_3 {
-    background-color: #0E1A2E;
-    border: 1px solid #1E2E4A;
-    border-radius: 14px;
+#onoff_comboBox{
+    color: #e65454;
+    border-color: #702424;
 }
-#frame_3 QPushButton:checked {
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #2A4A7A, stop:1 #1E3A62);
-    border-color: #4269ad;
-    color: #FFFFFF;
-}
-
-QComboBox {
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #1A2D50, stop:1 #142442);
-    border: 1px solid #304b82;
-    border-radius: 6px;
-    color: #9CB8E8;
-    font-size: 14px;
-    font-weight: bold;
-}
-QComboBox:hover {
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #243c69, stop:1 #1c325b);
-    border-color: #4269ad;
-    color: #E6EDF7;
-}
-QComboBox:disabled {
-    background: #111928;
-    border: 1px solid #202b40;
-    color: #445470;
-}
-QComboBox::drop-down {
-    background: transparent;
-}
-
-QComboBox QAbstractItemView {
-    background-color: #142442;
-    border: 1px solid #304b82;
-    border-radius: 8px;
-    color: #9CB8E8;
-    font-size: 14px;
-    font-weight: bold;
-    padding: 4px;
-    outline: none;
-    selection-background-color: #2A4A7A;
-    selection-color: #FFFFFF;
-}
-QComboBox QAbstractItemView::item {
-    min-height: 26px;
-    padding: 2px 8px;
-    border-radius: 6px;
-    background: transparent;
-    color: #9CB8E8;
-}
-QComboBox QAbstractItemView::item:hover {
-    background-color: #243c69;
-    color: #E6EDF7;
-}
-QComboBox QAbstractItemView::item:selected {
-    background-color: #2A4A7A;
-    color: #FFFFFF;
+#onoff_comboBox[Outputed=true]{
+    color: #34b979;
+    border-color: #1f5c40;
 }</string>
   </property>
   <property name="locale">
@@ -185,6 +160,9 @@ QComboBox QAbstractItemView::item:selected {
    </property>
    <property name="bottomMargin">
     <number>0</number>
+   </property>
+   <property name="spacing">
+    <number>3</number>
    </property>
    <item row="0" column="0" colspan="3">
     <widget class="QFrame" name="frame_5">
@@ -228,7 +206,7 @@ QComboBox QAbstractItemView::item:selected {
          <number>0</number>
         </property>
         <property name="text">
-         <string>通道-设置</string>
+         <string>设置/通道</string>
         </property>
        </widget>
       </item>
@@ -1590,6 +1568,9 @@ QComboBox QAbstractItemView::item:selected {
         <property name="checkable">
          <bool>true</bool>
         </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
       <item row="5" column="5">
@@ -1811,18 +1792,24 @@ QComboBox QAbstractItemView::item:selected {
     </widget>
    </item>
    <item row="1" column="2">
-    <widget class="QFrame" name="keyframe">
+    <widget class="numberkeypad" name="keyframe">
+     <property name="cursor">
+      <cursorShape>BlankCursor</cursorShape>
+     </property>
+     <property name="contextMenuPolicy">
+      <enum>Qt::NoContextMenu</enum>
+     </property>
      <property name="styleSheet">
       <string notr="true"/>
      </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Plain</enum>
      </property>
      <property name="lineWidth">
-      <number>1</number>
+      <number>0</number>
      </property>
     </widget>
    </item>
@@ -1921,14 +1908,7 @@ QComboBox QAbstractItemView::item:selected {
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">#onoff_comboBox{
-    color: #e65454;
-    border-color: #702424;
-}
-#onoff_comboBox[Outputed=true]{
-    color: #34b979;
-    border-color: #1f5c40;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="currentText">
          <string>ON</string>
@@ -2033,6 +2013,14 @@ QComboBox QAbstractItemView::item:selected {
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>numberkeypad</class>
+   <extends>QFrame</extends>
+   <header>widgets/component/numberkeypad.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
  <buttongroups>

@@ -10,17 +10,17 @@ class remoteoverlay : public QFrame
 private:
     Ui::remoteoverlay *ui;
 
-public:
-    explicit remoteoverlay(QWidget *parent = nullptr);
-    ~remoteoverlay();
-
 signals:
     void exitRemote();
-
-private slots:
-    void on_gobackpushButton_clicked();
 
 protected:
     void showEvent(QShowEvent *event) override;
     void hideEvent(QHideEvent *event) override;
+
+public:
+    explicit remoteoverlay(QWidget *parent = nullptr);
+    ~remoteoverlay();
+
+private slots:
+    void on_gobackpushButton_clicked();
 };

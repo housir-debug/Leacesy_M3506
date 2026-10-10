@@ -40,9 +40,7 @@ devicesetpage::devicesetpage(QWidget *parent) :
         m_setmode = Setmode::ip;
     }
 
-    m_setnmbkeycard = new numberkeypad(ui->keyframe->parentWidget());
-    m_setnmbkeycard->setGeometry(ui->keyframe->geometry());
-    QObject::connect(m_setnmbkeycard, &numberkeypad::valueEntered, this, [this](const QString &value) {
+    QObject::connect(ui->keyframe, &numberkeypad::valueEntered, this, [this](const QString &value) {
         if (!value.isEmpty()){
             switch (m_setmode) {
                 case 0:case 1:case 2:{
@@ -77,7 +75,6 @@ devicesetpage::devicesetpage(QWidget *parent) :
                 default:return;
             }
         }});
-    delete ui->keyframe;
 }
 
 devicesetpage::~devicesetpage()

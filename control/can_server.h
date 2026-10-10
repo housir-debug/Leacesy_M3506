@@ -3,7 +3,6 @@
 #include <linux/can/raw.h>
 #include <QSocketNotifier>
 #include <QLoggingCategory>
-#include "auxiliary/config_manager.h"
 
 Q_DECLARE_LOGGING_CATEGORY(can_server);
 
@@ -15,11 +14,6 @@ signals:
     void isRemote(quint8 reface);
     void baudrefresh();
 
-    #define CHANNEL(n) void to_UartChannel##n(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
-
-    CHANNEL_COUNT
-    #undef CHANNEL
-
 public:
     void sendFrame(quint8 ch,quint16 uart,const QByteArray &param);
     void changebaudandid();
@@ -30,8 +24,6 @@ public:
 private:
     bool OpeningCanN();
     bool createSocket();
-
-    void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param);
     void processFrame(const QByteArray &data);
 
     int m_socketFd{-1};

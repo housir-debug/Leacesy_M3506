@@ -1,5 +1,5 @@
 #include "auxiliary/vxinamespace.h"
-#include "tirpc_loader.h"
+#include "auxiliary/tirpc_loader.h"
 #include "vxi_server.h"
 #include <arpa/inet.h>
 #include <QTcpSocket>

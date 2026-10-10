@@ -1,5 +1,5 @@
-#include "numberkeypad.h"
 #include "ui_numberkeypad.h"
+#include "numberkeypad.h"
 #include <QTimer>
 
 numberkeypad::numberkeypad(QWidget *parent) :
@@ -35,9 +35,11 @@ numberkeypad::~numberkeypad()
     delete ui;
 }
 
-QString numberkeypad::getvalue() const{return ui->displayfield->text();}
+void numberkeypad::setPlaceholderText(const QString &text){ui->displayfield->setPlaceholderText(text);}
 
 void numberkeypad::setValue(const QString &value){ui->displayfield->setText(value);}
+
+QString numberkeypad::getvalue() const{return ui->displayfield->text();}
 
 void numberkeypad::on_btn0_clicked(){insertText("0");}
 

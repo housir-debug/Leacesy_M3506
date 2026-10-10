@@ -8,9 +8,8 @@ class numberkeypad : public QFrame
     Q_OBJECT
 
 private:
-    Ui::numberkeypad *ui;
-
     bool m_isPressed;
+    Ui::numberkeypad *ui;
     QTimer *m_longPressTimer;
     bool m_longPressTriggered;
 
@@ -18,8 +17,9 @@ public:
     explicit numberkeypad(QWidget *parent = nullptr);
     ~numberkeypad();
 
-    QString getvalue() const;
+    void setPlaceholderText(const QString &text);
     void setValue(const QString &value);
+    QString getvalue() const;
 
 signals:
     void valueEntered(const QString &value);

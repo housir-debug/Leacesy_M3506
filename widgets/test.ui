@@ -19,13 +19,13 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QGraphicsView" name="graphicsView">
+  <widget class="QStackedWidget" name="stackedWidget">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>100</y>
-     <width>831</width>
-     <height>311</height>
+     <x>0</x>
+     <y>0</y>
+     <width>1280</width>
+     <height>400</height>
     </rect>
    </property>
   </widget>

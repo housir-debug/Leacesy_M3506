@@ -1,11 +1,21 @@
-#include "remoteoverlay.h"
 #include "ui_remoteoverlay.h"
+#include "remoteoverlay.h"
 #include <QGraphicsOpacityEffect>
 #include <QShowEvent>
 #include <QHideEvent>
 
-remoteoverlay::remoteoverlay(QWidget *parent) :
-    QFrame(parent),
+void remoteoverlay::showEvent(QShowEvent *event)
+{
+    setAttribute(Qt::WA_TransparentForMouseEvents, false);
+    QFrame::showEvent(event);
+}
+
+void remoteoverlay::hideEvent(QHideEvent *event)
+{
+    QFrame::hideEvent(event);
+}
+
+remoteoverlay::remoteoverlay(QWidget *parent) : QFrame(parent),
     ui(new Ui::remoteoverlay)
 {
     QGraphicsOpacityEffect *logoOpacity = new QGraphicsOpacityEffect(this);
@@ -21,16 +31,6 @@ remoteoverlay::~remoteoverlay()
     delete ui;
 }
 
-void remoteoverlay::showEvent(QShowEvent *event)
-{
-    setAttribute(Qt::WA_TransparentForMouseEvents, false);
-    QFrame::showEvent(event);
-}
-
-void remoteoverlay::hideEvent(QHideEvent *event)
-{
-    QFrame::hideEvent(event);
-}
 
 void remoteoverlay::on_gobackpushButton_clicked()
 {

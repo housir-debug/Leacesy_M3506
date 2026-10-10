@@ -1,4 +1,4 @@
-//#include "widgets/test.h"
+#include "widgets/test.h"
 #include "widgets/appmain.h"
 #include <QFontDatabase>
 #include <QApplication>
@@ -20,12 +20,12 @@ int main(int argc, char *argv[])
         }
     }
 
-    /*test tw;
+    test tw;
     tw.show();
-    return app.exec();*/
+    return app.exec();
 
     //QTimer::singleShot(9000, &app, &QGuiApplication::quit); // 9s
-    Mainwindow mw; // inside -> show
+    //Mainwindow mw; // inside -> show
     return app.exec();
 }
 

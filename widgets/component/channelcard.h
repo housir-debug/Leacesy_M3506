@@ -9,6 +9,22 @@ class channelcard : public QStackedWidget
 {
     Q_OBJECT
 
+private:
+    bool m_isPressed;
+    QPoint m_pressPos;
+    Ui::channelcard *ui;
+    QTimer *m_longPressTimer;
+    bool m_longPressTriggered;
+
+signals:
+    void longPressed(quint8 ch);
+    void clicked(quint8 ch,bool status);
+
+protected:
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
 public:
     explicit channelcard(QWidget *parent = nullptr);
     ~channelcard();
@@ -52,6 +68,9 @@ public:
     float getcurrentOCV() const;
     float getcurrentESR() const;
 
+    /* status */
+    void setChtatus(const QString &status);
+
     /* version */
     void setChSWVersion(const QString &ver);
     void setChHWVersion(const QString &ver);
@@ -65,20 +84,11 @@ public:
     void setChannelState(bool state);
     int getChmode();
     void setChannelmode(int index);
-
-private:
-    bool m_isPressed;
-    QPoint m_pressPos;
-    Ui::channelcard *ui;
-    QTimer *m_longPressTimer;
-    bool m_longPressTriggered;
-
-signals:
-    void longPressed(quint8 ch);
-    void clicked(quint8 ch,bool status);
-
-protected:
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
 };
+
+namespace ChCardindex {
+    constexpr int Digital      = 0x00;
+    constexpr int Battery      = 0x01;
+    constexpr int Status       = 0x02;
+    constexpr int Version      = 0x03;
+}

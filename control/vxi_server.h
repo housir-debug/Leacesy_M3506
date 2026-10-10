@@ -1,6 +1,6 @@
 #pragma once
 #include <QTcpServer>
-#include "auxiliary/scpi_handle.h"
+#include "scpi_handle.h"
 
 Q_DECLARE_LOGGING_CATEGORY(vxi_server)
 

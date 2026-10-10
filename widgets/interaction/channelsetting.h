@@ -1,8 +1,6 @@
 #pragma once
 #include <QWidget>
 #include "auxiliary/battery_model.h"
-#include "auxiliary/config_manager.h"
-#include "../component/numberkeypad.h"
 
 namespace Ui {class channelsetting;}
 
@@ -10,17 +8,13 @@ class channelsetting : public QWidget
 {
     Q_OBJECT
 
-public:
-    explicit channelsetting(QWidget *parent = nullptr);
-    ~channelsetting();
+private:
+    Ui::channelsetting *ui;
+    int m_setmode{0};
 
-    std::shared_ptr<BatteryModelManager> m_modelManager{nullptr};
+    void sendModecmd(float val,quint8 func);
 
 signals:
-    #define CHANNEL(n) void to_UartChannel##n(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
-    CHANNEL_COUNT
-    #undef CHANNEL
-
     void to_chModel(int ch,const QString model);
     void to_chSOC(int ch,float val);
     void to_chCAP(int ch,float val);
@@ -37,13 +31,11 @@ private slots:
     void on_soc_pushButton_clicked();
     void on_cap_pushButton_clicked();
 
-private:
-    numberkeypad* m_setnmbkeycard;
-    Ui::channelsetting *ui;
-    int m_setmode{0};
+public:
+    explicit channelsetting(QWidget *parent = nullptr);
+    ~channelsetting();
 
-    void sendModecmd(float val,quint8 func);
-    void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param);
+    std::shared_ptr<BatteryModelManager> m_modelManager{nullptr};
 };
 
 namespace channelSet_mode {

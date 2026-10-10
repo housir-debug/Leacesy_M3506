@@ -1,5 +1,6 @@
 #include "appmain.h"
 #include "ui_appmain.h"
+#include "auxiliary/channelbus.h"
 #include "auxiliary/uartProtocol.h"
 Q_LOGGING_CATEGORY(widget, "WIDGET:")
 
@@ -39,7 +40,7 @@ Mainwindow::~Mainwindow()
 
 
 void Mainwindow::initChannels(){
-    using CanSign_toUartCh = void (CanServerManager::*)(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
+    /*using CanSign_toUartCh = void (CanServerManager::*)(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
     std::vector<CanSign_toUartCh> can_signal = {
         #define CHANNEL(n) static_cast<CanSign_toUartCh>(&CanServerManager::to_UartChannel##n),
         CHANNEL_COUNT
@@ -62,17 +63,25 @@ void Mainwindow::initChannels(){
         #define CHANNEL(n) static_cast<ScpiRSTSign_toUartCh>(&ScpiManager::to_UartChannel##n##Reset),
         CHANNEL_COUNT
         #undef CHANNEL
+    };*/
+
+    using ChannelBus_toUartCh = void (ChannelBus::*)(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
+    std::vector<ChannelBus_toUartCh> Bus_toUCh = {
+        #define CHANNEL(n) static_cast<ChannelBus_toUartCh>(&ChannelBus::to_UartChannel##n),
+        CHANNEL_COUNT
+        #undef CHANNEL
     };
 
-    for (const auto& config : configs) {
+    for (const auto& config : ChannelBus::instance()->configs) {
         auto channel = std::make_unique<UartChannelManager>();
         channel->initUartchannel(config.channel, config.port, config.baudRate);
-        QObject::connect(Scpi_share.get(),scpi_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
-        QObject::connect(Scpi_share.get(),scpi_rst_signal[config.channel-1],channel.get(),&UartChannelManager::sendInitCommand,Qt::QueuedConnection);
+        QObject::connect(ChannelBus::instance(),Bus_toUCh[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
+        //QObject::connect(Scpi_share.get(),scpi_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
+        //QObject::connect(Scpi_share.get(),scpi_rst_signal[config.channel-1],channel.get(),&UartChannelManager::sendInitCommand,Qt::QueuedConnection);
 
         if (canServer){
-            QObject::connect(canServer.get(),can_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
-            QObject::connect(channel.get(),&UartChannelManager::to_CanServer,canServer.get(),&CanServerManager::sendFrame,Qt::QueuedConnection);
+            //QObject::connect(canServer.get(),can_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
+            //QObject::connect(channel.get(),&UartChannelManager::to_CanServer,canServer.get(),&CanServerManager::sendFrame,Qt::QueuedConnection);
         }
 
         if (m_ChPage){
@@ -89,7 +98,7 @@ void Mainwindow::initChannels(){
             QObject::connect(channel.get(),&UartChannelManager::CH_impChanged,m_ChPage.get(),&channelpage::update_Imp,Qt::QueuedConnection);
 
             /* screen view slot function */
-            QObject::connect(m_ChPage.get(),qml_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
+            //QObject::connect(m_ChPage.get(),qml_signal[config.channel-1],channel.get(),&UartChannelManager::writeFrame,Qt::QueuedConnection);
         }
 
         channel->m_scpiManager = Scpi_share;
@@ -191,6 +200,7 @@ void Mainwindow::initUi()
     QObject::connect(webServer.get(),&WebServerManager::networkrefresh,m_DeviceSetPage,&devicesetpage::responseUpdate,Qt::QueuedConnection);
 
     m_ChPage->load_BatteryModel();
+    m_ChPage->update_cardtest();
 }
 
 void Mainwindow::update_remotemodel(int reface){

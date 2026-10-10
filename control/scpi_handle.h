@@ -11,6 +11,7 @@ extern "C" {
 #include <QWaitCondition>
 #include <QLoggingCategory>
 #include "auxiliary/uartProtocol.h"
+#include "auxiliary/channelbus.h"
 #include "auxiliary/config_manager.h"
 
 Q_DECLARE_LOGGING_CATEGORY(scpi)

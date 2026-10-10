@@ -34,25 +34,24 @@
    <enum>Qt::NoContextMenu</enum>
   </property>
   <property name="styleSheet">
-   <string notr="true">* 
-{
+   <string notr="true">* {
 	font-family:&quot;WenQuanYi Micro Hei&quot;;
 }
 
-QStackedWidget &gt; QWidget
-{
+#channelcard &gt; QWidget{
     background-color: #101C30;
     border: 1.8px solid rgba(63, 63, 90, 0.81);
 	border-radius: 18px;
 }
-QStackedWidget[Outputed=true] &gt; QWidget
-{
+#channelcard[Outputed=true] &gt; QWidget{
     background-color: #1A2A45;
     border-color: rgba(100, 100, 130, 0.9);
 }
 
-#digitalch_label,#versionch_label,#batterych_label
-{
+#digitalch_label,
+#versionch_label,
+#batterych_label,
+#statusch_label{
 	font-weight: bold;
 	font-size: 36px;
 	color: #C9C9C9;
@@ -83,49 +82,64 @@ QStackedWidget[Outputed=true] &gt; QWidget
     <enum>Qt::NoContextMenu</enum>
    </property>
    <property name="styleSheet">
-    <string notr="true">/* 电压电流 */
-#measureframe
-{
+    <string notr="true">#measureframe{
 	background-color: #080810;
   	border-radius: 12px;
  	border: 1.2px solid #3A3A4E;
 }
-#curr_label
-{
+#curr_label{
 	font-weight: bold;
 	font-size: 32px;
 	color: #D23040;
 }
-#currunit_label
-{
+#currunit_label{
 	font-size: 16px;
 	color: #D23040;
 }
-#volt_label
-{
-	color: #10B870;
+#volt_label{
 	font-weight: bold;
 	font-size: 32px;
+	color: #10B870;
 }
-#voltunit_label
-{
+#voltunit_label{
 	font-size: 16px;
 	color: #10B870;
 }
-/* 输出状态 */
-#cv_frame QLabel,#cc_frame QLabel,#ovp_frame QLabel
-{
+
+
+#cv_frame ,
+#cc_frame,
+#ovp_frame{ 
+    background-color: rgba(255,255,255,0.035);
+    border: 1px solid rgba(90,100,125,0.32);
+	border-radius:9px;
+}
+#cv_frame QLabel,
+#cc_frame QLabel,
+#ovp_frame QLabel{
 	font-size: 12px;
 	color: #C9C9C9;
 }
-#cv_frame ,#cc_frame,#ovp_frame
-{ 
-    background-color: rgba(255,255,255,0.035);
-    border: 1px solid rgba(90,100,125,0.32);
-	border-radius:6px;
+#cv_frame[Status=true] { 
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(13, 175, 101, 0.36),
+        stop:1 rgba(13, 175, 101, 0.12));
+    border: 1px solid rgba(13,175,101,0.84);
+}
+#cc_frame[Status=true] { 
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(223, 29, 50, 0.36),
+        stop:1 rgba(223, 29, 50, 0.12));
+    border: 1px solid rgba(223, 29, 50, 0.84);
+}
+#ovp_frame[Status=true] { 
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(229, 194, 125, 0.36),
+        stop:1 rgba(229, 194, 125, 0.12));
+    border: 1px solid rgba(229, 194, 125, 0.84);
 }</string>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="3,7,2,2,2">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="2,6,2,2,2">
     <property name="spacing">
      <number>6</number>
     </property>
@@ -367,13 +381,7 @@ QStackedWidget[Outputed=true] &gt; QWidget
        <enum>Qt::NoContextMenu</enum>
       </property>
       <property name="styleSheet">
-       <string notr="true">#cv_frame[Status=true] 
-{ 
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
-        stop:0 rgba(13, 175, 101, 0.36),
-        stop:1 rgba(13, 175, 101, 0.12));
-    border: 1px solid rgba(13,175,101,0.84);
-}</string>
+       <string notr="true"/>
       </property>
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
@@ -484,13 +492,7 @@ QStackedWidget[Outputed=true] &gt; QWidget
        <enum>Qt::NoContextMenu</enum>
       </property>
       <property name="styleSheet">
-       <string notr="true">#cc_frame[Status=true] 
-{ 
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
-        stop:0 rgba(223, 29, 50, 0.36),
-        stop:1 rgba(223, 29, 50, 0.12));
-    border: 1px solid rgba(223, 29, 50, 0.84);
-}</string>
+       <string notr="true"/>
       </property>
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
@@ -599,13 +601,7 @@ QStackedWidget[Outputed=true] &gt; QWidget
        <enum>Qt::NoContextMenu</enum>
       </property>
       <property name="styleSheet">
-       <string notr="true">#ovp_frame[Status=true] 
-{ 
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
-        stop:0 rgba(229, 194, 125, 0.36),
-        stop:1 rgba(229, 194, 125, 0.12));
-    border: 1px solid rgba(229, 194, 125, 0.84);
-}</string>
+       <string notr="true"/>
       </property>
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
@@ -717,49 +713,67 @@ QStackedWidget[Outputed=true] &gt; QWidget
     <enum>Qt::NoContextMenu</enum>
    </property>
    <property name="styleSheet">
-    <string notr="true">#ocvframe,#esrframe,#capframe
-{
+    <string notr="true">#socprogressBar{
+	background: rgba(255,255,255,0.04);
+	border: 6px solid rgba(90,100,125,0.32);
+	border-radius: 6px;
+   font-weight: bold;
+	font-size: 18px;
+   color: #5A5A6A;
+}
+#socprogressBar::chunk {
+	border-radius: 6px;
+   margin: 1px;
+}
+#socprogressBar[Power=&quot;high&quot;]::chunk {
+	background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+        stop:0 #00C696,stop:1 #0DAF65
+    );
+}
+#socprogressBar[Power=&quot;mid&quot;]::chunk {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+        stop:0 #B88C2E,stop:1 #94681A
+    );
+}
+#socprogressBar[Power=&quot;low&quot;]::chunk {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+        stop:0 #A83238, stop:1 #822025
+    );
+}
+
+
+#modelframe{
+ 	background: rgba(255, 255, 255, 0.036);
+	border: 1px solid #2A2A3A;
+	border-radius: 9px;
+}
+#modelframe QLabel{
+	font-size: 12px;
+	color: #C9C9C9;
+}
+
+
+#ocvframe,
+#esrframe,
+#capframe{
 	background: rgba(255,255,255,0.036);
 	border: 1px solid rgba(90,100,125,0.32);
 	border-radius: 6px;
 }
-#caplabel,#esrlabel,#ocvlabel
-{
+#caplabel,
+#esrlabel,
+#ocvlabel{
 	font-size: 12px;
 	color: #C9C9C9;
 }
-#capvaluelabel,#esrvaluelabel,#ocvvaluelabel
-{
+#capvaluelabel,
+#esrvaluelabel,
+#ocvvaluelabel{
 	font-size: 18px;
  	color: #D0D0D0;
-}
-
-#socprogressBar{
-   font-weight: bold;
-   color: #5A5A6A;
-   font-size: 18px;
-	border: 6px solid rgba(90,100,125,0.32);
-	border-radius: 6px;
-	background: rgba(255,255,255,0.04);
-}
-#socprogressBar::chunk {
-   margin: 1px;
-	border-radius: 6px;
-}
-
-#modelframe
-{
- background: rgba(255, 255, 255, 0.036);
-border: 1px solid #2A2A3A;
-border-radius: 9px;
-}
-#modellabel,#modelnamelabel
-{
-font-size: 12px;
-color: #C9C9C9;
 }</string>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,5,1">
     <item>
      <widget class="QLabel" name="batterych_label">
       <property name="enabled">
@@ -921,24 +935,7 @@ color: #C9C9C9;
          <enum>Qt::LeftToRight</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">#socprogressBar[Power=&quot;high&quot;]::chunk {
-	background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
-        stop:0 #00C696,
-        stop:1 #0DAF65
-    );
-}
-#socprogressBar[Power=&quot;mid&quot;]::chunk {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
-        stop:0 #B88C2E,
-        stop:1 #94681A
-    );
-}
-#socprogressBar[Power=&quot;low&quot;]::chunk {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
-        stop:0 #A83238,
-        stop:1 #822025
-    );
-}</string>
+         <string notr="true"/>
         </property>
         <property name="value">
          <number>72</number>
@@ -1237,6 +1234,630 @@ color: #C9C9C9;
     </item>
    </layout>
   </widget>
+  <widget class="QWidget" name="status">
+   <property name="cursor">
+    <cursorShape>BlankCursor</cursorShape>
+   </property>
+   <property name="contextMenuPolicy">
+    <enum>Qt::NoContextMenu</enum>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">#statuschframe{
+	background-color: #101C30;
+	border: 1.8px solid rgba(63, 63, 90, 0.81);
+	border-radius: 12px;
+}
+#statuschframe QPushButton {
+	border: 1px solid rgba(63, 63, 90, 0.81);
+	border-radius: 6px;
+	font-size: 12px;
+    color: #808090;
+}
+#statuschframe QPushButton[status=true] {
+	background-color: #0D1F35;
+    border: 1.8px solid #2A6EB0;
+    color: #60A8E0;
+}</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_8" stretch="1,6">
+    <property name="spacing">
+     <number>6</number>
+    </property>
+    <item>
+     <widget class="QLabel" name="statusch_label">
+      <property name="cursor">
+       <cursorShape>BlankCursor</cursorShape>
+      </property>
+      <property name="contextMenuPolicy">
+       <enum>Qt::NoContextMenu</enum>
+      </property>
+      <property name="lineWidth">
+       <number>0</number>
+      </property>
+      <property name="text">
+       <string>CH-1</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="statuschframe">
+      <property name="cursor">
+       <cursorShape>BlankCursor</cursorShape>
+      </property>
+      <property name="contextMenuPolicy">
+       <enum>Qt::NoContextMenu</enum>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="lineWidth">
+       <number>0</number>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <property name="leftMargin">
+        <number>6</number>
+       </property>
+       <property name="rightMargin">
+        <number>6</number>
+       </property>
+       <property name="verticalSpacing">
+        <number>9</number>
+       </property>
+       <item row="0" column="0">
+        <widget class="QPushButton" name="pushButton1">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>OPC</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="pushButton2">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>WAI</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="pushButton3">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>LCC</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QPushButton" name="pushButton4">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>ERR</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QPushButton" name="pushButton5">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>CP</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="pushButton6">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>FAN</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QPushButton" name="pushButton7">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>CAL</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QPushButton" name="pushButton8">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>RL</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="pushButton9">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>IMP</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QPushButton" name="pushButton10">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>OTP</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QPushButton" name="pushButton11">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>OCP</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QPushButton" name="pushButton12">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>OVP</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QPushButton" name="pushButton13">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>LD</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QPushButton" name="pushButton14">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>CC</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QPushButton" name="pushButton15">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>CV</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QPushButton" name="pushButton16">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>WenQuanYi Micro Hei</family>
+           <pointsize>-1</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>PON</string>
+         </property>
+         <property name="status" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
   <widget class="QWidget" name="version">
    <property name="cursor">
     <cursorShape>BlankCursor</cursorShape>
@@ -1245,27 +1866,26 @@ color: #C9C9C9;
     <enum>Qt::NoContextMenu</enum>
    </property>
    <property name="styleSheet">
-    <string notr="true">#channelframe
-{
+    <string notr="true">#channelframe{
     border: 1.8px solid #2A2A3A; 
     border-radius: 9px; 
 }
-#channelswlabel,#channelhwlabel
-{
+#channelswlabel,
+#channelhwlabel{
     color: #808090;
     font-size: 12px;
 }
-#chswvaluelabel,#chhwvaluelabel
-{
-    color: #D0D0D0;
-    font-size: 18px;
+#chswvaluelabel,
+#chhwvaluelabel{
     background: rgba(255, 255, 255, 0.06); 
     border-radius: 6px;
+	font-size: 18px;
+	color: #D0D0D0;
 }</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_7" stretch="1,6">
     <property name="spacing">
-     <number>9</number>
+     <number>6</number>
     </property>
     <property name="leftMargin">
      <number>9</number>

@@ -38,11 +38,10 @@
    <string>NumberKeyPad</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">#numberkeypad
-{
-background-color: #101C30;
-border-radius: 18px;
-border: 2px solid #004095;
+   <string notr="true">* {
+	background-color: #101C30;
+	border-radius: 18px;
+	border: 2px solid #004095;
 }</string>
   </property>
   <property name="locale">
@@ -53,24 +52,36 @@ border: 2px solid #004095;
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,4">
    <property name="spacing">
-    <number>9</number>
+    <number>6</number>
    </property>
    <property name="leftMargin">
+    <number>6</number>
+   </property>
+   <property name="topMargin">
     <number>6</number>
    </property>
    <property name="rightMargin">
     <number>6</number>
    </property>
+   <property name="bottomMargin">
+    <number>6</number>
+   </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="3,1">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="7,3">
      <property name="spacing">
       <number>3</number>
      </property>
      <property name="leftMargin">
-      <number>0</number>
+      <number>6</number>
+     </property>
+     <property name="topMargin">
+      <number>6</number>
      </property>
      <property name="rightMargin">
-      <number>0</number>
+      <number>6</number>
+     </property>
+     <property name="bottomMargin">
+      <number>6</number>
      </property>
      <item>
       <widget class="QLineEdit" name="displayfield">
@@ -88,6 +99,7 @@ border: 2px solid #004095;
        </property>
        <property name="font">
         <font>
+         <family>WenQuanYi Micro Hei</family>
          <pointsize>-1</pointsize>
         </font>
        </property>
@@ -110,9 +122,9 @@ border: 2px solid #004095;
         <string notr="true">#displayfield {
     background-color: #102B40;
     border: 1px solid #1E3A5F;
-    border-radius: 9px;
-    color: #E0E0E0;
-    font-size: 18px;
+    border-radius: 6px;
+    font-size: 16px;
+	color: #E0E0E0;
 }</string>
        </property>
        <property name="frame">
@@ -125,7 +137,7 @@ border: 2px solid #004095;
         <bool>true</bool>
        </property>
        <property name="placeholderText">
-        <string>Please enter</string>
+        <string>Please input</string>
        </property>
        <property name="clearButtonEnabled">
         <bool>false</bool>
@@ -144,6 +156,8 @@ border: 2px solid #004095;
         <font>
          <family>WenQuanYi Micro Hei</family>
          <pointsize>-1</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
         </font>
        </property>
        <property name="cursor">
@@ -159,13 +173,18 @@ border: 2px solid #004095;
         <string notr="true">#deletebtn{
     background-color: #102B40;
     border: 1px solid #1E3A5F;
+    border-radius: 6px;
+	font-weight: bold;
+	font-size: 12px;
 	color: #FF6B6B;
-    border-radius: 9px;
-    font-size: 12px;
 }
 #deletebtn:pressed {
     background-color: #1E3A5F;
     border-color: #1A6ECF;
+}
+#deletebtn:disabled {
+    border-color: #1A2A3A;
+	color: #4A5A6A;
 }</string>
        </property>
        <property name="text">
@@ -193,6 +212,22 @@ border: 2px solid #004095;
       <string notr="true">#keypadframe {
     background-color: transparent;
     border: none;
+}
+
+#keypadframe QPushButton {
+    background-color: #102B40;
+    border: 1.8px solid #1E3A5F;
+    border-radius: 9px;
+    font-weight: bold;
+	font-size: 18px;
+	color: #E0E0E0;
+}
+#keypadframe QPushButton:pressed {
+    background-color: #1E3A5F;
+    border-color: #1A6ECF;
+}
+#keypadframe #btnenter{
+	color: #1A6ECF;
 }</string>
      </property>
      <property name="lineWidth">
@@ -246,18 +281,7 @@ border: 2px solid #004095;
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">#btn7{
-    background-color: #102B40;
-    border: 1px solid #1E3A5F;
-	color: #E0E0E0;
-    border-radius: 12px;
-    font-size: 27px;
-    font-weight: bold;
-}
-#btn7:pressed {
-    background-color: #1E3A5F;
-    border-color: #1A6ECF;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>7</string>
@@ -296,18 +320,7 @@ border: 2px solid #004095;
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">#btn8{
-    background-color: #102B40;
-    border: 1px solid #1E3A5F;
-	color: #E0E0E0;
-    border-radius: 12px;
-    font-size: 27px;
-    font-weight: bold;
-}
-#btn8:pressed {
-    background-color: #1E3A5F;
-    border-color: #1A6ECF;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>8</string>
@@ -346,18 +359,7 @@ border: 2px solid #004095;
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">#btn9{
-    background-color: #102B40;
-    border: 1px solid #1E3A5F;
-	color: #E0E0E0;
-    border-radius: 12px;
-    font-size: 27px;
-    font-weight: bold;
-}
-#btn9:pressed {
-    background-color: #1E3A5F;
-    border-color: #1A6ECF;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>9</string>
@@ -396,18 +398,7 @@ border: 2px solid #004095;
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">#btn4{
-    background-color: #102B40;
-    border: 1px solid #1E3A5F;
-	color: #E0E0E0;
-    border-radius: 12px;
-    font-size: 27px;
-    font-weight: bold;
-}
-#btn4:pressed {
-    background-color: #1E3A5F;
-    border-color: #1A6ECF;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>4</string>
@@ -446,18 +437,7 @@ border: 2px solid #004095;
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">#btn5{
-    background-color: #102B40;
-    border: 1px solid #1E3A5F;
-	color: #E0E0E0;
-    border-radius: 12px;
-    font-size: 27px;
-    font-weight: bold;
-}
-#btn5:pressed {
-    background-color: #1E3A5F;
-    border-color: #1A6ECF;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>5</string>
@@ -496,18 +476,7 @@ border: 2px solid #004095;
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">#btn6{
-    background-color: #102B40;
-    border: 1px solid #1E3A5F;
-	color: #E0E0E0;
-    border-radius: 12px;
-    font-size: 27px;
-    font-weight: bold;
-}
-#btn6:pressed {
-    background-color: #1E3A5F;
-    border-color: #1A6ECF;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>6</string>
@@ -546,18 +515,7 @@ border: 2px solid #004095;
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">#btn1{
-    background-color: #102B40;
-    border: 1px solid #1E3A5F;
-	color: #E0E0E0;
-    border-radius: 12px;
-    font-size: 27px;
-    font-weight: bold;
-}
-#btn1:pressed {
-    background-color: #1E3A5F;
-    border-color: #1A6ECF;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>1</string>
@@ -596,18 +554,7 @@ border: 2px solid #004095;
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">#btn2{
-    background-color: #102B40;
-    border: 1px solid #1E3A5F;
-	color: #E0E0E0;
-    border-radius: 12px;
-    font-size: 27px;
-    font-weight: bold;
-}
-#btn2:pressed {
-    background-color: #1E3A5F;
-    border-color: #1A6ECF;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>2</string>
@@ -646,18 +593,7 @@ border: 2px solid #004095;
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">#btn3{
-    background-color: #102B40;
-    border: 1px solid #1E3A5F;
-	color: #E0E0E0;
-    border-radius: 12px;
-    font-size: 27px;
-    font-weight: bold;
-}
-#btn3:pressed {
-    background-color: #1E3A5F;
-    border-color: #1A6ECF;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>3</string>
@@ -696,18 +632,7 @@ border: 2px solid #004095;
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">#btn0{
-    background-color: #102B40;
-    border: 1px solid #1E3A5F;
-	color: #E0E0E0;
-    border-radius: 12px;
-    font-size: 27px;
-    font-weight: bold;
-}
-#btn0:pressed {
-    background-color: #1E3A5F;
-    border-color: #1A6ECF;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>0</string>
@@ -746,18 +671,7 @@ border: 2px solid #004095;
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">#btndot{
-    background-color: #102B40;
-    border: 1px solid #1E3A5F;
-	color: #E0E0E0;
-    border-radius: 12px;
-    font-size: 27px;
-    font-weight: bold;
-}
-#btndot:pressed {
-    background-color: #1E3A5F;
-    border-color: #1A6ECF;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>.</string>
@@ -796,18 +710,7 @@ border: 2px solid #004095;
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">#btnenter{
-    background-color: #102B40;
-    border: 1px solid #1E3A5F;
-	color: #1A6ECF;
-    border-radius: 12px;
-    font-size: 27px;
-    font-weight: bold;
-}
-#btnenter:pressed {
-    background-color: #1E3A5F;
-    border-color: #1A6ECF;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>↵</string>

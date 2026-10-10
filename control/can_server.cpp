@@ -1,3 +1,5 @@
+#include "auxiliary/config_manager.h"
+#include "auxiliary/channelbus.h"
 #include "can_server.h"
 #include <sys/ioctl.h>
 #include <net/if.h>
@@ -360,17 +362,17 @@ void CanServerManager::processFrame(const QByteArray &data)
     // output
         case 0x01:{
             quint8 func = static_cast<quint8>(data[7]);
-            to_Channel(channel,func,func,"");
+            ChannelBus::instance()->to_Channel(channel,func,func,"");
             return;
         }
         case 0x0108:
         case 0x0109:
-            to_Channel(channel,cmd,func,one);
+            ChannelBus::instance()->to_Channel(channel,cmd,func,one);
             return;
         case 0x0180:
         case 0x0188:
         case 0x0189:
-            to_Channel(channel,cmd,func,"");
+            ChannelBus::instance()->to_Channel(channel,cmd,func,"");
             return;
     // setting
         case 0x0200:
@@ -379,7 +381,7 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x0203:
         case 0x0204:
         case 0x0205:
-            to_Channel(channel,cmd,func,four);
+            ChannelBus::instance()->to_Channel(channel,cmd,func,four);
             return;
         case 0x0280:
         case 0x0281:
@@ -387,7 +389,7 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x0283:
         case 0x0284:
         case 0x0285:
-            to_Channel(channel,cmd,func,"");
+            ChannelBus::instance()->to_Channel(channel,cmd,func,"");
             return;
     // control
         case 0x0300:
@@ -398,7 +400,7 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x0305:
         case 0x0308:
         case 0x0309:
-            to_Channel(channel,cmd,func,one);
+            ChannelBus::instance()->to_Channel(channel,cmd,func,one);
             return;
         case 0x0380:
         case 0x0381:
@@ -408,14 +410,14 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x0385:
         case 0x0388:
         case 0x0389:
-            to_Channel(channel,cmd,func,"");
+            ChannelBus::instance()->to_Channel(channel,cmd,func,"");
             return;
     // measurement
         case 0x040F:
-            to_Channel(channel,cmd,func,four);
+            ChannelBus::instance()->to_Channel(channel,cmd,func,four);
             return;
         case 0x0410:
-            to_Channel(channel,cmd,func,one);
+            ChannelBus::instance()->to_Channel(channel,cmd,func,one);
             return;
         case 0x048F:
         case 0x0480:
@@ -442,7 +444,7 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x049A:
         case 0x049B:
         case 0x049C:
-            to_Channel(channel,cmd,func,"");
+            ChannelBus::instance()->to_Channel(channel,cmd,func,"");
             return;
     // register
         case 0x0580:
@@ -452,24 +454,24 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x0503:
         case 0x0584:
         case 0x0585:
-            to_Channel(channel,cmd,func,"");
+            ChannelBus::instance()->to_Channel(channel,cmd,func,"");
             return;
     // trigger
         case 0x0801:
         case 0x0802:
         case 0x0805:
         case 0x0809:
-            to_Channel(channel,cmd,func,one);
+            ChannelBus::instance()->to_Channel(channel,cmd,func,one);
             return;
         case 0x0806:
-            to_Channel(channel,cmd,func,two);
+            ChannelBus::instance()->to_Channel(channel,cmd,func,two);
             return;
         case 0x0807:
         case 0x0808:
         case 0x080A:
         case 0x080B:
         case 0x080C:
-            to_Channel(channel,cmd,func,four);
+            ChannelBus::instance()->to_Channel(channel,cmd,func,four);
             return;
         case 0x0800:
         case 0x0803:
@@ -482,12 +484,12 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x088A:
         case 0x088B:
         case 0x088C:
-            to_Channel(channel,cmd,func,"");
+            ChannelBus::instance()->to_Channel(channel,cmd,func,"");
             return;
     // calibrate
         case 0x07:{
             m_calibrate_step = static_cast<quint8>(data[3]);
-            to_Channel(channel,func,m_calibrate_step,four);
+            ChannelBus::instance()->to_Channel(channel,func,m_calibrate_step,four);
             return;
         };
         case 0x0601:
@@ -497,32 +499,9 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x0604:
         case 0x0605:
         case 0x0606:
-            to_Channel(channel,cmd,func,"");
+            ChannelBus::instance()->to_Channel(channel,cmd,func,"");
             return;
 
         default:qCWarning(can_server)<<"[processFrame]error case";return;
     }
 }
-
-void CanServerManager::to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param)
-{
-    // All channel send
-    if (channel == 0) {
-        #define CHANNEL(n) emit to_UartChannel##n(cmd, func, param,true);
-        CHANNEL_COUNT
-        #undef CHANNEL
-        return;
-    }
-
-    // Single channel send
-    switch(channel) {
-        #define CHANNEL(n) case n: return emit to_UartChannel##n(cmd, func, param,true);
-        CHANNEL_COUNT
-        #undef CHANNEL
-        default:
-            qCWarning(can_server)<<"[to_Channel]Invalid channel: "<<channel;
-            return;
-    }
-}
-
-

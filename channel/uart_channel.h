@@ -1,8 +1,8 @@
 #pragma once
 #include <QTimer>
+#include <QSerialPort>
 #include <QLoggingCategory>
-#include "auxiliary/scpi_handle.h"
-#include "auxiliary/config_manager.h"
+#include "control/scpi_handle.h"
 
 Q_DECLARE_LOGGING_CATEGORY(uart_channel)
 

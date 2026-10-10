@@ -15,20 +15,20 @@ LIBS += -L$$PWD/thirdparty/scpi/lib -lscpi -lm
 
 HEADERS += \
     auxiliary/battery_model.h \
-    auxiliary/scpi_handle.h \
+    auxiliary/channelbus.h \
+    auxiliary/tirpc_loader.h \
     auxiliary/config_manager.h \
     auxiliary/uartProtocol.h \
     auxiliary/vxinamespace.h \
     channel/can_channel.h \
     channel/uart_channel.h \
     control/can_server.h \
-    control/tirpc_loader.h \
+    control/scpi_handle.h \
     control/vxi_server.h \
     control/web_server.h \
     control/uart_server.h \
     widgets/appmain.h \
     widgets/component/channelcard.h \
-    widgets/component/chstatusview.h \
     widgets/interaction/channelpage.h \
     widgets/interaction/channelsetting.h \
     widgets/interaction/devicesetpage.h \
@@ -38,19 +38,19 @@ HEADERS += \
 
 SOURCES += \
     auxiliary/battery_model.cpp \
-    auxiliary/scpi_handle.cpp \
+    auxiliary/channelbus.cpp \
+    auxiliary/tirpc_loader.cpp \
     auxiliary/config_manager.cpp \
     channel/can_channel.cpp \
     channel/uart_channel.cpp \
     control/can_server.cpp \
-    control/tirpc_loader.cpp \
+    control/scpi_handle.cpp \
     control/vxi_server.cpp \
     control/web_server.cpp \
     control/uart_server.cpp \
     main.cpp \
     widgets/appmain.cpp \
     widgets/component/channelcard.cpp \
-    widgets/component/chstatusview.cpp \
     widgets/interaction/channelpage.cpp \
     widgets/interaction/channelsetting.cpp \
     widgets/interaction/devicesetpage.cpp \
@@ -61,7 +61,6 @@ SOURCES += \
 FORMS += \
     widgets/appmain.ui \
     widgets/component/channelcard.ui \
-    widgets/component/chstatusview.ui \
     widgets/interaction/channelpage.ui \
     widgets/interaction/channelsetting.ui \
     widgets/interaction/devicesetpage.ui \

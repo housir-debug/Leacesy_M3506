@@ -1,28 +1,12 @@
 #pragma once
 #include <QLoggingCategory>
-#include <QSerialPort>
 #include <QSettings>
 
 Q_DECLARE_LOGGING_CATEGORY(config)
 
-/* support uart channel number and config */
-#define CHANNEL_COUNT \
-    CHANNEL(1)  CHANNEL(2)  CHANNEL(3)  CHANNEL(4)  CHANNEL(5)  CHANNEL(6)  \
-    CHANNEL(7)  CHANNEL(8)  CHANNEL(9)  CHANNEL(10) CHANNEL(11) CHANNEL(12) \
-    CHANNEL(13) CHANNEL(14) CHANNEL(15) CHANNEL(16) CHANNEL(17) CHANNEL(18) \
-    CHANNEL(19) CHANNEL(20) CHANNEL(21) CHANNEL(22) CHANNEL(23) CHANNEL(24) \
-    CHANNEL(25) CHANNEL(26) CHANNEL(27) CHANNEL(28) CHANNEL(29) CHANNEL(30) \
-    CHANNEL(31) CHANNEL(32) CHANNEL(33) CHANNEL(34) CHANNEL(35) CHANNEL(36)
 
-struct UartConfig {
-    QString port;
-    QSerialPort::BaudRate baudRate;
-    quint8 channel;
-};
-extern std::vector<UartConfig> configs;
-/* ************************************** */
-
-class ConfigManager {
+class ConfigManager
+{
 public:
     static QString s_loglevel;
     static std::atomic<int> s_remoteSt;

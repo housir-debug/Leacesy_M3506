@@ -47,79 +47,67 @@
 	border: none;
 }
 
-#logo_label{background: transparent;}
-
-#topnaviga_frame,#botnaviga_frame{
-	background: qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 #172847,stop:1 #0E1B33);
-}
-
-QPushButton{
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #1A2D50, stop:1 #142442);
-    border: 1px solid #304b82;
-    border-radius: 6px;
-    color: #9CB8E8;
-    font-size: 13px;
+#channelpage QProgressBar {
+    background-color: #0E1B33;
+    border: 1.2px solid #243B66;
+    border-radius: 9px;
     font-weight: bold;
-    padding: 4px 9px;
+	font-size: 12px;
+	color: #E6EDF7;
 }
-QPushButton:hover,QPushButton:checked{
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #243c69, stop:1 #1c325b);
+#channelpage QProgressBar::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,stop:0 #2f7de0, stop:1 #34b979);
+	border-radius: 7px;
+}
+
+#channelpage QPushButton{
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #1A2D50, stop:1 #142442);
+    border: 1px solid #304b82;
+    border-radius: 9px;
+    font-weight: bold;
+	font-size: 12px;
+	color: #9CB8E8;
+}
+#channelpage QPushButton:checked{
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #243c69, stop:1 #1c325b);
     border-color: #4269ad;
     color: #E6EDF7;
 }
-QPushButton:pressed{
+#channelpage QPushButton:pressed{
     background: #195c3c;
     border-color: #37b677;
     color: #ffffff;
 }
-QPushButton:disabled{
+#channelpage QPushButton:disabled{
     background: #111928;
     border: 1px solid #202b40;
     color: #445470;
 }
-#next_pushButton,#pre_pushButton{
-    border-radius:16px;
-    font-size:18px;
+
+#topnaviga_frame,#botnaviga_frame{
+	background: qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 #172847,stop:1 #0E1B33);
 }
+#logo_label{
+	background: transparent;
+}
+
 #mode_frame{
 	background-color: #0E1A2E;
 	border: 1px solid #1E2E4A;
-	border-radius: 10px;
-	padding: 3px;
+	border-radius: 9px;
 }
 #mode_frame QPushButton {
 	background-color: transparent; 
     border: none;
-    border-radius: 8px;  
-    color: #6A7288; 
-    font-size: 13px;
+    border-radius: 9px;  
     font-weight: bold;
-    padding: 4px 9px;
+	font-size: 12px;
+	color: #6A7288; 
 }
 #mode_frame QPushButton:checked{
-    color: #B0B8C5;
     background-color: rgba(255, 255, 255, 0.04);
-}
-
-QProgressBar {
-    background-color: #0E1B33;
-    border: 1px solid #243B66;
-    border-radius: 8px;
-    text-align: center;
-    color: #E6EDF7;
-    font-size: 12px;
-    font-weight: bold;
-    min-height: 16px;
-    max-height: 16px;
-}
-QProgressBar::chunk {
-    border-radius: 7px;
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                stop:0 #2f7de0, stop:1 #34b979);
-}
-</string>
+	color: #B0B8C5;
+}</string>
   </property>
   <property name="locale">
    <locale language="Chinese" country="China"/>
@@ -165,21 +153,21 @@ QProgressBar::chunk {
      <property name="lineWidth">
       <number>0</number>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,10,2">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,15,1,1">
       <property name="spacing">
-       <number>9</number>
+       <number>3</number>
       </property>
       <property name="leftMargin">
-       <number>3</number>
+       <number>6</number>
       </property>
       <property name="topMargin">
-       <number>3</number>
+       <number>6</number>
       </property>
       <property name="rightMargin">
-       <number>3</number>
+       <number>6</number>
       </property>
       <property name="bottomMargin">
-       <number>3</number>
+       <number>6</number>
       </property>
       <item>
        <widget class="QLabel" name="logo_label">
@@ -240,7 +228,39 @@ QProgressBar::chunk {
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="set_pushButton">
+       <widget class="QPushButton" name="setCh_pushButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../resources/master.qrc">
+          <normaloff>:/web/icon/promotion.png</normaloff>:/web/icon/promotion.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="setDe_pushButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -249,8 +269,8 @@ QProgressBar::chunk {
         </property>
         <property name="maximumSize">
          <size>
-          <width>72</width>
-          <height>24</height>
+          <width>16777215</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -282,8 +302,8 @@ QProgressBar::chunk {
         </property>
         <property name="iconSize">
          <size>
-          <width>18</width>
-          <height>18</height>
+          <width>16</width>
+          <height>16</height>
          </size>
         </property>
        </widget>
@@ -483,18 +503,21 @@ QProgressBar::chunk {
      <property name="lineWidth">
       <number>0</number>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="2,7,1">
+     <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="2,6,1">
+      <property name="spacing">
+       <number>6</number>
+      </property>
       <property name="leftMargin">
        <number>6</number>
       </property>
       <property name="topMargin">
-       <number>0</number>
+       <number>6</number>
       </property>
       <property name="rightMargin">
        <number>6</number>
       </property>
       <property name="bottomMargin">
-       <number>0</number>
+       <number>6</number>
       </property>
       <item>
        <widget class="QFrame" name="mode_frame">
@@ -513,24 +536,24 @@ QProgressBar::chunk {
         <property name="lineWidth">
          <number>0</number>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="1,1,1,1">
          <property name="spacing">
           <number>0</number>
          </property>
          <property name="leftMargin">
-          <number>0</number>
+          <number>3</number>
          </property>
          <property name="topMargin">
-          <number>0</number>
+          <number>3</number>
          </property>
          <property name="rightMargin">
-          <number>0</number>
+          <number>3</number>
          </property>
          <property name="bottomMargin">
-          <number>0</number>
+          <number>3</number>
          </property>
          <item>
-          <widget class="QPushButton" name="ver_pushButton">
+          <widget class="QPushButton" name="dig_pushButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -547,13 +570,13 @@ QProgressBar::chunk {
             <enum>Qt::NoContextMenu</enum>
            </property>
            <property name="text">
-            <string>版本</string>
+            <string>正常</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
            </property>
            <property name="checked">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup</string>
@@ -598,7 +621,7 @@ QProgressBar::chunk {
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="dig_pushButton">
+          <widget class="QPushButton" name="stat_pushButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -615,13 +638,44 @@ QProgressBar::chunk {
             <enum>Qt::NoContextMenu</enum>
            </property>
            <property name="text">
-            <string>正常</string>
+            <string>状态</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
            </property>
            <property name="checked">
+            <bool>false</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ver_pushButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="text">
+            <string>版本</string>
+           </property>
+           <property name="checkable">
             <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
            </property>
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup</string>
