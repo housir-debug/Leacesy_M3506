@@ -1,119 +1,18 @@
-#include "auxiliary/uartProtocol.h"
+#include "auxiliary/global_static.h"
+#include "auxiliary/signal_bus.h"
+#include "uart_protocol.h"
 #include "uart_channel.h"
-#include <QtCore>
+#include "scpi_handle.h"
+#include <QSerialPort>
+#include <QtEndian>
+#include <QThread>
+#include <QTimer>
 
-UartChannelManager::UartChannelManager(QObject *parent):QObject(parent){}
-UartChannelManager::~UartChannelManager()
+void UartChannelManager::writeFrame(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi)
 {
-    if (m_serialPort && m_serialPort->isOpen()) { m_serialPort->close(); }
-    if (m_refreshtimer) { m_refreshtimer->stop(); }
-}
-
-Q_LOGGING_CATEGORY(uart_channel, "UART_CHANNEL:")
-
-QThread* UartChannelManager::getWorkerThread(quint32 channel) {
-    static constexpr int THREAD_COUNT = 4;
-    static QThread threads[THREAD_COUNT];
-    static std::once_flag flag;
-
-    std::call_once(flag, [] {
-        for (int i = 0; i < THREAD_COUNT; i++) {
-            threads[i].setObjectName(QString("UartChThread_%1").arg(i));
-            threads[i].start();
-        }
-    });
-
-    return &threads[channel % THREAD_COUNT];
-}
-
-void UartChannelManager::initUartchannel(quint8 ch, const QString &portName,qint32 baudRate)
-{
-    QThread* worker = getWorkerThread(ch);
-    this->moveToThread(worker); // The child object will follow the parent class.
-
-    QMetaObject::invokeMethod(this, [this,ch,portName,baudRate]() {
-        m_channel = ch;
-        m_commands = {
-            {0x04, 0x80, ""},// voltage
-            {0x04, 0x81, ""},// current
-            {0x05, 0x80, ""},// status
-        };
-
-        m_serialPort = new QSerialPort(this);
-        // Set the data bit to 8 bits, For example: Data5 - Data8
-        m_serialPort->setDataBits(QSerialPort::Data8);
-        // Not use parity check bits, the upper-level protocol ensures data integrity.
-        m_serialPort->setParity(QSerialPort::NoParity);
-        // Use 1 stop bit, Mark the end of A data byte
-        m_serialPort->setStopBits(QSerialPort::OneStop);
-        // HardwareControl: Requires wiring support | SoftwareControl: Applicable only to written text
-        m_serialPort ->setFlowControl(QSerialPort::NoFlowControl);
-        // setting QSerialPort::Baud38400 and QSerialPort - name
-        m_serialPort->setBaudRate(baudRate);
-        m_serialPort->setPortName(portName);
-
-        if (m_serialPort->open(QIODevice::ReadWrite)) {
-            connect(m_serialPort, &QSerialPort::readyRead, this, &UartChannelManager::handleReadyRead, Qt::DirectConnection);
-            connect(m_serialPort, &QSerialPort::errorOccurred, this, [this]() {
-                qCWarning(uart_channel)<<"[initUartchannel]:Channel_"<<m_channel<<" Error: "<<m_serialPort->errorString();
-                }, Qt::DirectConnection);
-
-            m_refreshtimer = new QTimer(this);
-            m_refreshtimer->setInterval(180); // ms -> 60ms < target < at will
-            connect(m_refreshtimer,&QTimer::timeout,this,[this]{
-                if (!m_commands.isEmpty()){
-                    m_timeindex = (m_timeindex + 1) % m_commands.size();
-                    const Command &cmd = m_commands[m_timeindex];
-                    writeFrame(cmd.cmd, cmd.func, cmd.param, false);
-                }}, Qt::DirectConnection);
-
-            // Channel initialization command
-            sendInitCommand();
-            return;
-        }
-
-        qCWarning(uart_channel)<<"[initUartchannel]:failed Open SerialPort: "<<portName;
-    }, Qt::QueuedConnection);
-}
-
-void UartChannelManager::sendInitCommand()
-{
-    if (m_initindex < m_initCommands.size()) {
-       const Command& cmd = m_initCommands[m_initindex];
-       writeFrame(cmd.cmd, cmd.func, cmd.param, false);
-
-       // disable direct call this function, will block reception
-       QTimer::singleShot(36, this, &UartChannelManager::sendInitCommand); // 36 ms
-       m_initindex++;
-       return;
-   }else if(ConfigManager::s_enableDisplay && isExist){
-        m_refreshtimer->start();
-        m_initindex = 0;
-   }
-}
-
-const QVector<Command> UartChannelManager::m_initCommands = {
-    {0x05, 0x84, ""},// query software
-    {0x05, 0x85, ""},// query Hardware
-    {0x01, 0x00, ""},// Turnoff output
-    {0x04, 0x0e, QByteArray::fromHex("00")},// set A Unit
-    {0x04, 0x0c, QByteArray::fromHex("3f 80 00 00")},// set NPLC =1
-    {0x04, 0x1e, QByteArray::fromHex("37 82 dc bf")},// set Tint =1.56e-05
-    {0x04, 0x0f, QByteArray::fromHex("01")},// set measure average =1
-    {0x02, 0x00, QByteArray::fromHex("00 00 00 00")},// set cv =0
-    {0x02, 0x01, QByteArray::fromHex("3f 80 00 00")},// set cc =1
-    {0x02, 0x03, QByteArray::fromHex("41 00 00 00")},// set ovp =8
-    {0x04, 0x1d, QByteArray::fromHex("00 01")},// set Output impedance step =1
-    {0x02, 0x02, QByteArray::fromHex("00 00 00 00")},// set Output impedance =0 -> cv model
-    //{0x04, 0x1f, QByteArray::fromHex("ff ff ff ff")},// set relarge, not vaild parameter
-};
-
-
-void UartChannelManager::writeFrame(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi) {
     if (m_waitR) {
         QTimer::singleShot(18, this, [this, cmd, func, param, isScpi] { // 18 ms
             writeFrame(cmd, func, param, isScpi);
-            m_waitR = false;
         });
 
         return;
@@ -138,7 +37,109 @@ void UartChannelManager::writeFrame(quint8 cmd, quint8 func, const QByteArray& p
     m_waitR = true;
     m_serialPort->write(m_responsebuffer);
     m_scpiCommand = isScpi ? (static_cast<quint16>(cmd) << 8) | func : 0; // 01 | 02 = 0x0102
-    qCDebug(uart_channel)<<"[writeFrame]:Ch_"<<m_channel<<" Send: "<<m_responsebuffer.toHex(' ');
+    qCDebug(uartCh)<<"[writeFrame]:Ch_"<<m_channel<<" Send: "<<m_responsebuffer.toHex(' ');
+}
+
+void UartChannelManager::initUartchannel(quint8 ch, const QString &portName,qint32 baudRate)
+{
+    m_channel = ch;
+
+    QThread* worker = getWorkerThread(ch);
+    this->moveToThread(worker); // The child object will follow the parent class.
+
+    QMetaObject::invokeMethod(this, [this,portName,baudRate]() {
+        m_serialPort = new QSerialPort(this);
+        // Set the data bit to 8 bits, For example: Data5 - Data8
+        m_serialPort->setDataBits(QSerialPort::Data8);
+        // Not use parity check bits, the upper-level protocol ensures data integrity.
+        m_serialPort->setParity(QSerialPort::NoParity);
+        // Use 1 stop bit, Mark the end of A data byte
+        m_serialPort->setStopBits(QSerialPort::OneStop);
+        // HardwareControl: Requires wiring support | SoftwareControl: Applicable only to written text
+        m_serialPort ->setFlowControl(QSerialPort::NoFlowControl);
+        // setting QSerialPort::Baud38400 and QSerialPort - name
+        m_serialPort->setBaudRate(baudRate);
+        m_serialPort->setPortName(portName);
+
+        if (m_serialPort->open(QIODevice::ReadWrite)) {
+            connect(m_serialPort, &QSerialPort::readyRead, this, &UartChannelManager::handleReadyRead, Qt::DirectConnection);
+            connect(m_serialPort, &QSerialPort::errorOccurred, this, [this]() {
+                qCWarning(uartCh)<<"[initUartchannel]:Channel_"<<m_channel<<" Error: "<<m_serialPort->errorString();
+                }, Qt::DirectConnection);
+
+            m_refreshtimer = new QTimer(this);
+            m_refreshtimer->setInterval(180); // ms -> 60ms < target < at will
+            connect(m_refreshtimer,&QTimer::timeout,this,[this]{
+                m_timeindex = (m_timeindex + 1) % m_commands.size();
+                const Command &cmd = m_commands[m_timeindex];
+                writeFrame(cmd.cmd, cmd.func, cmd.param, false);
+                }, Qt::DirectConnection);
+
+            // Channel initialization command
+            sendInitCommand();
+            return;
+        }
+
+        qCWarning(uartCh)<<"[initUartchannel]:failed Open SerialPort: "<<portName;
+        }, Qt::QueuedConnection);
+}
+void UartChannelManager::sendInitCommand()
+{
+    if (m_initindex < m_initCommands.size()) {
+       const Command& cmd = m_initCommands[m_initindex];
+       writeFrame(cmd.cmd, cmd.func, cmd.param, false);
+
+       // disable direct call this function, will block reception
+       QTimer::singleShot(36, this, &UartChannelManager::sendInitCommand); // 36 ms
+       m_initindex++;
+       return;
+   }else if(isExist && Module::enable_DisPlay){
+       m_refreshtimer->start();
+       m_initindex = 0;
+   }
+}
+
+const QVector<UartChannelManager::Command> UartChannelManager::m_commands =
+{
+    {0x04, 0x80, ""},// voltage
+    {0x04, 0x81, ""},// current
+    {0x05, 0x80, ""},// status
+};
+const QVector<UartChannelManager::Command> UartChannelManager::m_initCommands =
+{
+    {0x05, 0x84, ""},// query software
+    {0x05, 0x85, ""},// query Hardware
+    {0x01, 0x00, ""},// Turnoff output
+    {0x04, 0x0e, QByteArray::fromHex("00")},// set A Unit
+    {0x04, 0x0c, QByteArray::fromHex("3f 80 00 00")},// set NPLC =1
+    {0x04, 0x1e, QByteArray::fromHex("37 82 dc bf")},// set Tint =1.56e-05
+    {0x04, 0x0f, QByteArray::fromHex("01")},// set measure average =1
+    {0x02, 0x00, QByteArray::fromHex("00 00 00 00")},// set cv =0
+    {0x02, 0x01, QByteArray::fromHex("3f 80 00 00")},// set cc =1
+    {0x02, 0x03, QByteArray::fromHex("41 00 00 00")},// set ovp =8
+    {0x04, 0x1d, QByteArray::fromHex("00 01")},// set Output impedance step =1
+    {0x02, 0x02, QByteArray::fromHex("00 00 00 00")},// set Output impedance =0 -> cv model
+    //{0x04, 0x1f, QByteArray::fromHex("ff ff ff ff")},// set relarge, not vaild parameter
+};
+QThread* UartChannelManager::getWorkerThread(quint32 channel)
+{
+    static QThread threads[JV6xxx::CHThread_NUM];
+    static std::once_flag flag;
+
+    std::call_once(flag, [] {
+        for (int i = 0; i < JV6xxx::CHThread_NUM; i++) {
+            threads[i].setObjectName(QString("UartChThread_%1").arg(i));
+            threads[i].start();
+        }});
+
+    return &threads[channel % JV6xxx::CHThread_NUM];
+}
+
+UartChannelManager::UartChannelManager(QObject *parent):QObject(parent){}
+UartChannelManager::~UartChannelManager()
+{
+    if (m_serialPort && m_serialPort->isOpen()) { m_serialPort->close(); }
+    if (m_refreshtimer) { m_refreshtimer->stop(); }
 }
 
 void UartChannelManager::handleReadyRead()
@@ -148,7 +149,7 @@ void UartChannelManager::handleReadyRead()
     // Normal response processing of the protocol
     if (m_readbuffer.size() >= 3){
         if(static_cast<quint8>(m_readbuffer[0]) == JV6xxx::HEADER_LOW && static_cast<quint8>(m_readbuffer[1]) == JV6xxx::HEADER_HIGH){
-            qCDebug(uart_channel)<<"[handleReadyRead]:Ch_"<<m_channel<<" Received: "<<m_readbuffer.toHex(' ');
+            qCDebug(uartCh)<<"[handleReadyRead]:Ch_"<<m_channel<<" Received: "<<m_readbuffer.toHex(' ');
             quint8 lengthB = static_cast<quint8>(m_readbuffer[2]);
 
             if (m_readbuffer.size() >= lengthB + 4){
@@ -173,11 +174,11 @@ void UartChannelManager::handleReadyRead()
                             case JV6xxx::CALIBRATION:          handleCalibrationcmd     (func,scpiId);break;
                             case JV6xxx::TRIGGER:              handleTriggercmd         (func,scpiId);break;
                             case JV6xxx::ERROR:                handleErrorcmd           (func);       break;
-                            default:qCDebug(uart_channel)<<"[handleReadyRead]:Ch_"<<m_channel<<" UndefCommand: "<<cmd;
+                            default:qCDebug(uartCh)<<"[handleReadyRead]:Ch_"<<m_channel<<" UndefCommand: "<<cmd;
                         }
 
                         if (m_scpiCommand == scpiId){
-                            if (ConfigManager::s_remoteSt == InterSt::CAN){emit to_CanServer(m_channel, scpiId, m_readparam);}
+                            if (ConfigManager::control_Mode == InterSt::CAN){emit ChannelBus::instance().to_CanServer(m_channel, scpiId, m_readparam);}
                             m_scpiCommand = 0;
                         }
 
@@ -189,14 +190,14 @@ void UartChannelManager::handleReadyRead()
                     }
                 }
 
-                qCDebug(uart_channel)<<"[handleReadyRead]:Ch_"<<m_channel<<" end/check format Error!";
+                qCDebug(uartCh)<<"[handleReadyRead]:Ch_"<<m_channel<<" end/check format Error!";
                 m_readbuffer.clear();
             }
 
             return; // Insufficient length; wait to be completed.
         }
 
-        qCDebug(uart_channel)<<"[handleReadyRead]:Ch_"<<m_channel<<" head format Error!";
+        qCDebug(uartCh)<<"[handleReadyRead]:Ch_"<<m_channel<<" head format Error!";
         m_readbuffer.clear();
     }
 }
@@ -205,63 +206,63 @@ void UartChannelManager::handleReadyRead()
 
 void UartChannelManager::handleOutputcmd(quint8 func,quint16 scpiIdentify){
     quint32 sh = m_readparam.size()==1 ? static_cast<quint32>(m_readparam[0]) : (m_readparam.size()==4) ? qFromBigEndian<quint32>(m_readparam.constData()) : 0;
-    qCDebug(uart_channel)<<"[handleOutputcmd]:Ch_"<<m_channel<<" ["<<func<<"] "<<sh;
+    qCDebug(uartCh)<<"[handleOutputcmd]:Ch_"<<m_channel<<" ["<<func<<"] "<<sh;
 
     switch (func){
         case JV6xxx::Output::QUERY_OUTPSTATUS:case JV6xxx::Output::QUERY_OUTPBAND:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHStateResponse(sh!=0);}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHBoolResponse(sh!=0);}
             return;
         case JV6xxx::Output::QUERY_OUTPMODE:case JV6xxx::Output::QUERY_OUTPCOMP_MODE:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHIntResponse(sh);}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHIntResponse(sh);}
             return;
 
         case JV6xxx::Output::SET_OUTPSTATUS_OFF:case JV6xxx::Output::SET_OUTPSTATUS_ON:
-            emit CH_isOutputChanged(m_channel,func == 1); // 可以改成直接传输数字，显示判断直接采用数字
+            emit ChannelBus::instance().CH_isOutputChanged(m_channel,func == 1); // 可以改成直接传输数字，显示判断直接采用数字
 
             if (m_scpiCommand == scpiIdentify){
-                if (ConfigManager::s_remoteSt == InterSt::CAN){
+                if (ConfigManager::control_Mode == InterSt::CAN){
                     QByteArray param(1,static_cast<char>(func));
-                    emit to_CanServer(m_channel,0x01,param);
+                    emit ChannelBus::instance().to_CanServer(m_channel,0x01,param);
                 }
-                m_scpiManager->processCHVoidResponse();
+                ScpiManager::instance().processCHVoidResponse();
             }
             return;
         case JV6xxx::Output::SET_OUTPMODE:case JV6xxx::Output::SET_OUTPBAND:
         case JV6xxx::Output::SET_OUTPCOMP_MODE:default:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHVoidResponse();}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHVoidResponse();}
             return;
     }
 }
 
 void UartChannelManager::handleSettingcmd(quint8 func,quint16 scpiIdentify){
     float shf = m_readparam.size()==4 ? qFromBigEndian<float>(m_readparam.constData()) : 0.0f;
-    qCDebug(uart_channel)<<"[handleSettingcmd]:Ch_"<<m_channel<<" ["<<func<<"] "<<shf;
+    qCDebug(uartCh)<<"[handleSettingcmd]:Ch_"<<m_channel<<" ["<<func<<"] "<<shf;
 
     switch (func){
         case JV6xxx::Setting::QUERY_SOURVOLT:case JV6xxx::Setting::QUERY_SOURCURR:
         case JV6xxx::Setting::QUERY_SOURIMP:case JV6xxx::Setting::QUERY_SOURVOLT_PROT:
         case JV6xxx::Setting::QUERY_THERPROT:case JV6xxx::Setting::QUERY_LOADCURR:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHFloatResponse(shf);}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHFloatResponse(shf);}
             return;
 
         case JV6xxx::Setting::SET_SOURVOLT:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHVoidResponse();}
-            emit CH_cvChanged(m_channel,shf);
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHVoidResponse();}
+            emit ChannelBus::instance().CH_cvChanged(m_channel,shf);
             return;
         case JV6xxx::Setting::SET_SOURCURR:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHVoidResponse();}
-            emit CH_ccChanged(m_channel,shf);
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHVoidResponse();}
+            emit ChannelBus::instance().CH_ccChanged(m_channel,shf);
             return;
         case JV6xxx::Setting::SET_SOURIMP:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHVoidResponse();}
-            emit CH_impChanged(m_channel,shf);
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHVoidResponse();}
+            emit ChannelBus::instance().CH_impChanged(m_channel,shf);
             return;
         case JV6xxx::Setting::SET_SOURVOLT_PROT:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHVoidResponse();}
-            emit CH_ovpChanged(m_channel,shf);
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHVoidResponse();}
+            emit ChannelBus::instance().CH_ovpChanged(m_channel,shf);
             return;
         case JV6xxx::Setting::SET_THERPROT:case JV6xxx::Setting::SET_LOADCURR:default:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHVoidResponse();}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHVoidResponse();}
             return;
     }
 }
@@ -269,18 +270,18 @@ void UartChannelManager::handleSettingcmd(quint8 func,quint16 scpiIdentify){
 void UartChannelManager::handleControlcmd(quint8 func,quint16 scpiIdentify){
     quint16 sh = m_readparam.size()==1 ? static_cast<quint16>(m_readparam[0]) : (m_readparam.size()==2) ? qFromBigEndian<quint16>(m_readparam.constData()) : 0;
     float  shf = m_readparam.size()==4 ? qFromBigEndian<float>(m_readparam.constData())  :  0.0f;
-    qCDebug(uart_channel)<<"[handleControlcmd]:Ch_"<<m_channel<<" ["<<func<<"] "<<sh<<","<<shf;
+    qCDebug(uartCh)<<"[handleControlcmd]:Ch_"<<m_channel<<" ["<<func<<"] "<<sh<<","<<shf;
 
     switch (func){
         case JV6xxx::Control::QUERY_SOURVOLT_CLAM:case JV6xxx::Control::QUERY_SOURCURR_TYPE:
         case JV6xxx::Control::QUERY_SYSTPOS:case JV6xxx::Control::QUERY_LOADINDE_STAT:
         case JV6xxx::Control::QUERY_LOADCURR_TYPE:case JV6xxx::Control::QUERY_SOURCURR_PRIO:
         case JV6xxx::Control::QUERY_SOURVOLT_ABS:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHIntResponse(sh);}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHIntResponse(sh);}
             return;
         case JV6xxx::Control::QUERY_SOURVOLT_TIME:case JV6xxx::Control::QUERY_SOURCURR_TIME:
         case JV6xxx::Control::QUERY_THERTIME:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHFloatResponse(shf);}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHFloatResponse(shf);}
             return;
 
         case JV6xxx::Control::SET_SOURVOLT_CLAM:case JV6xxx::Control::SET_SOURCURR_TYPE:
@@ -289,7 +290,7 @@ void UartChannelManager::handleControlcmd(quint8 func,quint16 scpiIdentify){
         case JV6xxx::Control::SET_SOURCURR_PRIO:case JV6xxx::Control::SET_SOURVOLT_ABS:
         case JV6xxx::Control::SET_SOURVOLT_TIME:case JV6xxx::Control::SET_SOURCURR_TIME:
         case JV6xxx::Control::SET_THERTIME:default:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHVoidResponse();}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHVoidResponse();}
             return;
     }
 }
@@ -297,20 +298,20 @@ void UartChannelManager::handleControlcmd(quint8 func,quint16 scpiIdentify){
 void UartChannelManager::handleMeasurementcmd(quint8 func,quint16 scpiIdentify){ // new protocol Needs to be completed
     quint16 sh = m_readparam.size()==1 ? static_cast<quint16>(m_readparam[0]) : (m_readparam.size()==2) ? qFromBigEndian<quint16>(m_readparam.constData()) : 0;
     float  shf = m_readparam.size()==4 ? qFromBigEndian<float>(m_readparam.constData())  :  0.0f;
-    qCDebug(uart_channel)<<"[handleMeasurementcmd]:Ch_"<<m_channel<<" ["<<func<<"] "<<sh<<","<<shf;
+    qCDebug(uartCh)<<"[handleMeasurementcmd]:Ch_"<<m_channel<<" ["<<func<<"] "<<sh<<","<<shf;
 
     switch (func){
         case JV6xxx::Measurement::QUERY_MEASVOLT:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHFloatResponse(shf);} // Otherwise, conflicts.
-            emit CH_VoltageChanged(m_channel,shf);
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHFloatResponse(shf);} // Otherwise, conflicts.
+            emit ChannelBus::instance().CH_VoltageChanged(m_channel,shf);
             return;
         case JV6xxx::Measurement::QUERY_MEASCURR:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHFloatResponse(shf);} // Otherwise, conflicts.
-            emit CH_CurrentAndUnitChanged(m_channel,shf);
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHFloatResponse(shf);} // Otherwise, conflicts.
+            emit ChannelBus::instance().CH_CurrentAndUnitChanged(m_channel,shf);
             return;
         case JV6xxx::Measurement::QUERY_SENSSWE_OFFS_POIN:{
             int sht = m_readparam.size()==4 ? qFromBigEndian<int>(m_readparam.constData())  :  0;
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHIntResponse(sht);}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHIntResponse(sht);}
             return;
         }
         case JV6xxx::Measurement::QUERY_MEASSCUR:case JV6xxx::Measurement::QUERY_MEASBTMP:
@@ -327,26 +328,26 @@ void UartChannelManager::handleMeasurementcmd(quint8 func,quint16 scpiIdentify){
         case JV6xxx::Measurement::QUERY_FETCVOLT_MAX:case JV6xxx::Measurement::QUERY_FETCVOLT_MIN:
         case JV6xxx::Measurement::QUERY_MEASARR_VOLT:case JV6xxx::Measurement::QUERY_MEASARR_CURR:case JV6xxx::Measurement::QUERY_MEASARR_DVM:
         case JV6xxx::Measurement::QUERY_SENSSWE_TINT:case JV6xxx::Measurement::QUERY_SENSCURR_RANGE_TIME:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHFloatResponse(shf);}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHFloatResponse(shf);}
             return;
         case JV6xxx::Measurement::QUERY_THERFAN:case JV6xxx::Measurement::QUERY_THERDUTY://case 0x9d:  :SENS:SWE:POIN?
         case JV6xxx::Measurement::QUERY_SENSCURR_RANGE:case JV6xxx::Measurement::QUERY_SENSFUNC:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHIntResponse(sh);}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHIntResponse(sh);}
             return;
         case JV6xxx::Measurement::QUERY_SENSNPLC:case JV6xxx::Measurement::QUERY_SENSAVER:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHVoidResponse();}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHVoidResponse();}
             return;
 
 
         case JV6xxx::Measurement::SET_SENSCURR_RANGE:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHVoidResponse();}
-            emit CH_RangeChanged(m_channel,sh);
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHVoidResponse();}
+            emit ChannelBus::instance().CH_RangeChanged(m_channel,sh);
             return;
         case JV6xxx::Measurement::SET_SENSNPLC:case JV6xxx::Measurement::SET_SENSCURR_RANGE_TIM:
         case JV6xxx::Measurement::SET_SENSAVER:case JV6xxx::Measurement::SET_SENSFUNC:
         case JV6xxx::Measurement::SET_SENSSWE_OFFS_POIN:case JV6xxx::Measurement::SET_SENSSWE_POIN:
         case JV6xxx::Measurement::SET_SENSSWE_TINT:default:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHVoidResponse();}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHVoidResponse();}
             return;
     }
 }
@@ -359,33 +360,33 @@ void UartChannelManager::handleRegistercmd(quint8 func,quint16 scpiIdentify){
     }
 
     quint16 sh = m_readparam.size()==1 ? static_cast<quint16>(m_readparam[0]) : (m_readparam.size()==2) ? qFromBigEndian<quint16>(m_readparam.constData()) : 0;
-    qCDebug(uart_channel)<<"[handleRegistercmd]:Ch_"<<m_channel<<" ["<<func<<"] "<<sh<<","<<str;;
+    qCDebug(uartCh)<<"[handleRegistercmd]:Ch_"<<m_channel<<" ["<<func<<"] "<<sh<<","<<str;;
 
     switch (func){
         case JV6xxx::Register::QUERY_STATOPER_EVEN:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHIntResponse(sh);}
-            emit CH_StatusChanged(m_channel,sh);
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHIntResponse(sh);}
+            emit ChannelBus::instance().CH_StatusChanged(m_channel,sh);
             return;
         case JV6xxx::Register::QUERY_SYSTENAB:case JV6xxx::Register::QUERY_STATOPER_COND:
         case JV6xxx::Register::QUERY_SYSTCONF:case JV6xxx::Register::QUERY_STATQUE_NEXT:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHIntResponse(sh);}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHIntResponse(sh);}
             return;
         case JV6xxx::Register::QUERY_SYSTSWV:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHStringResponse(str);}
-            emit CH_svChanged(m_channel,str);
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHStringResponse(str);}
+            emit ChannelBus::instance().CH_svChanged(m_channel,str);
             isExist = true;
             return;
         case JV6xxx::Register::QUERY_SYSTHWV:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHStringResponse(str);}
-            emit CH_hvChanged(m_channel,str);
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHStringResponse(str);}
+            emit ChannelBus::instance().CH_hvChanged(m_channel,str);
             isExist = true;
             return;
         case JV6xxx::Register::QUERY_SYSTREG:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHStringResponse(str);}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHStringResponse(str);}
             return;
 
         case JV6xxx::Register::SET_STATQUE_CLEAR:default:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHVoidResponse();}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHVoidResponse();}
             return;
     }
 }
@@ -394,8 +395,8 @@ void UartChannelManager::handleCalibratecmd(quint8 func,quint16 scpiIdentify){
     switch (func){
         case JV6xxx::Calibrate::QUERY_CALISTAR_ALL:{
             quint8 sh = m_readparam.size() == 1 ? static_cast<quint8>(m_readparam[0]) : 0;
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHIntResponse(sh);}
-            qCDebug(uart_channel)<<"[handleCalibratecmd]:Ch_"<<m_channel<<" | "<<sh;
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHIntResponse(sh);}
+            qCDebug(uartCh)<<"[handleCalibratecmd]:Ch_"<<m_channel<<" | "<<sh;
             return;
         }
 
@@ -406,7 +407,7 @@ void UartChannelManager::handleCalibratecmd(quint8 func,quint16 scpiIdentify){
         case JV6xxx::Calibrate::SET_CALISTART_IMP:case JV6xxx::Calibrate::SET_CALISTART_DCP:
         case JV6xxx::Calibrate::SET_CALISTART_DCN:case JV6xxx::Calibrate::SET_CALICLEARTC:
         case JV6xxx::Calibrate::SET_CALISAVETC:case JV6xxx::Calibrate::SET_CALIUPDATETC:default:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHVoidResponse();}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHVoidResponse();}
             return;
     }
 }
@@ -414,27 +415,27 @@ void UartChannelManager::handleCalibratecmd(quint8 func,quint16 scpiIdentify){
 void UartChannelManager::handleCalibrationcmd(quint8 func,quint16 scpiIdentify){
     if (m_readparam.size()==4 && m_scpiCommand == scpiIdentify){ // // Query and Set
         float shf = qFromBigEndian<float>(m_readparam.constData()); // step = func
-        m_scpiManager->processCHFloatResponse(shf);
+        ScpiManager::instance().processCHFloatResponse(shf);
 
-        emit to_CanServer(m_channel,0x07,m_readparam);
-        qCDebug(uart_channel)<<"[handleCalibrationcmd]:Ch_"<<m_channel<<" step: "<<func<<" CD: "<<shf;
+        emit ChannelBus::instance().to_CanServer(m_channel,0x07,m_readparam);
+        qCDebug(uartCh)<<"[handleCalibrationcmd]:Ch_"<<m_channel<<" step: "<<func<<" CD: "<<shf;
     }
 }
 
 void UartChannelManager::handleTriggercmd(quint8 func,quint16 scpiIdentify){ // new protocol Needs to be change
     quint16 sh = m_readparam.size()==1 ? static_cast<quint16>(m_readparam[0]) : (m_readparam.size()==2) ? qFromBigEndian<quint16>(m_readparam.constData()) : 0;
     float  shf = m_readparam.size()==4 ? qFromBigEndian<float>(m_readparam.constData())  :  0.0f;
-    qCDebug(uart_channel)<<"[handleTriggercmd]:Ch_"<<m_channel<<" ["<<func<<"] "<<sh<<","<<shf;
+    qCDebug(uartCh)<<"[handleTriggercmd]:Ch_"<<m_channel<<" ["<<func<<"] "<<sh<<","<<shf;
 
     switch (func){
         case JV6xxx::Trigger::QUERY_TRIGSEQ2_SOUR:case JV6xxx::Trigger::QUERY_TRIGSEQ2_COUN:
         case JV6xxx::Trigger::QUERY_TRIGSEQ2_SLOP:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHIntResponse(sh);}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHIntResponse(sh);}
             return;
         case JV6xxx::Trigger::QUERY_TRIGSEQ2_HYST:case JV6xxx::Trigger::QUERY_TRIGSEQ2_LEV:
         case JV6xxx::Trigger::QUERY_SOURVOLT_AMPL_TRIG:case JV6xxx::Trigger::QUERY_SOURCURR_TRIG:
         case JV6xxx::Trigger::QUERY_SOURRES_TRIG:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHFloatResponse(shf);}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHFloatResponse(shf);}
             return;
 
         case JV6xxx::Trigger::SET_ABORT:case JV6xxx::Trigger::SET_INIT_IMM:
@@ -444,7 +445,7 @@ void UartChannelManager::handleTriggercmd(quint8 func,quint16 scpiIdentify){ // 
         case JV6xxx::Trigger::SET_TRIGSEQ2_LEV:case JV6xxx::Trigger::SET_TRIGSEQ2_SLOP:
         case JV6xxx::Trigger::SET_SOURVOLT_AMPL_TRIG:case JV6xxx::Trigger::SET_SOURCURR_TRIG:
         case JV6xxx::Trigger::SET_SOURRES_TRIG:default:
-            if (m_scpiCommand == scpiIdentify){m_scpiManager->processCHVoidResponse();}
+            if (m_scpiCommand == scpiIdentify){ScpiManager::instance().processCHVoidResponse();}
             return;
     }
 }
@@ -462,8 +463,8 @@ void UartChannelManager::handleErrorcmd(quint8 func){
         default:  errstr = "Unknow Error";        break;
     }
 
-    qCDebug(uart_channel)<<"[handleErrorcmd]:Ch_"<<m_channel<<" Error: "<<errstr;
-    m_scpiManager->processCHStringResponse(errstr);
+    qCDebug(uartCh)<<"[handleErrorcmd]:Ch_"<<m_channel<<" Error: "<<errstr;
+    ScpiManager::instance().processCHStringResponse(errstr);
 }
 
 // new protocol needs to be complete other section - test

@@ -1,3 +1,4 @@
+#include "auxiliary/battery_model.h"
 #include "ui_channelcard.h"
 #include "channelcard.h"
 #include <QMouseEvent>
@@ -13,7 +14,6 @@ void channelcard::mouseMoveEvent(QMouseEvent *event)
         m_isPressed = false;
     }
 }
-
 void channelcard::mousePressEvent(QMouseEvent *event)
 {
     m_longPressTriggered = false;
@@ -23,12 +23,13 @@ void channelcard::mousePressEvent(QMouseEvent *event)
     m_isPressed = true;
     event->accept();
 }
-
 void channelcard::mouseReleaseEvent(QMouseEvent *event)
 {
     if (m_isPressed && !m_longPressTriggered){
-        bool status = property("outputed").toBool();
-        emit clicked(m_channel,!status);
+        if (currentIndex() == ChCardindex::Battery || currentIndex() == ChCardindex::Digital){
+            bool status = property("outputed").toBool();
+            emit clicked(m_channel,!status);
+        }
     }
 
     m_longPressTimer->stop();
@@ -37,7 +38,7 @@ void channelcard::mouseReleaseEvent(QMouseEvent *event)
 }
 
 channelcard::channelcard(QWidget *parent) : QStackedWidget(parent),
-    ui(new Ui::channelcard) // objectname
+    ui(new Ui::channelcard)
 {
     ui->setupUi(this);
 
@@ -48,24 +49,22 @@ channelcard::channelcard(QWidget *parent) : QStackedWidget(parent),
     connect(m_longPressTimer, &QTimer::timeout, this, [this]{
         if (m_isPressed && !m_longPressTriggered) {
             m_longPressTriggered = true;
-            emit longPressed(m_channel);
+            // emit longPressed(m_channel);
+            setCurrentIndex(ChCardindex::Selected);
         }
     });
 }
-
 channelcard::~channelcard()
 {
     delete ui;
 }
 
 /* digital */
-
 void channelcard::setVoltage(float value)
 {
     ui->volt_label->setText(QString::number(value, 'f', 4));
     m_voltage.store(value);
 }
-
 void channelcard::setCurrent(float value)
 {
     ui->curr_label->setText(QString::number(value, 'f', 4));
@@ -73,56 +72,43 @@ void channelcard::setCurrent(float value)
 }
 
 QString channelcard::getChunit() const{return ui->currunit_label->text();}
-
 void channelcard::setCurrentUnit(const QString &unit){ui->currunit_label->setText(unit);}
-
-bool channelcard::getChCVChecked() const{return ui->cv_frame->property("Status").toBool();}
-
-void channelcard::setCVChecked(bool checked)
-{
-    ui->cv_frame->setProperty("Status",checked);
-    ui->cv_frame->style()->unpolish(this);
-    ui->cv_frame->style()->polish(this);
-}
 
 void channelcard::setCvValue(float value)
 {
     ui->cvvalue_label->setText(QString::number(value, 'f', 3) + " V");
     m_cv.store(value);
 }
-
-bool channelcard::getChCCChecked() const{return ui->cc_frame->property("Status").toBool();}
-
-void channelcard::setCCChecked(bool checked)
-{
-    ui->cc_frame->setProperty("Status",checked);
-    ui->cc_frame->style()->unpolish(this);
-    ui->cc_frame->style()->polish(this);
-}
-
 void channelcard::setCcValue(float value)
 {
     ui->ccvalue_label->setText(QString::number(value, 'f', 3) + " A");
     m_cc.store(value);
 }
-
-bool channelcard::getChOVPChecked() const{return ui->ovp_frame->property("Status").toBool();}
-
-void channelcard::setOVPChecked(bool checked)
-{
-    ui->ovp_frame->setProperty("Status",checked);
-    ui->ovp_frame->style()->unpolish(this);
-    ui->ovp_frame->style()->polish(this);
-}
-
 void channelcard::setOvpValue(float value)
 {
     ui->ovpvalue_label->setText(QString::number(value, 'f', 3) + " V");
     m_ovp.store(value);
 }
 
-/* battery */
+bool channelcard::getChCVChecked() const{return ui->cv_frame->property("Status").toBool();}
+bool channelcard::getChCCChecked() const{return ui->cc_frame->property("Status").toBool();}
+bool channelcard::getChOVPChecked() const{return ui->ovp_frame->property("Status").toBool();}
+void channelcard::setOutChecked(const QString &status)
+{
+    if (status.size() == 16){
+        ui->cv_frame->setProperty("Status",status.at(14) == "1");
+        ui->cv_frame->style()->unpolish(this);
+        ui->cv_frame->style()->polish(this);
+        ui->cc_frame->setProperty("Status",status.at(13) == "1");
+        ui->cc_frame->style()->unpolish(this);
+        ui->cc_frame->style()->polish(this);
+        ui->ovp_frame->setProperty("Status",status.at(11) == "1");
+        ui->ovp_frame->style()->unpolish(this);
+        ui->ovp_frame->style()->polish(this);
+    }
+}
 
+/* battery */
 void channelcard::setSocValue(float value)
 {
     ui->socprogressBar->setValue(qRound(value));
@@ -140,27 +126,22 @@ void channelcard::setSocValue(float value)
     ui->socprogressBar->style()->polish(this);
     // update();
 }
-
 void channelcard::setOcvValue(float value)
 {
     ui->ocvvaluelabel->setText(QString::number(value, 'f', 4) + " V");
     m_ocv = value;
 }
-
 void channelcard::setCapValue(float value)
 {
     ui->capvaluelabel->setText(QString::number(value, 'f', 2) + " Ah");
     m_cap = value;
 }
-
 void channelcard::setEsrValue(float value)
 {
     ui->esrvaluelabel->setText(QString::number(value, 'f', 4) + " Ω");
     m_esr = value;
 }
-
 QString channelcard::getChmodelname() const{return ui->modelnamelabel->text();}
-
 void channelcard::setModelValue(const QString &model){ui->modelnamelabel->setText(model);}
 
 float channelcard::getcurrentOCV() const
@@ -171,7 +152,6 @@ float channelcard::getcurrentOCV() const
         return 0.0f;
     }
 }
-
 float channelcard::getcurrentESR() const
 {
     if (!m_activeModel.isNull() && !m_activeModel->isOver(m_soc.load())){
@@ -180,7 +160,6 @@ float channelcard::getcurrentESR() const
         return 0.0f;
     }
 }
-
 void channelcard::updateSocValue(float current)
 {
     float deltaTimeHours = m_integralTimer.elapsed() / 3600000.0f; // ms -> hours
@@ -198,7 +177,6 @@ void channelcard::updateSocValue(float current)
 }
 
 /* status */
-
 void channelcard::setChtatus(const QString &status)
 {
     if (status.size() == 16){
@@ -206,9 +184,7 @@ void channelcard::setChtatus(const QString &status)
             QString btnName = QString("pushButton%1").arg(i+1);
             QPushButton *btn = ui->statuschframe->findChild<QPushButton*>(btnName);
 
-            bool statuschar  = status.at(i) == "1";
-            btn->setProperty("status", statuschar);
-
+            btn->setProperty("status", status.at(i) == "1");
             btn->style()->unpolish(btn);
             btn->style()->polish(btn);
             //btn->update();
@@ -217,13 +193,10 @@ void channelcard::setChtatus(const QString &status)
 }
 
 /* version */
-
 void channelcard::setChSWVersion(const QString &ver){ui->chswvaluelabel->setText(ver);}
-
 void channelcard::setChHWVersion(const QString &ver){ui->chhwvaluelabel->setText(ver);}
 
 /* share */
-
 void channelcard::setChannel(int ch)
 {
     QString channel = QString("CH-%1").arg(ch, 2, 10, QChar('0'));
@@ -231,21 +204,26 @@ void channelcard::setChannel(int ch)
 
     ui->digitalch_label->setText(channel);
     ui->batterych_label->setText(channel);
+    ui->statusch_label->setText(channel);
     ui->versionch_label->setText(channel);
 }
 
 bool channelcard::getChstatus() const{return property("Outputed").toBool();}
-
 void channelcard::setChannelState(bool state)
 {
-    m_integralTimer.restart();
-
     setProperty("Outputed",state);
     style()->unpolish(this);
     style()->polish(this);
     // update();
+
+    m_integralTimer.restart();
 }
 
 int channelcard::getChmode(){return currentIndex();}
-
 void channelcard::setChannelmode(int index){setCurrentIndex(index);}
+
+/* slots */
+void channelcard::on_digt_pushButton_clicked(){setCurrentIndex(ChCardindex::Digital);}
+void channelcard::on_batt_pushButton_clicked(){setCurrentIndex(ChCardindex::Battery);}
+void channelcard::on_stat_pushButton_clicked(){setCurrentIndex(ChCardindex::Status);}
+void channelcard::on_vers_pushButton_clicked(){setCurrentIndex(ChCardindex::Version);}

@@ -1,5 +1,5 @@
-#include "widgets/test.h"
 #include "widgets/appmain.h"
+#include "widgets/apptest.h"
 #include <QFontDatabase>
 #include <QApplication>
 
@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     QApplication::setOverrideCursor(Qt::BlankCursor);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     // QApplication::setAttribute(Qt::AA_EnableHighDpiScaling); -* Warning: It will deform.
+    // QTimer::singleShot(9000, &app, &QGuiApplication::quit); // 9s
 
     int fontId = QFontDatabase::addApplicationFont(":/fonts/wqy-microhei.ttc");
     if (fontId != -1) {
@@ -20,12 +21,10 @@ int main(int argc, char *argv[])
         }
     }
 
-    test tw;
-    tw.show();
-    return app.exec();
+    /*test tw;
+    tw.show();*/
 
-    //QTimer::singleShot(9000, &app, &QGuiApplication::quit); // 9s
-    //Mainwindow mw; // inside -> show
+    Mainwindow mw; // inside -> show
     return app.exec();
 }
 

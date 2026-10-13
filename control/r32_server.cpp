@@ -1,4 +1,7 @@
-#include "uart_server.h"
+#include "auxiliary/global_static.h"
+#include "auxiliary/signal_bus.h"
+#include "channel/scpi_handle.h"
+#include "r32_server.h"
 #include <QtCore>
 
 Q_LOGGING_CATEGORY(uart_server, "UART_SERVER:")
@@ -8,8 +11,8 @@ void UartServerManager::changeBaudRate()
     static const QList<int> validBaudRates = {1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200};
 
     if (validBaudRates.contains(ConfigManager::s_rs232BaudRate) && m_uartServer->setBaudRate(static_cast<QSerialPort::BaudRate>(ConfigManager::s_rs232BaudRate))) {
-        ConfigManager::setConfigValue("Device/RS232Baud",ConfigManager::s_rs232BaudRate);
-        emit baudrefresh();
+        ConfigManager::saveNewValue("Device/RS232Baud",ConfigManager::s_rs232BaudRate);
+        emit ChannelBus::instance().interAcUpdate();
         return;
     }
 }
@@ -54,13 +57,13 @@ UartServerManager::UartServerManager(QObject *parent): QObject(parent)
                     m_readbuffer.clear();
                 }*/
 
-                switch (ConfigManager::s_remoteSt.load()) {
-                    case InterSt::LOCAL:emit isRemote(InterSt::RS232);// fall through
+                switch (ConfigManager::control_Mode.load()) {
+                    case InterSt::LOCAL:emit ChannelBus::instance().switchRemote(InterSt::RS232);// fall through
                     case InterSt::RS232:
                         m_readbuffer = m_uartServer->readAll();
                         qCDebug(uart_server)<<"[UartServerManager]:UartServer SCPI-Commend: "<< m_readbuffer;
 
-                        m_responsebuffer = m_scpiManager->processCommand(m_readbuffer);
+                        m_responsebuffer = ScpiManager::instance().processCommand(m_readbuffer);
                         if (!m_responsebuffer.isEmpty()){m_uartServer->write(m_responsebuffer);}
                         qCDebug(uart_server)<<"[UartServerManager]:UartServer SCPI Response: "<<m_responsebuffer;
                         break;

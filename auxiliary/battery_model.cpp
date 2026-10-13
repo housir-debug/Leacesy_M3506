@@ -1,14 +1,8 @@
+#include "global_static.h"
 #include "battery_model.h"
-#include <QFile>
-#include <QTextStream>
-#include <QRegularExpression>
-#include <QFileInfo>
 #include <QDir>
-#include <algorithm>
 
 BatteryModel::BatteryModel(QObject *parent) : QObject(parent) {}
-
-Q_LOGGING_CATEGORY(battery, "BATTERY:")
 
 // *************************** BatteryModel ***********************************
 
@@ -114,11 +108,11 @@ bool BatteryModelManager::saveModel(QSharedPointer<BatteryModel> model,const QSt
             return true;
         }
 
-        qCWarning(battery)<<"[saveModel]: not create model file: "<<filePath;
+        qCWarning(battMod)<<"[saveModel]: not create model file: "<<filePath;
         return false;
     }
 
-    qCWarning(battery)<<"[saveModel]: model file already exist!";
+    qCWarning(battMod)<<"[saveModel]: model file already exist!";
     return false;
 }
 
@@ -130,7 +124,7 @@ bool BatteryModelManager::removeModel(const QString &modelName) {
             return true;
         }
 
-        qCWarning(battery)<<"[removeModel]: delete model: "<<modelName<<" | error:"<<file.errorString();
+        qCWarning(battMod)<<"[removeModel]: delete model: "<<modelName<<" | error:"<<file.errorString();
         return false;
     }
 
@@ -157,7 +151,7 @@ bool BatteryModelManager::loadAllModels() {
         return true;
     }
 
-    qCWarning(battery)<<"[loadAllModels]:No model file exists.";
+    qCWarning(battMod)<<"[loadAllModels]:No model file exists.";
     return false;
 }
 
@@ -196,7 +190,7 @@ QSharedPointer<BatteryModel> BatteryModelManager::parseCSV(const QString &filePa
                     }
                 }
 
-                qCWarning(battery)<<"[parseCSV]: line failed: "<< columns;
+                qCWarning(battMod)<<"[parseCSV]: line failed: "<< columns;
                 return nullptr;
             }
 
@@ -204,10 +198,10 @@ QSharedPointer<BatteryModel> BatteryModelManager::parseCSV(const QString &filePa
             return model;
         }
 
-        qCWarning(battery)<<"[parseCSV]: format failed!" << filePath;
+        qCWarning(battMod)<<"[parseCSV]: format failed!" << filePath;
         return nullptr;
     }
 
-    qCWarning(battery)<<"[parseCSV]:failed open file!" << filePath;
+    qCWarning(battMod)<<"[parseCSV]:failed open file!" << filePath;
     return nullptr;
 }

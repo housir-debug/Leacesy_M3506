@@ -1,74 +1,64 @@
-#include "auxiliary/uartProtocol.h"
-#include "auxiliary/channelbus.h"
+#include "../component/channelcard.h"
+#include "auxiliary/battery_model.h"
+#include "channel/uart_protocol.h"
+#include "auxiliary/signal_bus.h"
 #include "ui_channelpage.h"
 #include "channelpage.h"
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QtEndian>
 
 /* slots function */
-
-void channelpage::on_setDe_pushButton_clicked(){emit jump_devicesetpage();}
-
-void channelpage::on_setCh_pushButton_clicked(){emit jump_chsetpage();}
-
 void channelpage::on_dig_pushButton_clicked()
 {
     for (channelcard *card :  qAsConst(m_channels)) {
         if (card->getChstatus()){
-            ChannelBus::instance()->to_Channel(card->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "");
+            ChannelBus::instance().to_Channel(card->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "",false);
         }
 
         card->setChannelmode(ChCardindex::Digital);
     }
 }
-
 void channelpage::on_batt_pushButton_clicked()
 {
     for (channelcard *card :  qAsConst(m_channels)) {
         if (card->getChstatus()){
-            ChannelBus::instance()->to_Channel(card->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "");
+            ChannelBus::instance().to_Channel(card->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "",false);
         }
 
         card->setChannelmode(ChCardindex::Battery);
     }
 }
-
 void channelpage::on_stat_pushButton_clicked()
 {
     for (channelcard *card :  qAsConst(m_channels)) {
         if (card->getChstatus()){
-            ChannelBus::instance()->to_Channel(card->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "");
+            ChannelBus::instance().to_Channel(card->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "",false);
         }
 
         card->setChannelmode(ChCardindex::Status);
     }
 }
-
 void channelpage::on_ver_pushButton_clicked()
 {
     for (channelcard *card :  qAsConst(m_channels)) {
         if (card->getChstatus()){
-            ChannelBus::instance()->to_Channel(card->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "");
+            ChannelBus::instance().to_Channel(card->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "",false);
         }
 
         card->setChannelmode(ChCardindex::Version);
     }
 }
 
-void channelpage::on_pre_pushButton_clicked()
-{
-    int newindex = ui->ch_stackedWidget->currentIndex() - 1;
-    to_channelpage(newindex);
-}
+void channelpage::on_setDe_pushButton_clicked(){emit jump_devicesetpage();}
+void channelpage::on_setCh_pushButton_clicked(){emit jump_chsetpage();}
 
-void channelpage::on_next_pushButton_clicked()
-{
-    int newindex = ui->ch_stackedWidget->currentIndex() + 1;
-    to_channelpage(newindex);
-}
-
+void channelpage::on_pre_pushButton_clicked(){to_channelpage(ui->ch_stackedWidget->currentIndex() - 1);}
+void channelpage::on_next_pushButton_clicked(){to_channelpage(ui->ch_stackedWidget->currentIndex() + 1);}
 void channelpage::to_channelpage(int newindex)
 {
-    ui->ch_stackedWidget->setCurrentIndex(newindex);
     int total = ui->ch_stackedWidget->count();
+    ui->ch_stackedWidget->setCurrentIndex(newindex);
 
     ui->progressBar->setValue(newindex + 1);
     ui->progressBar->setMaximum(total);
@@ -83,55 +73,40 @@ channelpage::channelpage(QWidget *parent) :
 {
     ui->setupUi(this);
 }
-
 channelpage::~channelpage()
 {
     delete ui;
 }
 
 /* create channel card */
-
-void channelpage::update_cardtest()
-{
-    QList<int> channels = {3, 1, 4,2,8,9,24,15,32,12,18};
-    //for (int i = 1; i <= 36; i++) {channels.append(i);}
-    std::sort(channels.begin(), channels.end());
-
-    for (const int ch : channels) {
-        update_SoftVer(ch,"1.2.3.4");
-        update_HardVer(ch,"4.3.2.1");
-    }
-}
-
 void channelpage::update_SoftVer(int ch,const QString &ver)
 {
    channelcard* card = create_chcard(ch);
-   if (card){card->setChSWVersion(ver);}
+   card->setChSWVersion(ver);
 }
-
 void channelpage::update_HardVer(int ch,const QString &ver)
 {
     channelcard* card = create_chcard(ch);
-    if (card){card->setChHWVersion(ver);}
+    card->setChHWVersion(ver);
 }
-
 channelcard* channelpage::create_chcard(int ch)
 {
-    if (!m_channels.contains(ch)){
+    auto itcard = m_channels.find(ch);
+    if (itcard == m_channels.end()) {
         QWidget* page = nullptr;
         QHBoxLayout* layout = nullptr;
         int neededPages = (m_channels.size() + ChPageCard::PageCard) / ChPageCard::PageCard;// Round up
 
         if (ui->ch_stackedWidget->count() < neededPages) {
-            page = new QWidget();
-            layout = new QHBoxLayout(page);
+            page = new QWidget(ui->ch_stackedWidget);
+            ui->ch_stackedWidget->addWidget(page);
+            ui->ch_stackedWidget->setCurrentIndex(0);
 
+            layout = new QHBoxLayout(page);
             layout->setContentsMargins(ChPageCard::RLMargin,ChPageCard::TBMargin,ChPageCard::RLMargin,ChPageCard::TBMargin);
             layout->setSpacing(ChPageCard::CardSpace);
             page->setLayout(layout);
 
-            ui->ch_stackedWidget->addWidget(page);
-            ui->ch_stackedWidget->setCurrentIndex(0);
             ui->progressBar->setValue(1);
             ui->progressBar->setMaximum(neededPages);
             ui->pre_pushButton->setEnabled(false);
@@ -147,7 +122,7 @@ channelcard* channelpage::create_chcard(int ch)
 
          connect(card, &channelcard::clicked, this, [card](bool switchs) {
              quint8 func = switchs ? JV6xxx::Output::SET_OUTPSTATUS_ON : JV6xxx::Output::SET_OUTPSTATUS_OFF;
-             ChannelBus::instance()->ChannelBus::instance()->to_Channel(card->m_channel,JV6xxx::OUTPUT, func, "");
+             ChannelBus::instance().to_Channel(card->m_channel,JV6xxx::OUTPUT, func, "",false);
              });
          //connect(card, &channelcard::longPressed, this, [this]() {emit jump_chsetpage();});
 
@@ -155,11 +130,10 @@ channelcard* channelpage::create_chcard(int ch)
          return card;
      }
 
-    return m_channels[ch];
+    return itcard.value();
 }
 
 /* update card style */
-
 void channelpage::update_IsOutput(int ch,bool status)
 {
     auto itcard = m_channels.find(ch);
@@ -167,71 +141,60 @@ void channelpage::update_IsOutput(int ch,bool status)
         itcard.value()->setChannelState(status);
     }
 }
-
 void channelpage::update_Voltage(int ch,float voltage)
 {
     auto itcard = m_channels.find(ch);
     if (itcard != m_channels.end()) {
         if (itcard.value()->getChmode() == ChCardindex::Digital){
             itcard.value()->setVoltage(voltage);
-        }else if (itcard.value()->getChstatus()){
-            /* battery mode and outputed status */
-            QByteArray data(4,0);
+        }else if (itcard.value()->getChmode() == ChCardindex::Battery && itcard.value()->getChstatus()){
             float ocvval = itcard.value()->getcurrentOCV();
             float esrval = itcard.value()->getcurrentESR();
+            QByteArray data(4,0);
 
             if (ocvval == 0.0f || esrval == 0.0f){
-                ChannelBus::instance()->to_Channel(itcard.value()->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "");
+                ChannelBus::instance().to_Channel(itcard.value()->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "",false);
                 return;
             }else{
                 qToBigEndian(ocvval, reinterpret_cast<uint8_t*>(data.data()));
-                ChannelBus::instance()->to_Channel(ch,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURVOLT, data);
+                ChannelBus::instance().to_Channel(ch,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURVOLT, data,false);
                 qToBigEndian(esrval, reinterpret_cast<uint8_t*>(data.data()));
-                ChannelBus::instance()->to_Channel(ch,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURIMP, data);
+                ChannelBus::instance().to_Channel(ch,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURIMP, data,false);
             }
         }
     }
 }
-
 void channelpage::update_CurrentAndUnit(int ch,float current)
 {
     auto itcard = m_channels.find(ch);
     if (itcard != m_channels.end()) {
         if (itcard.value()->getChmode() == ChCardindex::Digital){
-            QString newUnit = (qAbs(current) < 1e-4) ? "mA" : "A";
-            itcard.value()->setCurrent(current);
-            itcard.value()->setCurrentUnit(newUnit);
-        }else if (itcard.value()->getChstatus()){
+            QString mA;QString A;
+            if (itcard.value()->m_curange == JV6xxx::Param::Auto){
+                mA = "@m"; A = "@A";
+            }else{
+                mA = "mA"; A =  "A";
+            }
+
+            if ((qAbs(current) < 1e-4)){
+                itcard.value()->setCurrent(current * 1000);
+                itcard.value()->setCurrentUnit(mA);
+            }else{
+                itcard.value()->setCurrent(current);
+                itcard.value()->setCurrentUnit(A);
+            }
+        }else if (itcard.value()->getChmode() == ChCardindex::Battery && itcard.value()->getChstatus()){
             itcard.value()->updateSocValue(current);
         }
     }
 }
-
-void channelpage::update_Cv(int ch,float cv)
-{
-    auto itcard = m_channels.find(ch);
-    if (itcard != m_channels.end()){
-        itcard.value()->setCvValue(cv);
-        itcard.value()->setOcvValue(cv);
-    }
-}
-
-void channelpage::update_Cc(int ch,float cc)
+void channelpage::update_Range(int ch,int range)
 {
     auto itcard = m_channels.find(ch);
     if (itcard != m_channels.end()) {
-        itcard.value()->setCcValue(cc);
+        itcard.value()->m_curange = range;
     }
 }
-
-void channelpage::update_Ovp(int ch,float ovp)
-{
-    auto itcard = m_channels.find(ch);
-    if (itcard != m_channels.end()) {
-        itcard.value()->setOvpValue(ovp);
-    }
-}
-
 void channelpage::update_Imp(int ch,float imp)
 {
     auto itcard = m_channels.find(ch);
@@ -239,15 +202,31 @@ void channelpage::update_Imp(int ch,float imp)
         itcard.value()->setEsrValue(imp);
     }
 }
-
-void channelpage::update_Range(int ch,int range)
+void channelpage::update_Cv(int ch,float cv)
+{
+    auto itcard = m_channels.find(ch);
+    if (itcard != m_channels.end()){
+        if (itcard.value()->getChmode() == ChCardindex::Digital){
+            itcard.value()->setCvValue(cv);
+        }else if(itcard.value()->getChmode() == ChCardindex::Battery){
+            itcard.value()->setOcvValue(cv);
+        }
+    }
+}
+void channelpage::update_Cc(int ch,float cc)
 {
     auto itcard = m_channels.find(ch);
     if (itcard != m_channels.end()) {
-        itcard.value()->m_curange = m_range.value(range);
+        itcard.value()->setCcValue(cc);
     }
 }
-
+void channelpage::update_Ovp(int ch,float ovp)
+{
+    auto itcard = m_channels.find(ch);
+    if (itcard != m_channels.end()) {
+        itcard.value()->setOvpValue(ovp);
+    }
+}
 void channelpage::update_Status(int ch,quint16 status)
 {
     auto itcard = m_channels.find(ch);
@@ -255,45 +234,35 @@ void channelpage::update_Status(int ch,quint16 status)
         QString binaryStr = QString("%1").arg(status, 16, 2, QLatin1Char('0'));
 
         if (itcard.value()->getChmode() == ChCardindex::Digital){
-            bool cv  = binaryStr.at(14) == "1";
-            bool cc  = binaryStr.at(13) == "1";
-            bool ovp = binaryStr.at(11) == "1";
-
-            itcard.value()->setCVChecked(cv);
-            itcard.value()->setCCChecked(cc);
-            itcard.value()->setOVPChecked(ovp);
+            itcard.value()->setOutChecked(binaryStr);
         }else if(itcard.value()->getChmode() == ChCardindex::Status){
             itcard.value()->setChtatus(binaryStr);
         }
     }
 }
-
-/* web or main call function */
-
-bool channelpage::load_BatteryModel()
+void channelpage::update_Soc(int ch,float soc)
 {
-    for (auto it = m_channels.cbegin(); it != m_channels.cend(); ++it) {
-        if (it.value()->getChstatus()){
-            return false;
-        }
+    auto itcard = m_channels.find(ch);
+    if (itcard != m_channels.end()) {
+        itcard.value()->setSocValue(soc);
     }
-
-    if (m_modelManager && m_modelManager->loadAllModels()) {
-        m_currentModelList = m_modelManager->getAvailableModels();
-        QString batteryModel = m_currentModelList[0]; // load = true -> exist at least 1
-
-        for (auto it = m_channels.cbegin(); it != m_channels.cend(); ++it) {
-            it.value()->m_modelindex = 0;
-            it.value()->setModelValue(batteryModel);
-            it.value()->m_activeModel = m_modelManager->getModel(batteryModel);
-        }
-
-        return true;
+}
+void channelpage::update_Cap(int ch,float cap)
+{
+    auto itcard = m_channels.find(ch);
+    if (itcard != m_channels.end()) {
+        itcard.value()->setCapValue(cap);
     }
-
-    return false;
+}
+void channelpage::update_Model(int ch,const QString model)
+{
+    auto itcard = m_channels.find(ch);
+    if (itcard != m_channels.end()) {
+        itcard.value()->setModelValue(model);
+    }
 }
 
+/* web or main call function */
 QJsonArray channelpage::getAllChannelsData()
 {
     QJsonArray channels;
@@ -315,4 +284,30 @@ QJsonArray channelpage::getAllChannelsData()
     }
 
     return channels;
+}
+
+bool channelpage::readBatteryModel()
+{
+    for (auto it = m_channels.cbegin(); it != m_channels.cend(); ++it) {
+        if (it.value()->getChstatus()){
+            return false;
+        }
+    }
+
+    if (m_modelManager) {
+        m_currentModelList = m_modelManager->getAvailableModels();
+        if (!m_currentModelList.isEmpty()){
+            QString batteryModel = m_currentModelList[0]; // load = true -> exist at least 1
+
+            for (auto it = m_channels.cbegin(); it != m_channels.cend(); ++it) {
+                it.value()->m_modelindex = 0;
+                it.value()->setModelValue(batteryModel);
+                it.value()->m_activeModel = m_modelManager->getModel(batteryModel);
+            }
+
+            return true;
+        }
+    }
+
+    return false;
 }

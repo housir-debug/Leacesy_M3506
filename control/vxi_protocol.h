@@ -1,5 +1,5 @@
 #pragma once
-#include <QtCore>
+#include <QString>
 
 namespace Vxi11 {
     constexpr int HTTP_PORT = 80;

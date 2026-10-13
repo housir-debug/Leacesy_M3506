@@ -1,9 +1,11 @@
 #pragma once
-#include <QLoggingCategory>
+#include <QString>
+#include <QVector>
+#include <QMap>
+#include <QSharedPointer>
 
 struct BatteryDataPoint {float soc;float ocv;float imp;};
 
-Q_DECLARE_LOGGING_CATEGORY(battery)
 
 class BatteryModel : public QObject
 {

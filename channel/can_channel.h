@@ -1,10 +1,8 @@
 #pragma once
-#include <QObject>
 
-class CanChannelManager : public QObject
+class can_channel
 {
-    Q_OBJECT
-
 public:
-    CanChannelManager();
+    can_channel();
 };
+

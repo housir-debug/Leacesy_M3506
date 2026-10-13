@@ -1,9 +1,9 @@
-#include "channelbus.h"
+#include "signal_bus.h"
 
-ChannelBus* ChannelBus::instance()
+ChannelBus& ChannelBus::instance()
 {
     static ChannelBus inst;
-    return &inst;
+    return inst;
 }
 
 ChannelBus::ChannelBus(QObject *parent) : QObject(parent)
@@ -47,15 +47,30 @@ ChannelBus::ChannelBus(QObject *parent) : QObject(parent)
     };
 }
 
-void ChannelBus::to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param)
+void ChannelBus::to_ChannelReset(int channel)
 {
     switch(channel) {
         case 0:
-            #define CHANNEL(n) emit to_UartChannel##n(cmd, func, param,false);
+            #define CHANNEL(n) emit to_UartChannel##n##Reset();
             CHANNEL_COUNT
             #undef CHANNEL
             return;
-        #define CHANNEL(n) case n: return emit to_UartChannel##n(cmd, func, param,false);
+        #define CHANNEL(n) case n: return emit to_UartChannel##n##Reset();
+        CHANNEL_COUNT
+        #undef CHANNEL
+        default:return;
+    }
+}
+
+void ChannelBus::to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param,bool isScpi)
+{
+    switch(channel) {
+        case 0:
+            #define CHANNEL(n) emit to_UartChannel##n(cmd, func, param,isScpi);
+            CHANNEL_COUNT
+            #undef CHANNEL
+            return;
+        #define CHANNEL(n) case n: return emit to_UartChannel##n(cmd, func, param,isScpi);
         CHANNEL_COUNT
         #undef CHANNEL
         default:return;

@@ -84,19 +84,20 @@
     color: #445470;
 }
 
-#topnaviga_frame,#botnaviga_frame{
+#channelpage #topnaviga_frame,
+#channelpage #botnaviga_frame{
 	background: qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 #172847,stop:1 #0E1B33);
 }
-#logo_label{
+#channelpage #logo_label{
 	background: transparent;
 }
 
-#mode_frame{
+#channelpage #mode_frame{
 	background-color: #0E1A2E;
 	border: 1px solid #1E2E4A;
 	border-radius: 9px;
 }
-#mode_frame QPushButton {
+#channelpage #mode_frame QPushButton {
 	background-color: transparent; 
     border: none;
     border-radius: 9px;  
@@ -104,7 +105,7 @@
 	font-size: 12px;
 	color: #6A7288; 
 }
-#mode_frame QPushButton:checked{
+#channelpage #mode_frame QPushButton:checked{
     background-color: rgba(255, 255, 255, 0.04);
 	color: #B0B8C5;
 }</string>

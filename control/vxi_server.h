@@ -1,8 +1,5 @@
 #pragma once
 #include <QTcpServer>
-#include "scpi_handle.h"
-
-Q_DECLARE_LOGGING_CATEGORY(vxi_server)
 
 struct DeviceLink {
     quint32 id;
@@ -16,14 +13,9 @@ class VxiServerManager : public QObject
 {
     Q_OBJECT
 
-signals:
-    void isRemote(quint8 reface);
-
 public:
     explicit VxiServerManager(QObject *parent = nullptr);
     ~VxiServerManager();
-
-    std::shared_ptr<ScpiManager> m_scpiManager{nullptr};
 
 private:
     void processClientData      (QTcpSocket* client);

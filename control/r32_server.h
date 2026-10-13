@@ -1,21 +1,15 @@
 #pragma once
-#include "scpi_handle.h"
-
-Q_DECLARE_LOGGING_CATEGORY(uart_server)
+#include <QSerialPort>
+#include <QElapsedTimer>
 
 class UartServerManager : public QObject
 {
     Q_OBJECT
 
-signals:
-    void isRemote(quint8 reface);
-    void baudrefresh();
-
 public:
     explicit UartServerManager(QObject *parent = nullptr);
     ~UartServerManager();
 
-    std::shared_ptr<ScpiManager> m_scpiManager{nullptr};
     void changeBaudRate();
 
 private:

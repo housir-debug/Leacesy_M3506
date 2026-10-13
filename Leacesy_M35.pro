@@ -15,58 +15,58 @@ LIBS += -L$$PWD/thirdparty/scpi/lib -lscpi -lm
 
 HEADERS += \
     auxiliary/battery_model.h \
-    auxiliary/channelbus.h \
+    auxiliary/global_static.h \
+    auxiliary/signal_bus.h \
     auxiliary/tirpc_loader.h \
-    auxiliary/config_manager.h \
-    auxiliary/uartProtocol.h \
-    auxiliary/vxinamespace.h \
     channel/can_channel.h \
+    channel/scpi_handle.h \
     channel/uart_channel.h \
+    channel/uart_protocol.h \
     control/can_server.h \
-    control/scpi_handle.h \
+    control/r32_server.h \
+    control/vxi_protocol.h \
     control/vxi_server.h \
     control/web_server.h \
-    control/uart_server.h \
-    widgets/appmain.h \
+    widgets/apptest.h \
     widgets/component/channelcard.h \
-    widgets/interaction/channelpage.h \
-    widgets/interaction/channelsetting.h \
-    widgets/interaction/devicesetpage.h \
     widgets/component/numberkeypad.h \
     widgets/component/remoteoverlay.h \
-    widgets/test.h
+    widgets/interaction/channelpage.h \
+    widgets/interaction/channelsetpage.h \
+    widgets/interaction/devicesetpage.h \
+    widgets/appmain.h
 
 SOURCES += \
     auxiliary/battery_model.cpp \
-    auxiliary/channelbus.cpp \
+    auxiliary/global_static.cpp \
+    auxiliary/signal_bus.cpp \
     auxiliary/tirpc_loader.cpp \
-    auxiliary/config_manager.cpp \
     channel/can_channel.cpp \
+    channel/scpi_handle.cpp \
     channel/uart_channel.cpp \
     control/can_server.cpp \
-    control/scpi_handle.cpp \
+    control/r32_server.cpp \
     control/vxi_server.cpp \
     control/web_server.cpp \
-    control/uart_server.cpp \
-    main.cpp \
-    widgets/appmain.cpp \
+    widgets/apptest.cpp \
     widgets/component/channelcard.cpp \
-    widgets/interaction/channelpage.cpp \
-    widgets/interaction/channelsetting.cpp \
-    widgets/interaction/devicesetpage.cpp \
     widgets/component/numberkeypad.cpp \
     widgets/component/remoteoverlay.cpp \
-    widgets/test.cpp
+    widgets/interaction/channelpage.cpp \
+    widgets/interaction/channelsetpage.cpp \
+    widgets/interaction/devicesetpage.cpp \
+    widgets/appmain.cpp \
+    main.cpp
 
 FORMS += \
-    widgets/appmain.ui \
+    widgets/apptest.ui \
     widgets/component/channelcard.ui \
-    widgets/interaction/channelpage.ui \
-    widgets/interaction/channelsetting.ui \
-    widgets/interaction/devicesetpage.ui \
     widgets/component/numberkeypad.ui \
     widgets/component/remoteoverlay.ui \
-    widgets/test.ui
+    widgets/interaction/channelpage.ui \
+    widgets/interaction/channelsetpage.ui \
+    widgets/interaction/devicesetpage.ui \
+    widgets/appmain.ui
 
 RESOURCES += resources/master.qrc
 

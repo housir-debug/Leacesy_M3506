@@ -9,7 +9,6 @@ void remoteoverlay::showEvent(QShowEvent *event)
     setAttribute(Qt::WA_TransparentForMouseEvents, false);
     QFrame::showEvent(event);
 }
-
 void remoteoverlay::hideEvent(QHideEvent *event)
 {
     QFrame::hideEvent(event);
@@ -25,12 +24,10 @@ remoteoverlay::remoteoverlay(QWidget *parent) : QFrame(parent),
     ui->remotelogo->setGraphicsEffect(logoOpacity);
     hide();
 }
-
 remoteoverlay::~remoteoverlay()
 {
     delete ui;
 }
-
 
 void remoteoverlay::on_gobackpushButton_clicked()
 {

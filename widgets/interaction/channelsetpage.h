@@ -1,8 +1,8 @@
 #pragma once
 #include <QWidget>
-#include "auxiliary/battery_model.h"
-
 namespace Ui {class channelsetting;}
+
+class BatteryModelManager;
 
 class channelsetting : public QWidget
 {
@@ -12,29 +12,30 @@ private:
     Ui::channelsetting *ui;
     int m_setmode{0};
 
-    void sendModecmd(float val,quint8 func);
-
 signals:
     void to_chModel(int ch,const QString model);
-    void to_chSOC(int ch,float val);
     void to_chCAP(int ch,float val);
+    void to_chSOC(int ch,float val);
     void backRequested();
 
 private slots:
-    void on_back_pushButton_clicked();
-    void on_allFO_pushButton_clicked();
-    void on_allNO_pushButton_clicked();
-    void setAllChannelsChecked(bool checked);
     void on_cv_pushButton_clicked();
     void on_cc_pushButton_clicked();
     void on_ovp_pushButton_clicked();
     void on_soc_pushButton_clicked();
     void on_cap_pushButton_clicked();
+    void on_back_pushButton_clicked();
+    void on_allFO_pushButton_clicked();
+    void on_allNO_pushButton_clicked();
+    void setAllChannelsChecked(bool checked);
+    void sendModecmd(float val,quint8 func);
 
 public:
     explicit channelsetting(QWidget *parent = nullptr);
     ~channelsetting();
 
+    void setCombModel();
+    void update_ChEn(int ch);
     std::shared_ptr<BatteryModelManager> m_modelManager{nullptr};
 };
 

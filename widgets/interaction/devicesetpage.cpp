@@ -1,7 +1,73 @@
-#include "devicesetpage.h"
+#include "auxiliary/global_static.h"
+#include "auxiliary/signal_bus.h"
 #include "ui_devicesetpage.h"
-#include "auxiliary/config_manager.h"
+#include "devicesetpage.h"
 #include <QTimer>
+
+/* slots function */
+void devicesetpage::on_ipradioButton_clicked()
+{
+    m_setmode = Setmode::ip;
+    ui->ipradioButton->setChecked(true);
+}
+void devicesetpage::on_maskradioButton_clicked()
+{
+    m_setmode = Setmode::mask;
+    ui->maskradioButton->setChecked(true);
+}
+void devicesetpage::on_gateradioButton_clicked()
+{
+    m_setmode = Setmode::gate;
+    ui->gateradioButton->setChecked(true);
+}
+void devicesetpage::on_canidradioButton_clicked()
+{
+    m_setmode = Setmode::canid;
+    ui->canidradioButton->setChecked(true);
+}
+void devicesetpage::on_canbaudradioButton_clicked()
+{
+    m_setmode = Setmode::canbuat;
+    ui->canbaudradioButton->setChecked(true);
+}
+void devicesetpage::on_rs232baudradioButton_clicked()
+{
+    m_setmode = Setmode::rs232buat;
+    ui->rs232baudradioButton->setChecked(true);
+}
+
+void devicesetpage::on_back_pushButton_clicked(){emit backRequested();}
+void devicesetpage::on_dhcp_pushButton_clicked()
+{
+    ui->ipradioButton->setEnabled(false);
+    ui->maskradioButton->setEnabled(false);
+    ui->gateradioButton->setEnabled(false);
+    ui->canidradioButton->setChecked(true);
+    m_setmode = Setmode::canid;
+
+    emit ChannelBus::instance().set_network(false);
+    ui->iplabel->setText("---.---.---.---");
+    ui->masklabel->setText("---.---.---.---");
+    ui->gatelabel->setText("---.---.---.---");
+}
+void devicesetpage::on_static_pushButton_clicked()
+{
+    ui->ipradioButton->setEnabled(true);
+    ui->maskradioButton->setEnabled(true);
+    ui->gateradioButton->setEnabled(true);
+    ui->ipradioButton->setChecked(true);
+
+    m_setmode = Setmode::ip;
+    ui->refreshpushButton->setEnabled(false);
+}
+void devicesetpage::on_refreshpushButton_clicked()
+{
+    if (ConfigManager::getNetworkConfig()){
+        ui->iplabel->setText(ConfigManager::IP);
+        ui->masklabel->setText(ConfigManager::SM);
+        ui->gatelabel->setText(ConfigManager::Gate);
+    }
+}
 
 devicesetpage::devicesetpage(QWidget *parent) :
     QWidget(parent),
@@ -11,16 +77,16 @@ devicesetpage::devicesetpage(QWidget *parent) :
 
     ui->hardver_label->setText(Device::HardVer);
     ui->softver_label->setText(Device::SoftVer);
-    ui->macaddress_label->setText(ConfigManager::s_MAC);
+    ui->macaddress_label->setText(ConfigManager::MAC);
 
-    ui->iplabel->setText(ConfigManager::s_IP);
-    ui->masklabel->setText(ConfigManager::s_SM);
-    ui->gatelabel->setText(ConfigManager::s_Gateway);
+    ui->iplabel->setText(ConfigManager::IP);
+    ui->masklabel->setText(ConfigManager::SM);
+    ui->gatelabel->setText(ConfigManager::Gate);
     ui->canidlabel->setText(QString::number(ConfigManager::s_CANid.load()));
     ui->canbaudlabel->setText(QString::number(ConfigManager::s_canBaudRate));
     ui->rs232baudlabel->setText(QString::number(ConfigManager::s_rs232BaudRate));
 
-    if (ConfigManager::s_isDHCP){
+    if (ConfigManager::isDHCP){
         ui->dhcp_pushButton->setChecked(true);
         ui->refreshpushButton->setEnabled(true);
 
@@ -44,127 +110,56 @@ devicesetpage::devicesetpage(QWidget *parent) :
         if (!value.isEmpty()){
             switch (m_setmode) {
                 case 0:case 1:case 2:{
-                    QString *fields[] = { &ConfigManager::s_IP, &ConfigManager::s_SM, &ConfigManager::s_Gateway };
+                    QString *fields[] = { &ConfigManager::IP, &ConfigManager::SM, &ConfigManager::Gate };
                     QLabel *valueLabels[] = { ui->iplabel, ui->masklabel, ui->gatelabel };
                     valueLabels[m_setmode]->setText(value);
                     *fields[m_setmode] = value;
 
-                    if (ConfigManager::s_IP != "---.---.---.---" && ConfigManager::s_SM != "---.---.---.---"
-                            && ConfigManager::s_Gateway != "---.---.---.---") {
-                            emit set_network(true);
+                    if (ConfigManager::IP != "---.---.---.---" && ConfigManager::SM != "---.---.---.---"
+                            && ConfigManager::Gate != "---.---.---.---") {
+                            emit ChannelBus::instance().set_network(true);
                     }
                     return;
                 }
                 case 3:
-                    ui->canidlabel->setText(value);
-                    ConfigManager::s_CANid = value.toUInt();
-                    if (ConfigManager::setConfigValue("Device/CANID",ConfigManager::s_CANid.load())){
-                        ui->canidlabel->setText(QString::number(ConfigManager::s_CANid.load()));
+                    if (ConfigManager::saveNewValue("Device/CANID",value.toUInt())){
+                        ConfigManager::s_CANid = value.toUInt();
+                        ui->canidlabel->setText(value);
                     }
                     return;
                 case 4:
                     ConfigManager::s_canBaudRate = value.toUInt();
+                    emit ChannelBus::instance().set_canbaud();
                     ui->canbaudlabel->setText(value);
-                    emit set_canbaud();
                     return;
                 case 5:
                     ConfigManager::s_rs232BaudRate = value.toUInt();
+                    emit ChannelBus::instance().set_RS232Baud();
                     ui->rs232baudlabel->setText(value);
-                    emit set_RS232Baud();
                     return;
                 default:return;
             }
         }});
 }
-
 devicesetpage::~devicesetpage()
 {
     delete ui;
 }
 
-void devicesetpage::on_back_pushButton_clicked(){emit backRequested();}
-
-void devicesetpage::on_dhcp_pushButton_clicked()
-{
-    ui->ipradioButton->setEnabled(false);
-    ui->maskradioButton->setEnabled(false);
-    ui->gateradioButton->setEnabled(false);
-    ui->canidradioButton->setChecked(true);
-    m_setmode = Setmode::canid;
-
-    emit set_network(false);
-    ui->iplabel->setText("---.---.---.---");
-    ui->masklabel->setText("---.---.---.---");
-    ui->gatelabel->setText("---.---.---.---");
-}
-
-void devicesetpage::on_static_pushButton_clicked()
-{
-    ui->ipradioButton->setEnabled(true);
-    ui->maskradioButton->setEnabled(true);
-    ui->gateradioButton->setEnabled(true);
-    ui->ipradioButton->setChecked(true);
-
-    m_setmode = Setmode::ip;
-    ui->refreshpushButton->setEnabled(false);
-}
-
-void devicesetpage::on_refreshpushButton_clicked()
-{
-    if (ConfigManager::getNetworkConfig()){
-        ui->iplabel->setText(ConfigManager::s_IP);
-        ui->masklabel->setText(ConfigManager::s_SM);
-        ui->gatelabel->setText(ConfigManager::s_Gateway);
-    }
-}
-
-
+/* update card style */
 void devicesetpage::responseUpdate()
 {
     ui->canidlabel->setText(QString::number(ConfigManager::s_CANid.load()));
     ui->canbaudlabel->setText(QString::number(ConfigManager::s_canBaudRate));
     ui->rs232baudlabel->setText(QString::number(ConfigManager::s_rs232BaudRate));
 
-    if (ConfigManager::s_isDHCP){
-        QTimer::singleShot(8100, this,[this]() {on_refreshpushButton_clicked();ui->refreshpushButton->setEnabled(true);}); // 8.1s
+    if (ConfigManager::isDHCP){
+        QTimer::singleShot(8100, this,[this]() {
+            ui->refreshpushButton->setEnabled(true);
+            on_refreshpushButton_clicked();
+            }); // 8.1s
     }else{
-        on_refreshpushButton_clicked();ui->refreshpushButton->setEnabled(false);
+        ui->refreshpushButton->setEnabled(false);
+        on_refreshpushButton_clicked();
     }
-}
-
-
-void devicesetpage::on_ipradioButton_clicked()
-{
-    m_setmode = Setmode::ip;
-    ui->ipradioButton->setChecked(true);
-}
-
-void devicesetpage::on_maskradioButton_clicked()
-{
-    m_setmode = Setmode::mask;
-    ui->maskradioButton->setChecked(true);
-}
-
-void devicesetpage::on_gateradioButton_clicked()
-{
-    m_setmode = Setmode::gate;
-    ui->gateradioButton->setChecked(true);
-}
-
-void devicesetpage::on_canidradioButton_clicked()
-{
-    m_setmode = Setmode::canid;
-    ui->canidradioButton->setChecked(true);
-}
-
-void devicesetpage::on_canbaudradioButton_clicked()
-{
-    m_setmode = Setmode::canbuat;
-    ui->canbaudradioButton->setChecked(true);
-}
-
-void devicesetpage::on_rs232baudradioButton_clicked()
-{
-    m_setmode = Setmode::rs232buat;
-    ui->rs232baudradioButton->setChecked(true);
 }

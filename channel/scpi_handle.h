@@ -1,4 +1,7 @@
 #pragma once
+#include <QMutex>
+#include <QObject>
+#include <QWaitCondition>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -6,42 +9,19 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+#include "uart_protocol.h"
 
-#include <QMutex>
-#include <QWaitCondition>
-#include <QLoggingCategory>
-#include "auxiliary/uartProtocol.h"
-#include "auxiliary/channelbus.h"
-#include "auxiliary/config_manager.h"
-
-Q_DECLARE_LOGGING_CATEGORY(scpi)
-
-struct ChannelAddress {
-    int channel;
-    int subAddr;
-};
-
-class ScpiManager : public QObject {
+class ScpiManager : public QObject
+{
     Q_OBJECT
 
-signals:
-    void networkrefresh();
-
-    // to C++ model control
-    #define CHANNEL(n) \
-        void to_UartChannel##n(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi); \
-        void to_UartChannel##n##Reset();
-
-    CHANNEL_COUNT
-    #undef CHANNEL
-
 private:   // auto inline
+    static scpi_result_t SCPI_NETInform(scpi_t* context);
+    static scpi_result_t SET_NETWork(scpi_t* context,int staticmode,bool isstatic);
+    static scpi_result_t SCPI_NETDHCP(scpi_t* context){return SET_NETWork(context,0,false);};
     static scpi_result_t SCPI_NETIPADress(scpi_t* context){return SET_NETWork(context,1,true);};
     static scpi_result_t SCPI_NETSUBNetmask(scpi_t* context){return SET_NETWork(context,2,true);};
     static scpi_result_t SCPI_NETGATeway(scpi_t* context){return SET_NETWork(context,3,true);};
-    static scpi_result_t SCPI_NETDHCP(scpi_t* context){return SET_NETWork(context,0,false);};
-    static scpi_result_t SET_NETWork(scpi_t* context,int staticmode,bool isstatic);
-    static scpi_result_t SCPI_NETInform(scpi_t* context);
 
     int32_t m_querymode{0};
     static scpi_result_t SCPI_Query(scpi_t* context);
@@ -179,61 +159,61 @@ private:   // auto inline
     static scpi_result_t SCPI_TriggerCurrQ(scpi_t* context)          {return sendQueryCmd(context,JV6xxx::TRIGGER,JV6xxx::Trigger::QUERY_SOURCURR_TRIG);};
     static scpi_result_t SCPI_TriggerResQ(scpi_t* context)           {return sendQueryCmd(context,JV6xxx::TRIGGER,JV6xxx::Trigger::QUERY_SOURRES_TRIG);};
 
+    /* Basic execution */
     static scpi_result_t sendBoolCmd(scpi_t* context, quint8 cmd, quint8 func);
     static scpi_result_t sendFloatCmd(scpi_t* context, quint8 cmd, quint8 func);
+    static const scpi_choice_def_t m_CmdparaChoices[];
     static scpi_result_t sendChoiceCmd(scpi_t* context, quint8 cmd, quint8 func);
     static scpi_result_t sendIntCmd(scpi_t* context, quint8 cmd, quint8 func,quint8 bytes);
 
-    int32_t m_channel{0};
+    /* Basic helper */
     static scpi_result_t sendQueryCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data = "");
+    struct ChannelAddress
+    {
+        int channel;
+        int subAddr;
+    };
+    static std::vector<ChannelAddress> allChannelList();
     static std::vector<ChannelAddress> parseChannelList(scpi_t* context);
-
     static scpi_result_t sendMultiCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data, const std::vector<ChannelAddress> &channels);
-    static scpi_result_t sendSingleCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data);
-    static scpi_result_t sendAllCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data);
     static scpi_result_t SCPI_ReadQ(scpi_t* context);
 
 public:
-    static const scpi_choice_def_t m_CmdparaChoices[];
     static const scpi_command_t m_scpiCommands[];
     static const scpi_unit_def_t m_scpi_units[];
-
-    explicit ScpiManager(QObject *parent = nullptr);
-    ~ScpiManager() override = default;
+    static ScpiManager& instance();
 
     // Channel -> this
-    void processCHVoidResponse();                  // 0
-    void processCHStateResponse(bool state);       // 1
-    void processCHFloatResponse(float value);      // 2
-    void processCHIntResponse(int value);          // 3
-    void processCHStringResponse(QString value);   // 4
-
+    void processCHVoidResponse();
+    void processCHBoolResponse(bool state);
+    void processCHFloatResponse(float value);
+    void processCHIntResponse(int value);
+    void processCHStringResponse(const QString& value);
     // Control -> this
     QByteArray processCommand(const QByteArray& command);
 
 private:
+    int m_ReType{0};
     QMutex m_syncMutex;
-    int m_ReturnType{0};
     QWaitCondition m_syncCondition;
 
     int m_CHIntReturn{0};
     bool m_CHStateReturn{false};
     float m_CHFloatReturn{0.0f};
-    QString m_CHStringReturn;
+    QString m_CHStringReturn{""};
 
     QMutex m_callMutex;
     QByteArray m_responseBuffer;
 
-    QByteArray m_idnManufacturer;
-    QByteArray m_idnModel;
-    QByteArray m_idnSerialNumber;
-    QByteArray m_idnVersion;
+    explicit ScpiManager(QObject *parent = nullptr);
+    ~ScpiManager() = default;
+    Q_DISABLE_COPY(ScpiManager)
 
     scpi_t m_scpiContext;
     char m_inputBuffer[256];
     scpi_error_t m_errorQueue[18];
-
     scpi_interface_t m_interface;
+
     static scpi_result_t staticFlush(scpi_t* context);
     static scpi_result_t staticReset(scpi_t* context);
     static int           staticError(scpi_t* context, int_fast16_t err);

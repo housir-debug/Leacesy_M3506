@@ -46,7 +46,7 @@
 	border: none;
 }
 
-#gobackpushButton {
+#remoteoverlay #gobackpushButton {
     background-color: rgba(26, 42, 69, 0.85);
     border: 2px solid rgba(74, 74, 90, 0.5);
     border-radius: 12px;
@@ -58,7 +58,7 @@
     padding-top:6px;
     padding-bottom:6px;
 }
-#gobackpushButton:pressed {
+#remoteoverlay #gobackpushButton:pressed {
     background-color: #0D1525;
     border-color: #4A8EC0;
     color: #B0C8E0;

@@ -42,7 +42,8 @@
   <property name="styleSheet">
    <string notr="true">* {
     font-family: &quot;WenQuanYi Micro Hei&quot;;
-    background-color: #0A1220;
+	background-color: #0A1220;
+	border: none;
 }
 
 #channelsetting QComboBox {
@@ -70,7 +71,6 @@
     font-weight: bold;
 	font-size: 14px;
 	color: #9CB8E8;
-    /*padding: 6px;*/
     outline: none;
     selection-background-color: #2A4A7A;
     selection-color: #FFFFFF;
@@ -106,41 +106,42 @@
     color: #445470;
 }
 
-#page_label {
+#channelsetting #page_label {
     background: transparent;
     border: none;
 	font-weight: bold;
 	font-size: 18px;
 	color: #E6EDF7;
 }
-#frame_5,
-#frame_6 {
+#channelsetting #frame_5,
+#channelsetting #frame_6 {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #172847, stop:1 #0E1B33);
  	border-radius: 12px;
     border: none;
 }
 
-#chselectframe,
-#frame_3,
-#keyframe {
+#channelsetting #chselectframe,
+#channelsetting #frame_3,
+#channelsetting #keyframe {
     background-color: #101C30;
     border: 1px solid #1E2E4A; 
     border-radius: 16px;
 }
-#chselectframe QPushButton {
+#channelsetting #chselectframe QPushButton {
     color: #808090;
 }
-#frame_3 QPushButton:checked,#chselectframe QPushButton:checked {
+#channelsetting #frame_3 QPushButton:checked,
+#channelsetting #chselectframe QPushButton:checked {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #2A4A7A, stop:1 #1E3A62);
     border: 1px solid #4269ad;
     color: #FFFFFF;
 }
 
-#onoff_comboBox{
+#channelsetting #onoff_comboBox{
     color: #e65454;
     border-color: #702424;
 }
-#onoff_comboBox[Outputed=true]{
+#channelsetting #onoff_comboBox[Outputed=true]{
     color: #34b979;
     border-color: #1f5c40;
 }</string>
@@ -274,7 +275,7 @@
       <item row="0" column="0">
        <widget class="QPushButton" name="pushButton1">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -313,7 +314,7 @@
       <item row="0" column="1">
        <widget class="QPushButton" name="pushButton2">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -352,7 +353,7 @@
       <item row="0" column="2">
        <widget class="QPushButton" name="pushButton3">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -391,7 +392,7 @@
       <item row="0" column="3">
        <widget class="QPushButton" name="pushButton4">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -430,7 +431,7 @@
       <item row="0" column="4">
        <widget class="QPushButton" name="pushButton5">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -469,7 +470,7 @@
       <item row="0" column="5">
        <widget class="QPushButton" name="pushButton6">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -508,7 +509,7 @@
       <item row="1" column="0">
        <widget class="QPushButton" name="pushButton7">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -547,7 +548,7 @@
       <item row="1" column="1">
        <widget class="QPushButton" name="pushButton8">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -586,7 +587,7 @@
       <item row="1" column="2">
        <widget class="QPushButton" name="pushButton9">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -625,7 +626,7 @@
       <item row="1" column="3">
        <widget class="QPushButton" name="pushButton10">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -664,7 +665,7 @@
       <item row="1" column="4">
        <widget class="QPushButton" name="pushButton11">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -700,7 +701,7 @@
       <item row="1" column="5">
        <widget class="QPushButton" name="pushButton12">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -736,7 +737,7 @@
       <item row="2" column="0">
        <widget class="QPushButton" name="pushButton13">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -772,7 +773,7 @@
       <item row="2" column="1">
        <widget class="QPushButton" name="pushButton14">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -808,7 +809,7 @@
       <item row="2" column="2">
        <widget class="QPushButton" name="pushButton15">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -844,7 +845,7 @@
       <item row="2" column="3">
        <widget class="QPushButton" name="pushButton16">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -883,7 +884,7 @@
       <item row="2" column="4">
        <widget class="QPushButton" name="pushButton17">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -919,7 +920,7 @@
       <item row="2" column="5">
        <widget class="QPushButton" name="pushButton18">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -955,7 +956,7 @@
       <item row="3" column="0">
        <widget class="QPushButton" name="pushButton19">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -991,7 +992,7 @@
       <item row="3" column="1">
        <widget class="QPushButton" name="pushButton20">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1027,7 +1028,7 @@
       <item row="3" column="2">
        <widget class="QPushButton" name="pushButton21">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1066,7 +1067,7 @@
       <item row="3" column="3">
        <widget class="QPushButton" name="pushButton22">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1102,7 +1103,7 @@
       <item row="3" column="4">
        <widget class="QPushButton" name="pushButton23">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1138,7 +1139,7 @@
       <item row="3" column="5">
        <widget class="QPushButton" name="pushButton24">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1174,7 +1175,7 @@
       <item row="4" column="0">
        <widget class="QPushButton" name="pushButton25">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1210,7 +1211,7 @@
       <item row="4" column="1">
        <widget class="QPushButton" name="pushButton26">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1246,7 +1247,7 @@
       <item row="4" column="2">
        <widget class="QPushButton" name="pushButton27">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1282,7 +1283,7 @@
       <item row="4" column="3">
        <widget class="QPushButton" name="pushButton28">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1321,7 +1322,7 @@
       <item row="4" column="4">
        <widget class="QPushButton" name="pushButton29">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1357,7 +1358,7 @@
       <item row="4" column="5">
        <widget class="QPushButton" name="pushButton30">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1393,7 +1394,7 @@
       <item row="5" column="0">
        <widget class="QPushButton" name="pushButton31">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1429,7 +1430,7 @@
       <item row="5" column="1">
        <widget class="QPushButton" name="pushButton32">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1465,7 +1466,7 @@
       <item row="5" column="2">
        <widget class="QPushButton" name="pushButton33">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1501,7 +1502,7 @@
       <item row="5" column="3">
        <widget class="QPushButton" name="pushButton34">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1537,7 +1538,7 @@
       <item row="5" column="4">
        <widget class="QPushButton" name="pushButton35">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1576,7 +1577,7 @@
       <item row="5" column="5">
        <widget class="QPushButton" name="pushButton36">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">

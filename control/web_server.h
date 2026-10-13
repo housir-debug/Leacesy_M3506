@@ -1,28 +1,21 @@
 #pragma once
-#include "scpi_handle.h"
+#include "channel/scpi_handle.h"
 #include "auxiliary/battery_model.h"
 #include "widgets/interaction/channelpage.h"
 #include <QWebSocketServer>
 #include <QLoggingCategory>
 #include <QTcpServer>
 
-Q_DECLARE_LOGGING_CATEGORY(web_server)
-
 class WebServerManager : public QObject
 {
     Q_OBJECT
-
-signals:
-    void isRemote(quint8 reface);
-    void networkrefresh();
 
 public:
     explicit WebServerManager(QObject *parent = nullptr);
     ~WebServerManager();
 
+    channelpage* m_ChPage;
     void set_network(bool isstatic);
-    std::shared_ptr<channelpage> m_qmlbridge;
-    std::shared_ptr<ScpiManager> m_scpiManager;
     std::shared_ptr<BatteryModelManager> m_BatteryManager;
 
 private:

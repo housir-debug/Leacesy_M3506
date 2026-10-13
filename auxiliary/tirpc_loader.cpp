@@ -1,10 +1,10 @@
-// tirpcloader.cpp
+#include "global_static.h"
 #include "tirpc_loader.h"
 #include <arpa/inet.h>
 
-Q_LOGGING_CATEGORY(libtripc, "LIBTRIPC:")
 
-bool TirpcDynamicLoader::load(){
+bool TirpcDynamicLoader::load()
+{
     static bool loaded = [this]() {
         const char* lib_names[] = {"libtirpc.so.3","libtirpc.so.1","libtirpc.so",nullptr};
 
@@ -23,18 +23,18 @@ bool TirpcDynamicLoader::load(){
             }
         }
 
-        qCCritical(libtripc)<<"[load]:Dynamic load failed!:";
+        qCCritical(tirpLoad)<<"[load]:Dynamic load failed!:";
         return false;
     }();
 
     return loaded;
 }
 
-TirpcDynamicLoader& TirpcDynamicLoader::instance(){
+TirpcDynamicLoader& TirpcDynamicLoader::instance()
+{
     static TirpcDynamicLoader loader;
     return loader;
 }
-
 
 bool TirpcDynamicLoader::smart_pmap_set(quint32 program, quint32 version, int protocol, quint16 port)
 {
@@ -49,6 +49,6 @@ bool TirpcDynamicLoader::smart_pmap_set(quint32 program, quint32 version, int pr
     if (currentPort != 0) {m_pmap_unset(program, version);}
     if (m_pmap_set(program, version, protocol, port)) {return true;}
 
-    qCDebug(libtripc) << "[smart_pmap_set]: Failed to register Program:" << program;
+    qCDebug(tirpLoad) << "[smart_pmap_set]: Failed to register Program:" << program;
     return false;
 }

@@ -29,7 +29,9 @@
    <string notr="true">*{
 	font-family: &quot;WenQuanYi Micro Hei&quot;;
 	background-color: #0A1220;
+	border: none;
 }
+
 
 #devicesetpage QRadioButton {
     background: transparent;
@@ -73,30 +75,30 @@
     color: #646e82;
 }
 
-#page_label {
+#devicesetpage #page_label {
 	background: transparent;
     border: none;
     font-weight: bold;
 	font-size: 18px;
 	 color: #E6EDF7;
 }
-#top_frame,
-#bot_frame {
+#devicesetpage #top_frame,
+#devicesetpage #bot_frame {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #172847, stop:1 #0E1B33);
     border: none;
     border-radius: 12px;
 }
-#mac_label, 
-#hard_label, 
-#soft_label {
+#devicesetpage #mac_label, 
+#devicesetpage #hard_label, 
+#devicesetpage #soft_label {
     background: transparent;
     border: none;
 	font-size: 15px;
 	color: #808090;
 }
-#macaddress_label, 
-#hardver_label, 
-#softver_label {
+#devicesetpage #macaddress_label, 
+#devicesetpage #hardver_label, 
+#devicesetpage #softver_label {
     background: transparent;
     border: none;
 	font-weight: bold;
@@ -104,27 +106,27 @@
 	color: #D0D0D0;
 }
 
-#LAN_frame,
-#other_frame,
-#keyframe {
+#devicesetpage #LAN_frame,
+#devicesetpage #other_frame,
+#devicesetpage #keyframe {
     background-color: #0E1A2E;
     border: 1px solid #1E2E4A;
     border-radius: 14px;
 }
-#LANbut_frame {
+#devicesetpage #LANbut_frame {
     background-color: #142442;
     border: none;
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
 }
-#settingLANlabel {
+#devicesetpage #settingLANlabel {
     color: #C0C8D5;
     font-size: 18px;
     font-weight: bold;
     background: transparent;
     border: none;
 }
-#other_label {
+#devicesetpage #other_label {
 	background-color: #142442;
 	border: none;
     font-weight: bold;
@@ -134,12 +136,12 @@
     border-top-right-radius: 12px;
 }
 
-#net_frame {
+#devicesetpage #net_frame {
     background-color: #0E1A2E; 
     border: 1px solid #1E2E4A;
     border-radius: 9px;
 }
-#net_frame QPushButton {
+#devicesetpage #net_frame QPushButton {
     background-color: transparent; 
     border: none;
     border-radius: 9px; 
@@ -147,23 +149,23 @@
 	font-size: 14px;
 	color: #6A7288; 
 }
-#net_frame QPushButton:checked{
+#devicesetpage #net_frame QPushButton:checked{
     background-color: rgba(255, 255, 255, 0.04);
 	color: #B0B8C5;
 }
 
-#networkframe,
-#deviceidframe  {
+#devicesetpage #networkframe,
+#devicesetpage #deviceidframe  {
     background-color: #111B2C;
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
 }
-#iplabel, 
-#masklabel, 
-#gatelabel ,
-#canidlabel, 
-#canbaudlabel, 
-#rs232baudlabel {
+#devicesetpage #iplabel, 
+#devicesetpage #masklabel, 
+#devicesetpage #gatelabel ,
+#devicesetpage #canidlabel, 
+#devicesetpage #canbaudlabel, 
+#devicesetpage #rs232baudlabel {
     color: #E0E8F0;
 	font-size: 14px;
     background-color: #1A2840;

@@ -36,6 +36,7 @@
   <property name="styleSheet">
    <string notr="true">* {
 	font-family:&quot;WenQuanYi Micro Hei&quot;;
+	background-color: transparent;
 }
 
 #channelcard &gt; QWidget{
@@ -48,10 +49,10 @@
     border-color: rgba(100, 100, 130, 0.9);
 }
 
-#digitalch_label,
-#versionch_label,
-#batterych_label,
-#statusch_label{
+#channelcard #digitalch_label,
+#channelcard #versionch_label,
+#channelcard #batterych_label,
+#channelcard #statusch_label{
 	font-weight: bold;
 	font-size: 36px;
 	color: #C9C9C9;
@@ -2071,6 +2072,140 @@
         </widget>
        </item>
       </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="select">
+   <property name="cursor">
+    <cursorShape>BlankCursor</cursorShape>
+   </property>
+   <property name="contextMenuPolicy">
+    <enum>Qt::NoContextMenu</enum>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">#select QPushButton {
+	background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #1A2D50, stop:1 #142442);
+    border: 1px solid #304b82;
+    border-radius: 9px;
+    font-weight: bold;
+	font-size: 12px;
+	color: #9CB8E8;
+}
+#select QPushButton:pressed{
+	background: #195c3c;
+    border-color: #37b677;
+    color: #ffffff;
+}
+#select QPushButton:disabled {
+    background: #111928;
+    border: 1px solid #202b40;
+    color: #445470;
+}
+</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_9" stretch="1,1,1,1">
+    <property name="spacing">
+     <number>18</number>
+    </property>
+    <property name="leftMargin">
+     <number>18</number>
+    </property>
+    <property name="topMargin">
+     <number>18</number>
+    </property>
+    <property name="rightMargin">
+     <number>18</number>
+    </property>
+    <property name="bottomMargin">
+     <number>18</number>
+    </property>
+    <item>
+     <widget class="QPushButton" name="digt_pushButton">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="cursor">
+       <cursorShape>BlankCursor</cursorShape>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
+      </property>
+      <property name="contextMenuPolicy">
+       <enum>Qt::NoContextMenu</enum>
+      </property>
+      <property name="text">
+       <string>正常</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="batt_pushButton">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="cursor">
+       <cursorShape>BlankCursor</cursorShape>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
+      </property>
+      <property name="contextMenuPolicy">
+       <enum>Qt::NoContextMenu</enum>
+      </property>
+      <property name="text">
+       <string>电池</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="stat_pushButton">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="cursor">
+       <cursorShape>BlankCursor</cursorShape>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
+      </property>
+      <property name="contextMenuPolicy">
+       <enum>Qt::NoContextMenu</enum>
+      </property>
+      <property name="text">
+       <string>状态</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="vers_pushButton">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="cursor">
+       <cursorShape>BlankCursor</cursorShape>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
+      </property>
+      <property name="contextMenuPolicy">
+       <enum>Qt::NoContextMenu</enum>
+      </property>
+      <property name="text">
+       <string>版本</string>
+      </property>
      </widget>
     </item>
    </layout>

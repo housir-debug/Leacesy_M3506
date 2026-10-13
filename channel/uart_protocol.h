@@ -1,7 +1,8 @@
 #pragma once
-#include <QtCore>
+#include <QString>
 
 namespace JV6xxx {
+    constexpr int CHThread_NUM   = 0x04;
     constexpr quint8 HEADER_HIGH = 0xAA;
     constexpr quint8 HEADER_LOW  = 0x55;
     constexpr quint8 END_MARKER  = 0xEE;
@@ -277,5 +278,11 @@ namespace JV6xxx {
         constexpr quint8 SET_SEQEDIT_LINKS           = 0x09;
         constexpr quint8 SET_SEQEDIT_LINKE           = 0x0A;
         constexpr quint8 SET_SEQEDIT_LINKC           = 0x0B;
+    }
+
+    namespace Param {
+        constexpr quint8 A            = 0x00;
+        constexpr quint8 mA           = 0x01;
+        constexpr quint8 Auto         = 0x10;
     }
 }

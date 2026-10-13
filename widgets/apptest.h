@@ -1,6 +1,5 @@
 #pragma once
 #include <QWidget>
-
 namespace Ui {class test;}
 
 class test : public QWidget

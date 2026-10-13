@@ -1,6 +1,6 @@
 #include "can_channel.h"
 
-CanChannelManager::CanChannelManager()
+can_channel::can_channel()
 {
 
 }

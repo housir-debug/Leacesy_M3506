@@ -1,17 +1,10 @@
 #pragma once
 #include <QWidget>
-
 namespace Ui {class devicesetpage;}
 
 class devicesetpage : public QWidget
 {
     Q_OBJECT
-
-public:
-    explicit devicesetpage(QWidget *parent = nullptr);
-    ~devicesetpage();
-
-    void responseUpdate();
 
 private:
     Ui::devicesetpage *ui;
@@ -19,22 +12,25 @@ private:
 
 signals:
     void backRequested();
-    void set_network(bool isstatic);
-    void set_canbaud();
-    void set_RS232Baud();
 
 private slots:
-    void on_back_pushButton_clicked();
-    void on_dhcp_pushButton_clicked();
-    void on_static_pushButton_clicked();
-    void on_refreshpushButton_clicked();
-
     void on_ipradioButton_clicked();
     void on_maskradioButton_clicked();
     void on_gateradioButton_clicked();
     void on_canidradioButton_clicked();
     void on_canbaudradioButton_clicked();
     void on_rs232baudradioButton_clicked();
+
+    void on_back_pushButton_clicked();
+    void on_dhcp_pushButton_clicked();
+    void on_static_pushButton_clicked();
+    void on_refreshpushButton_clicked();
+
+public:
+    explicit devicesetpage(QWidget *parent = nullptr);
+    ~devicesetpage();
+
+    void responseUpdate();
 };
 
 namespace Setmode {

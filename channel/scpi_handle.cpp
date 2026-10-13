@@ -1,8 +1,23 @@
+#include "auxiliary/global_static.h"
+#include "auxiliary/signal_bus.h"
 #include "scpi_handle.h"
-#include <QtCore>
+#include <QtEndian>
+#include <QFile>
 
-Q_LOGGING_CATEGORY(scpi, "SCPI:")
+scpi_result_t ScpiManager::SCPI_NETInform(scpi_t* context)
+{
+    if (ConfigManager::getNetworkConfig()){
+        // SCPI Standard format
+        SCPI_ResultText(context, ConfigManager::isDHCP ? "DHCP" : "Static");
+        SCPI_ResultText(context, ConfigManager::IP.toLatin1().constData());
+        SCPI_ResultText(context, ConfigManager::SM.toLatin1().constData());
+        SCPI_ResultText(context, ConfigManager::Gate.toLatin1().constData());
+        return SCPI_RES_OK;
+    }
 
+    qCWarning(scpi)<<"[SCPI_NETInform]:getNetworkConfig failed!";
+    return SCPI_RES_ERR;
+}
 scpi_result_t ScpiManager::SET_NETWork(scpi_t* context,int staticmode,bool isstatic)
 {
     QFile file("/etc/network/interfaces");
@@ -18,9 +33,9 @@ scpi_result_t ScpiManager::SET_NETWork(scpi_t* context,int staticmode,bool issta
                 qCDebug(scpi) << "[SCPI_NETIPADress]: "<<data;
 
                 switch (staticmode) {
-                    case 1:ConfigManager::s_IP = QString::fromUtf8(data);break;
-                    case 2:ConfigManager::s_SM = QString::fromUtf8(data);break;
-                    case 3:ConfigManager::s_Gateway = QString::fromUtf8(data);break;
+                    case 1:ConfigManager::IP = QString::fromUtf8(data);break;
+                    case 2:ConfigManager::SM = QString::fromUtf8(data);break;
+                    case 3:ConfigManager::Gate = QString::fromUtf8(data);break;
                     default:break;
                 }
 
@@ -30,13 +45,13 @@ scpi_result_t ScpiManager::SET_NETWork(scpi_t* context,int staticmode,bool issta
                     "iface lo inet loopback\n\n"
                     "auto eth0\n"
                     "iface eth0 inet static\n"
-                    "    address " + ConfigManager::s_IP + "\n"
-                    "    netmask " + ConfigManager::s_SM + "\n"
-                    "    gateway " + ConfigManager::s_Gateway;
+                    "    address " + ConfigManager::IP + "\n"
+                    "    netmask " + ConfigManager::SM + "\n"
+                    "    gateway " + ConfigManager::Gate;
 
-                if (ConfigManager::s_IP == "---.---.---.---" ||
-                    ConfigManager::s_SM == "---.---.---.---" ||
-                    ConfigManager::s_Gateway == "---.---.---.---") {
+                if (ConfigManager::IP == "---.---.---.---" ||
+                    ConfigManager::SM == "---.---.---.---" ||
+                    ConfigManager::Gate == "---.---.---.---") {
                     file.close();return SCPI_RES_OK;
                 }
             }
@@ -53,36 +68,121 @@ scpi_result_t ScpiManager::SET_NETWork(scpi_t* context,int staticmode,bool issta
         out << configContent; file.close();
         QString restartCmd = "/etc/init.d/S40network restart";
         if (system(restartCmd.toStdString().c_str()) == 0) {
-            auto* self = static_cast<ScpiManager*>(context->user_context);
-            ConfigManager::s_isDHCP = !isstatic;
-            emit self->networkrefresh();
+            emit ChannelBus::instance().interAcUpdate();
+            ConfigManager::isDHCP = !isstatic;
             return SCPI_RES_OK;
         }
 
-        qCWarning(scpi) << "[SET_NETWork]:/etc/init.d/S40network restart failed!";
+        qCWarning(scpi)<<"[SET_NETWork]:/etc/init.d/S40network restart failed!";
         return SCPI_RES_ERR;
     }
 
-    qCWarning(scpi) << "[SET_NETWork]:Cannot open interfaces file for writing";
+    qCWarning(scpi)<<"[SET_NETWork]:Cannot open interfaces file for writing";
     return SCPI_RES_ERR;
 }
 
-scpi_result_t ScpiManager::SCPI_NETInform(scpi_t* context)
+scpi_result_t ScpiManager::SCPI_Query(scpi_t* context)
 {
-    if (ConfigManager::getNetworkConfig()){
-        // SCPI Standard format
-        SCPI_ResultText(context, ConfigManager::s_isDHCP ? "DHCP" : "Static");
-        SCPI_ResultText(context, ConfigManager::s_IP.toLatin1().constData());
-        SCPI_ResultText(context, ConfigManager::s_SM.toLatin1().constData());
-        SCPI_ResultText(context, ConfigManager::s_Gateway.toLatin1().constData());
-        return SCPI_RES_OK;
+    auto* self = static_cast<ScpiManager*>(context->user_context);
+
+    switch (self->m_querymode){ // Only query ,not response. Read -> response
+        case 0: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASCURR);
+        case 1: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASDVM);
+        case 2: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASVOLT);
+        case 3: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASSCUR);
+        case 4: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASBTMP);
+        case 5: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASHTMP);
+        case 6: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASTMP1);
+        case 7: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASTMP2);
+        case 8: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASTMP3);
+        default:return SCPI_RES_ERR;
+    }
+}
+// Output
+scpi_result_t ScpiManager::SCPI_OutputState(scpi_t* context)
+{
+    scpi_bool_t OpenOut;
+    if(SCPI_ParamBool(context, &OpenOut,true)){
+        quint8 func = OpenOut ? JV6xxx::Output::SET_OUTPSTATUS_ON : JV6xxx::Output::SET_OUTPSTATUS_OFF;
+        qCDebug(scpi)<<"[SCPI_OutputState]:SCPI_Output OpenOut: "<<OpenOut;
+        return sendQueryCmd(context,JV6xxx::OUTPUT,func,"");
     }
 
-    qCWarning(scpi) << "[SCPI_NETInform]:getNetworkConfig failed!";
+    return SCPI_RES_ERR;
+}
+// Measurement
+scpi_result_t ScpiManager::SCPI_MeasureFunc(scpi_t* context)
+{
+    int32_t choice;
+    auto* self = static_cast<ScpiManager*>(context->user_context);
+    if (SCPI_ParamChoice(context, m_CmdparaChoices, &choice, true)) {
+        qCDebug(scpi) <<"[SCPI_MeasureFunc]:Param choice: "<< choice;
+        QByteArray data(1, static_cast<quint8>(choice));
+        self->m_querymode = choice;
+        switch (choice){
+            case 0: case 1: case 2: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSFUNC,data);
+            default:return SCPI_RES_OK;
+        }
+    }
+
+    return SCPI_RES_ERR;
+}
+// Calibrate
+scpi_result_t ScpiManager::SCPI_CalibrateStep(scpi_t* context)
+{
+    int32_t step;
+    float parameter;
+    if (SCPI_ParamInt(context, &step, true)) {
+        if (SCPI_ParamFloat(context, &parameter, true)) {
+            QByteArray data(4, 0);
+            qCDebug(scpi) <<"[SCPI_CalibrateStep]:step: "<<step<<" param: "<<parameter;
+            qToBigEndian(parameter, reinterpret_cast<uint8_t*>(data.data()));
+            return sendQueryCmd(context,JV6xxx::CALIBRATION,step,data);
+        }
+    }
+
+    return SCPI_RES_ERR;
+}
+// -
+scpi_result_t ScpiManager::SCPI_CalibrateStepQ(scpi_t* context)
+{
+    int value;
+    if (SCPI_ParamInt(context, &value, true)) {
+        qCDebug(scpi) <<"[SCPI_CalibrateStepQ]:Step Value: "<< value;
+        return sendQueryCmd(context,JV6xxx::CALIBRATION,value);
+    }
+
     return SCPI_RES_ERR;
 }
 
-const scpi_choice_def_t ScpiManager::m_CmdparaChoices[] = {
+// ******************************* Basic execution ************************************
+
+scpi_result_t ScpiManager::sendBoolCmd(scpi_t* context, quint8 cmd, quint8 func)
+{
+    scpi_bool_t OpenOut;
+    if(SCPI_ParamBool(context, &OpenOut,true)){
+        qCDebug(scpi)<<"[sendBoolCmd]:SCPI_Output OpenOut: "<<OpenOut;
+        quint8 swi = OpenOut ? 0x01 : 0x00;
+        QByteArray data(1, swi);
+        return sendQueryCmd(context,cmd,func,data);
+    }
+
+    return SCPI_RES_ERR;
+}
+scpi_result_t ScpiManager::sendFloatCmd(scpi_t* context, quint8 cmd, quint8 func)
+{
+    float value;
+    if (SCPI_ParamFloat(context, &value, true)) {
+        qCDebug(scpi) <<"[sendFloatCmd]:Channel Set Value:"<< value;
+        QByteArray data(4, 0);
+        qToBigEndian(value, reinterpret_cast<uint8_t*>(data.data()));
+        return sendQueryCmd(context,cmd,func,data);
+    }
+
+    return SCPI_RES_ERR;
+}
+const scpi_choice_def_t ScpiManager::m_CmdparaChoices[] =
+{
     // --- output -
     {"HIGH",     1},
     {"LOW",      0},
@@ -121,106 +221,8 @@ const scpi_choice_def_t ScpiManager::m_CmdparaChoices[] = {
     {"EITHer",   3},
     SCPI_CHOICE_LIST_END
 };
-
-scpi_result_t ScpiManager::SCPI_Query(scpi_t* context){
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-
-    switch (self->m_querymode){ // Only query ,not response. Read -> response
-        case 0: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASCURR);
-        case 1: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASDVM);
-        case 2: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASVOLT);
-        case 3: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASSCUR);
-        case 4: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASBTMP);
-        case 5: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASHTMP);
-        case 6: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASTMP1);
-        case 7: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASTMP2);
-        case 8: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASTMP3);
-        default:return SCPI_RES_ERR;
-    }
-}
-
-// Output
-scpi_result_t ScpiManager::SCPI_OutputState(scpi_t* context) {
-    scpi_bool_t OpenOut;
-    if(SCPI_ParamBool(context, &OpenOut,true)){
-        quint8 func = OpenOut ? JV6xxx::Output::SET_OUTPSTATUS_ON : JV6xxx::Output::SET_OUTPSTATUS_OFF;
-        qCDebug(scpi)<<"[SCPI_OutputState]:SCPI_Output OpenOut: "<<OpenOut;
-        return sendQueryCmd(context,JV6xxx::OUTPUT,func,"");
-    }
-
-    return SCPI_RES_ERR;
-}
-
-// Measurement
-scpi_result_t ScpiManager::SCPI_MeasureFunc(scpi_t* context) {
-    int32_t choice;
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-    if (SCPI_ParamChoice(context, m_CmdparaChoices, &choice, true)) {
-        qCDebug(scpi) <<"[SCPI_MeasureFunc]:Param choice: "<< choice;
-        QByteArray data(1, static_cast<quint8>(choice));
-        self->m_querymode = choice;
-        switch (choice){
-            case 0: case 1: case 2: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSFUNC,data);
-            default:return SCPI_RES_OK;
-        }
-    }
-
-    return SCPI_RES_ERR;
-}
-
-// Calibrate
-scpi_result_t ScpiManager::SCPI_CalibrateStep(scpi_t* context) {
-    int32_t step;
-    float parameter;
-    if (SCPI_ParamInt(context, &step, true)) {
-        if (SCPI_ParamFloat(context, &parameter, true)) {
-            QByteArray data(4, 0);
-            qCDebug(scpi) <<"[SCPI_CalibrateStep]:step: "<<step<<" param: "<<parameter;
-            qToBigEndian(parameter, reinterpret_cast<uint8_t*>(data.data()));
-            return sendQueryCmd(context,JV6xxx::CALIBRATION,step,data);
-        }
-    }
-
-    return SCPI_RES_ERR;
-}
-// -
-scpi_result_t ScpiManager::SCPI_CalibrateStepQ(scpi_t* context) {
-    int value;
-    if (SCPI_ParamInt(context, &value, true)) {
-        qCDebug(scpi) <<"[SCPI_CalibrateStepQ]:Step Value: "<< value;
-        return sendQueryCmd(context,JV6xxx::CALIBRATION,value);
-    }
-
-    return SCPI_RES_ERR;
-}
-
-// ******************************* Basic execution ************************************
-
-scpi_result_t ScpiManager::sendBoolCmd(scpi_t* context, quint8 cmd, quint8 func) {
-    scpi_bool_t OpenOut;
-    if(SCPI_ParamBool(context, &OpenOut,true)){
-        qCDebug(scpi)<<"[sendBoolCmd]:SCPI_Output OpenOut: "<<OpenOut;
-        quint8 swi = OpenOut ? 0x01 : 0x00;
-        QByteArray data(1, swi);
-        return sendQueryCmd(context,cmd,func,data);
-    }
-
-    return SCPI_RES_ERR;
-}
-
-scpi_result_t ScpiManager::sendFloatCmd(scpi_t* context, quint8 cmd, quint8 func) {
-    float value;
-    if (SCPI_ParamFloat(context, &value, true)) {
-        qCDebug(scpi) <<"[sendFloatCmd]:Channel Set Value:"<< value;
-        QByteArray data(4, 0);
-        qToBigEndian(value, reinterpret_cast<uint8_t*>(data.data()));
-        return sendQueryCmd(context,cmd,func,data);
-    }
-
-    return SCPI_RES_ERR;
-}
-
-scpi_result_t ScpiManager::sendChoiceCmd(scpi_t* context,quint8 cmd, quint8 func) {
+scpi_result_t ScpiManager::sendChoiceCmd(scpi_t* context,quint8 cmd, quint8 func)
+{
     int32_t choice;
     if (SCPI_ParamChoice(context, m_CmdparaChoices, &choice, true)) {
         qCDebug(scpi) <<"[sendChoiceCmd]:Channel choice: "<< choice;
@@ -230,13 +232,13 @@ scpi_result_t ScpiManager::sendChoiceCmd(scpi_t* context,quint8 cmd, quint8 func
 
     return SCPI_RES_ERR;
 }
-
-scpi_result_t ScpiManager::sendIntCmd(scpi_t* context, quint8 cmd, quint8 func,quint8 bytes) {
+scpi_result_t ScpiManager::sendIntCmd(scpi_t* context, quint8 cmd, quint8 func,quint8 bytes)
+{
     int value;
     if (SCPI_ParamInt(context, &value, true)) {
         qCDebug(scpi) <<"[sendIntCmd]:Channel Set Value:"<< value;
-
         QByteArray data(bytes, 0);
+
         if (bytes == 1) {
             data.append(static_cast<quint8>(value));
         }else if(bytes == 2){
@@ -255,26 +257,40 @@ scpi_result_t ScpiManager::sendIntCmd(scpi_t* context, quint8 cmd, quint8 func,q
 
 // ********************************* Basic helper *************************************
 
-scpi_result_t ScpiManager::sendQueryCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data) {
-    auto* self = static_cast<ScpiManager*>(context->user_context);
+scpi_result_t ScpiManager::sendQueryCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data)
+{
+    int32_t ch{0};
+    if(SCPI_CommandNumbers(context, &ch, 1, -1)){ // Array 1, Default Channel -1
+        // Extract only the numerical parts that are filled with "#" in the command list
+        std::vector<ChannelAddress> channels;
 
-    // Extract only the numerical parts that are filled with "#" in the command list
-    if(SCPI_CommandNumbers(context, &self->m_channel, 1, -1)){ // Array 1, Default Channel -1
-        if (self->m_channel == 0){
-            return sendAllCHCmd(context, cmd, func, data);
-        }else if(self->m_channel > 0){
-            return sendSingleCHCmd(context, cmd, func, data);
+        if (ch == 0){
+            channels = allChannelList();
+        }else if(ch > 0){
+            channels = {{ch, 0}};
         }else{
-            std::vector<ChannelAddress> channels = parseChannelList(context);
-            if (!channels.empty()) {return sendMultiCHCmd(context, cmd, func, data, channels);}
-        } // channel is not single number
+            channels = parseChannelList(context);
+        }
+
+        return sendMultiCHCmd(context, cmd, func, data, channels);
     }
 
     SCPI_ErrorPush(context, SCPI_ERROR_EXECUTION_ERROR);
     return SCPI_RES_ERR; // SCPI_RES_ERR = -1; SCPI_RES_OK = 1
 }
 
-std::vector<ChannelAddress> ScpiManager::parseChannelList(scpi_t* context) {
+std::vector<ScpiManager::ChannelAddress> ScpiManager::allChannelList()
+{
+    std::vector<ChannelAddress> allList;
+
+    #define CHANNEL(n) allList.push_back({n, 0});
+    CHANNEL_COUNT
+    #undef CHANNEL
+
+    return allList;
+}
+std::vector<ScpiManager::ChannelAddress> ScpiManager::parseChannelList(scpi_t* context)
+{
     std::vector<ChannelAddress> channelList;
     scpi_parameter_t channelListParam;
     const int MAX_DIM = 2; // SCPI standard Max 2 dimensions
@@ -322,114 +338,95 @@ std::vector<ChannelAddress> ScpiManager::parseChannelList(scpi_t* context) {
 
     return channelList; // emtry or true list
 }
+scpi_result_t ScpiManager::sendMultiCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data, const std::vector<ChannelAddress> &channels)
+{
+    if (!channels.empty()) {
+        auto* self = static_cast<ScpiManager*>(context->user_context);
+        self->m_responseBuffer.append("[");
 
+        for (ChannelAddress chaddress : channels) {
+            qCDebug(scpi)<<"[sendSingleCHCmd]: Single-Channel: "<<chaddress.channel;
+            ChannelBus::instance().to_Channel(chaddress.channel,cmd,func,data,true);
 
-scpi_result_t ScpiManager::sendMultiCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data, const std::vector<ChannelAddress> &channels){
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-    self->m_responseBuffer.append("[");
+            if(!self->m_syncCondition.wait(&self->m_syncMutex, 120) || SCPI_ReadQ(context) == SCPI_RES_ERR){
+                self->m_responseBuffer.append("Null");
+            }
+            self->m_responseBuffer.append(",");
+        }
 
-    for (ChannelAddress chaddress : channels) {
-        self->m_channel = chaddress.channel;
-
-        sendSingleCHCmd(context, cmd, func, data);
-        self->m_responseBuffer.append(",");
+        self->m_responseBuffer.chop(1); // remove ","
+        self->m_responseBuffer.append("]");
+        return SCPI_RES_OK;
     }
 
-    self->m_responseBuffer.chop(1); // remove ","
-    self->m_responseBuffer.append("]");
-    return SCPI_RES_OK;
+    return SCPI_RES_ERR;
 }
 
-scpi_result_t ScpiManager::sendSingleCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data) {
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-    switch (self->m_channel){
-        #define CHANNEL(n) \
-            case n: \
-                emit self->to_UartChannel##n(cmd,func,data,true);  \
-                qCDebug(scpi)<<"[sendSingleCHCmd]: Single-Channel: "<<n; \
-                if(self->m_syncCondition.wait(&self->m_syncMutex, 120) && SCPI_ReadQ(context) == SCPI_RES_OK){ \
-                    return SCPI_RES_OK; \
-                } \
-                self->m_responseBuffer.append("Null"); \
-                return SCPI_RES_ERR;
-
-        CHANNEL_COUNT
-        #undef CHANNEL
-            default:return SCPI_RES_ERR;
-    }
+namespace chResType
+{
+    constexpr const int Void     = 0x00;
+    constexpr const int Bool     = 0x01;
+    constexpr const int Float    = 0x02;
+    constexpr const int Int      = 0x03;
+    constexpr const int String   = 0x04;
 }
-
-scpi_result_t ScpiManager::sendAllCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data) {
+scpi_result_t ScpiManager::SCPI_ReadQ(scpi_t* context)
+{
     auto* self = static_cast<ScpiManager*>(context->user_context);
-    self->m_responseBuffer.append("[");
-    #define CHANNEL(n) \
-        emit self->to_UartChannel##n(cmd,func,data,true); \
-        if(!self->m_syncCondition.wait(&self->m_syncMutex, 120) || SCPI_ReadQ(context) == SCPI_RES_ERR){ \
-            self->m_responseBuffer.append("Null"); \
-        } \
-        self->m_responseBuffer.append(",");
-
-    CHANNEL_COUNT
-    #undef CHANNEL
-    self->m_responseBuffer.chop(1); // remove ","
-    self->m_responseBuffer.append("]");
-    return SCPI_RES_OK;
-}
-
-scpi_result_t ScpiManager::SCPI_ReadQ(scpi_t* context) {
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-    switch (self->m_ReturnType){
-        case 0: return SCPI_RES_OK; // emtry response
-        case 1: SCPI_ResultBool(context, self->m_CHStateReturn);                        return SCPI_RES_OK;
-        case 2: SCPI_ResultFloat(context, self->m_CHFloatReturn);                       return SCPI_RES_OK;
-        case 3: SCPI_ResultInt(context, self->m_CHIntReturn);                           return SCPI_RES_OK;
-        case 4: SCPI_ResultText(context, self->m_CHStringReturn.toUtf8().constData());  return SCPI_RES_OK;
+    switch (self->m_ReType){
+        case chResType::Void: return SCPI_RES_OK;
+        case chResType::Bool: SCPI_ResultBool(context, self->m_CHStateReturn);                         return SCPI_RES_OK;
+        case chResType::Float: SCPI_ResultFloat(context, self->m_CHFloatReturn);                       return SCPI_RES_OK;
+        case chResType::Int: SCPI_ResultInt(context, self->m_CHIntReturn);                             return SCPI_RES_OK;
+        case chResType::String: SCPI_ResultText(context, self->m_CHStringReturn.toUtf8().constData()); return SCPI_RES_OK;
         default:return SCPI_RES_ERR;
     }
 }
 
 // ********************************** external API **********************************
 
-void ScpiManager::processCHVoidResponse(){
+void ScpiManager::processCHVoidResponse()
+{
     m_syncMutex.lock();
-    m_ReturnType = 0;
+    m_ReType = chResType::Void;
     m_syncMutex.unlock();
     m_syncCondition.wakeAll();
 }
-
-void ScpiManager::processCHStateResponse(bool state) {
+void ScpiManager::processCHBoolResponse(bool state)
+{
     m_syncMutex.lock();
-    m_ReturnType = 1;
+    m_ReType = chResType::Bool;
     m_CHStateReturn = state;
     m_syncMutex.unlock();
     m_syncCondition.wakeAll();
 }
-
-void ScpiManager::processCHFloatResponse(float chf) {
+void ScpiManager::processCHFloatResponse(float chf)
+{
     m_syncMutex.lock();
-    m_ReturnType = 2;
+    m_ReType = chResType::Float;
     m_CHFloatReturn = chf;
     m_syncMutex.unlock();
     m_syncCondition.wakeAll();
 }
-
-void ScpiManager::processCHIntResponse(int cht) {
+void ScpiManager::processCHIntResponse(int cht)
+{
     m_syncMutex.lock();
-    m_ReturnType = 3;
+    m_ReType = chResType::Int;
     m_CHIntReturn = cht;
     m_syncMutex.unlock();
     m_syncCondition.wakeAll();
 }
-
-void ScpiManager::processCHStringResponse(QString str) {
+void ScpiManager::processCHStringResponse(const QString& val)
+{
     m_syncMutex.lock();
-    m_ReturnType = 4;
-    m_CHStringReturn = str;
+    m_ReType = chResType::String;
+    m_CHStringReturn = val;
     m_syncMutex.unlock();
     m_syncCondition.wakeAll();
 }
-
-QByteArray ScpiManager::processCommand(const QByteArray &command) {
+// Control -> this
+QByteArray ScpiManager::processCommand(const QByteArray &command)
+{
     QMutexLocker locker(&m_callMutex);
     m_responseBuffer.clear();
 
@@ -439,7 +436,8 @@ QByteArray ScpiManager::processCommand(const QByteArray &command) {
 
 // ********************************* Initialize SCPI ********************************
 
-const scpi_command_t ScpiManager::m_scpiCommands[] = {
+const scpi_command_t ScpiManager::m_scpiCommands[] =
+{
      /* IEEE Mandated Commands (SCPI std V1999.0 4.1.1) */
     { "*CLS",      SCPI_CoreCls,    0 },//清除所有状态数据结构（寄存器、错误队列）
     { "*ESE",      SCPI_CoreEse,    0 },//设置标准事件状态启用寄存器
@@ -599,8 +597,8 @@ const scpi_command_t ScpiManager::m_scpiCommands[] = {
 
     SCPI_CMD_LIST_END // Empty sentry post
 };
-
-const scpi_unit_def_t ScpiManager::m_scpi_units[] = {
+const scpi_unit_def_t ScpiManager::m_scpi_units[] =
+{
     {"V",    SCPI_UNIT_VOLT,     1},       // 伏特
     {"MV",   SCPI_UNIT_VOLT,     1e-3},    // 毫伏
     {"UV",   SCPI_UNIT_VOLT,     1e-6},    // 微伏
@@ -619,13 +617,13 @@ const scpi_unit_def_t ScpiManager::m_scpi_units[] = {
     SCPI_UNITS_LIST_END
 };
 
-ScpiManager::ScpiManager(QObject *parent) : QObject(parent) {
-    // QByteArray <- QString
-    m_idnManufacturer = Device::Manufacturer;
-    m_idnModel        = ConfigManager::s_model.toUtf8();
-    m_idnSerialNumber = ConfigManager::s_serialNumber.toUtf8();
-    m_idnVersion      = Device::SoftVer;
-
+ScpiManager& ScpiManager::instance()
+{
+    static ScpiManager inst;
+    return inst;
+}
+ScpiManager::ScpiManager(QObject *parent) : QObject(parent)
+{
     m_interface.flush   = staticFlush;
     m_interface.reset   = staticReset;
     m_interface.error   = staticError;
@@ -636,10 +634,10 @@ ScpiManager::ScpiManager(QObject *parent) : QObject(parent) {
               m_scpiCommands,
               &m_interface,
               m_scpi_units,
-              m_idnManufacturer.constData(),
-              m_idnModel.constData(),
-              m_idnSerialNumber.constData(),
-              m_idnVersion.constData(),
+              Device::Manufacturer,
+              Device::ModelNumber,
+              Device::Identifying,
+              Device::SoftVer,
               m_inputBuffer,
               sizeof(m_inputBuffer),
               m_errorQueue,
@@ -648,40 +646,37 @@ ScpiManager::ScpiManager(QObject *parent) : QObject(parent) {
     m_scpiContext.user_context = this;
 }
 
-scpi_result_t ScpiManager::staticFlush(scpi_t* context) {
+scpi_result_t ScpiManager::staticFlush(scpi_t* context)
+{
     // Send immediately, no need for forceful pressure
     Q_UNUSED(context);
     return SCPI_RES_OK;
 }
-
-scpi_result_t ScpiManager::staticReset(scpi_t* context) {
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-
-    #define CHANNEL(n) emit self->to_UartChannel##n##Reset();
-
-    CHANNEL_COUNT
-    #undef CHANNEL
-
+scpi_result_t ScpiManager::staticReset(scpi_t* context)
+{
+    Q_UNUSED(context);
+    //auto* self = static_cast<ScpiManager*>(context->user_context);
+    ChannelBus::instance().to_ChannelReset(0);
     qCDebug(scpi) <<"[staticReset]: Reset";
     return SCPI_RES_OK;
 }
-
-int ScpiManager::staticError(scpi_t* context, int_fast16_t err) {
+int           ScpiManager::staticError(scpi_t* context, int_fast16_t err)
+{
     auto* self = static_cast<ScpiManager*>(context->user_context);
     QString errorMsg = QString("{%1,'%2'}").arg(err).arg(SCPI_ErrorTranslate(err));
     qCDebug(scpi)<<"[staticError]:SCPI Error:"<< errorMsg;
     self->m_responseBuffer.append(errorMsg.toUtf8());
     return 0;
 }
-
-size_t ScpiManager::staticWrite(scpi_t* context, const char* data, size_t len) {
+size_t        ScpiManager::staticWrite(scpi_t* context, const char* data, size_t len)
+{
     auto* self = static_cast<ScpiManager*>(context->user_context);
     qCDebug(scpi)<<"[staticWrite]:SCPI Response: "<< data;
     self->m_responseBuffer.append(data, len);
     return len; // Automatically add \r\n
 }
-
-scpi_result_t ScpiManager::staticControl(scpi_t* context, scpi_ctrl_name_t ctrl, scpi_reg_val_t val) {
+scpi_result_t ScpiManager::staticControl(scpi_t* context, scpi_ctrl_name_t ctrl, scpi_reg_val_t val)
+{
     // To accommodate the hardware interface, it is not supported.
     Q_UNUSED(context);Q_UNUSED(ctrl);Q_UNUSED(val);
     return SCPI_RES_OK;

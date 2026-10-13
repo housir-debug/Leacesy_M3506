@@ -1,6 +1,5 @@
 #pragma once
 #include <QFrame>
-
 namespace Ui {class remoteoverlay;}
 
 class remoteoverlay : public QFrame

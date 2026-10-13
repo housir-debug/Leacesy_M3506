@@ -1,42 +1,15 @@
 #pragma once
-#include <QTimer>
-#include <QSerialPort>
-#include <QLoggingCategory>
-#include "control/scpi_handle.h"
+#include <QObject>
 
-Q_DECLARE_LOGGING_CATEGORY(uart_channel)
-
-struct Command {
-    quint8 cmd;
-    quint8 func;
-    QByteArray param;
-};
+class QTimer;
+class QSerialPort;
 
 class UartChannelManager : public QObject
 {
     Q_OBJECT
 
-signals:
-    void to_CanServer(quint8 ch,quint16 uart,const QByteArray &param);
-
-    void CH_svChanged(int ch,const QString &ver);
-    void CH_hvChanged(int ch,const QString &ver);
-
-    void CH_VoltageChanged(int ch,float voltage);
-    void CH_CurrentAndUnitChanged(int ch,float current);
-    void CH_RangeChanged(int ch,quint8 range);
-    void CH_StatusChanged(int ch,quint16 status);
-
-    void CH_cvChanged(int ch,float cv);
-    void CH_ccChanged(int ch,float cc);
-    void CH_ovpChanged(int ch,float ovp);
-    void CH_isOutputChanged(int ch,bool status);
-    void CH_impChanged(int ch,float imp);
-
 public:
     void writeFrame(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
-    std::shared_ptr<ScpiManager> m_scpiManager{nullptr};
-
     void initUartchannel(quint8 ch, const QString &portName,qint32 baudRate);
     void sendInitCommand();
 
@@ -56,22 +29,29 @@ private:
     void handleErrorcmd          (quint8 func);
 
 private:
+    bool m_waitR{false};
+    quint16 m_scpiCommand{0};
+
     QByteArray m_readparam;
     QByteArray m_readbuffer;
     QByteArray m_responsebuffer;
 
+    quint8 m_channel{0};
     int m_timeindex{0};
     int m_initindex{0};
     bool isExist{false};
-    bool m_waitR{false};
-    quint8 m_channel{0};
-    quint16 m_scpiCommand{0};
-    QVector<Command> m_commands;
+
+    struct Command
+    {
+        quint8 cmd;
+        quint8 func;
+        QByteArray param;
+    };
+    static const QVector<Command> m_commands;
+    static const QVector<Command> m_initCommands;
+    static QThread* getWorkerThread(quint32 channel);
 
     QTimer *m_refreshtimer{nullptr};
     QSerialPort *m_serialPort{nullptr};
-
-    static QThread* getWorkerThread(quint32 channel);
-    static const QVector<Command> m_initCommands;
 };
 

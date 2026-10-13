@@ -29,40 +29,26 @@ numberkeypad::numberkeypad(QWidget *parent) :
         }
     });
 }
-
 numberkeypad::~numberkeypad()
 {
     delete ui;
 }
 
 void numberkeypad::setPlaceholderText(const QString &text){ui->displayfield->setPlaceholderText(text);}
-
 void numberkeypad::setValue(const QString &value){ui->displayfield->setText(value);}
-
 QString numberkeypad::getvalue() const{return ui->displayfield->text();}
 
 void numberkeypad::on_btn0_clicked(){insertText("0");}
-
 void numberkeypad::on_btn1_clicked(){insertText("1");}
-
 void numberkeypad::on_btn2_clicked(){insertText("2");}
-
 void numberkeypad::on_btn3_clicked(){insertText("3");}
-
 void numberkeypad::on_btn4_clicked(){insertText("4");}
-
 void numberkeypad::on_btn5_clicked(){insertText("5");}
-
 void numberkeypad::on_btn6_clicked(){insertText("6");}
-
 void numberkeypad::on_btn7_clicked(){insertText("7");}
-
 void numberkeypad::on_btn8_clicked(){insertText("8");}
-
 void numberkeypad::on_btn9_clicked(){insertText("9");}
-
 void numberkeypad::on_btndot_clicked(){insertText(".");}
-
 void numberkeypad::on_btnenter_clicked(){insertText("↵");}
 
 void numberkeypad::on_deletebtn_clicked()

@@ -1,21 +1,21 @@
-#include "auxiliary/config_manager.h"
-#include "auxiliary/channelbus.h"
+#include "auxiliary/global_static.h"
+#include "auxiliary/signal_bus.h"
 #include "can_server.h"
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <QtCore>
+#include <QSocketNotifier>
 
-Q_LOGGING_CATEGORY(can_server, "CAN_SERVER:");
 
 void CanServerManager::changebaudandid()
 {
     static const QList<int> validBaudRates = {10000, 20000, 50000, 100000, 125000, 250000, 500000, 800000, 1000000};
 
     if (validBaudRates.contains(ConfigManager::s_canBaudRate) && OpeningCanN()) {
-        ConfigManager::setConfigValue("Device/CANBaud",ConfigManager::s_canBaudRate);
-        emit baudrefresh();
+        ConfigManager::saveNewValue("Device/CANBaud",ConfigManager::s_canBaudRate);
+        emit ChannelBus::instance().interAcUpdate();
     }
 }
 
@@ -30,7 +30,7 @@ bool CanServerManager::OpeningCanN()
 
     for (const QString &cmd : qAsConst(commands)) {
         if (system(cmd.toUtf8().constData()) != 0) {
-            qCCritical(can_server)<<"[OpeningCanN]:Command failed: "<<cmd;
+            qCCritical(canSer)<<"[OpeningCanN]:Command failed: "<<cmd;
             return false;
         }
     }
@@ -42,7 +42,7 @@ bool CanServerManager::createSocket()
 {
     m_socketFd = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (m_socketFd < 0) {
-        qCCritical(can_server)<<"[createSocket]:Failed to create CAN socket: "<<strerror(errno);
+        qCCritical(canSer)<<"[createSocket]:Failed to create CAN socket: "<<strerror(errno);
         return false;
     }
 
@@ -51,7 +51,7 @@ bool CanServerManager::createSocket()
     ifr.ifr_name[IFNAMSIZ - 1] = '\0';
 
     if (ioctl(m_socketFd, SIOCGIFINDEX, &ifr) < 0) {
-        qCCritical(can_server)<<"[createSocket]:Failed to get interface index: "<<strerror(errno);
+        qCCritical(canSer)<<"[createSocket]:Failed to get interface index: "<<strerror(errno);
         close(m_socketFd);
         m_socketFd = -1;
         return false;
@@ -62,7 +62,7 @@ bool CanServerManager::createSocket()
     addr.can_ifindex = ifr.ifr_ifindex;
 
     if (bind(m_socketFd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-        qCCritical(can_server)<<"[createSocket]:Failed to bind socket: "<<strerror(errno);
+        qCCritical(canSer)<<"[createSocket]:Failed to bind socket: "<<strerror(errno);
         close(m_socketFd);
         m_socketFd = -1;
         return false;
@@ -71,7 +71,7 @@ bool CanServerManager::createSocket()
     // Set non-blocking mode
     int flags = fcntl(m_socketFd, F_GETFL, 0);
     if (fcntl(m_socketFd, F_SETFL, flags | O_NONBLOCK) < 0) {
-        qCCritical(can_server)<<"[createSocket]:Failed to set non-blocking mode: "<<strerror(errno);
+        qCCritical(canSer)<<"[createSocket]:Failed to set non-blocking mode: "<<strerror(errno);
         close(m_socketFd);
         m_socketFd = -1;
         return false;
@@ -119,20 +119,20 @@ CanServerManager::CanServerManager(QObject *parent): QObject(parent)
                     if (nbytes == sizeof(frame)) { // always 16Bytes
                         if(frame.can_id == 0 || frame.can_id == ConfigManager::s_CANid.load()){
                             QByteArray data(reinterpret_cast<const char*>(frame.data), frame.can_dlc);
-                            qCDebug(can_server)<<"[CanServerManager]:Received Data: "<<data.toHex();
+                            qCDebug(canSer)<<"[CanServerManager]:Received Data: "<<data.toHex();
 
-                            switch (ConfigManager::s_remoteSt.load()) {
-                                case InterSt::LOCAL:emit isRemote(InterSt::CAN);// fall through
+                            switch (ConfigManager::control_Mode.load()) {
+                                case InterSt::LOCAL:emit ChannelBus::instance().switchRemote(InterSt::CAN);// fall through
                                 case InterSt::CAN:processFrame(data); break;
                                 default:
-                                    qCDebug(can_server)<<"[CanServerManager]: remoteMode[!=can-1]: "<<ConfigManager::s_remoteSt.load();
+                                    qCDebug(canSer)<<"[CanServerManager]: remoteMode[!=can-1]: "<<ConfigManager::control_Mode.load();
                                     quint8 channel = static_cast<quint8>(data[0]);
                                     sendFrame(channel,0xffff,""); break;
                             }
                         }
                     }
 
-                    qCWarning(can_server)<<"[CanServerManager]:Read error: "<<strerror(errno);
+                    qCWarning(canSer)<<"[CanServerManager]:Read error: "<<strerror(errno);
                 }
 
                 m_readNotifier->setEnabled(true);
@@ -147,11 +147,11 @@ CanServerManager::CanServerManager(QObject *parent): QObject(parent)
                     if (sent == sizeof(frame)) {
                         m_sendQueue.dequeue();
                         QByteArray data(reinterpret_cast<const char*>(frame.data), frame.can_dlc);
-                        qCDebug(can_server)<<"[CanServerManager]:Sent Data: "<<data.toHex()<<", QueueRemain: "<<m_sendQueue.size();
+                        qCDebug(canSer)<<"[CanServerManager]:Sent Data: "<<data.toHex()<<", QueueRemain: "<<m_sendQueue.size();
                         break;
                     }
 
-                    qCWarning(can_server)<<"[CanServerManager]:Write error: "<<strerror(errno);
+                    qCWarning(canSer)<<"[CanServerManager]:Write error: "<<strerror(errno);
                 }
                 m_writeNotifier->setEnabled(true);
             }, Qt::DirectConnection);
@@ -162,17 +162,10 @@ CanServerManager::CanServerManager(QObject *parent): QObject(parent)
     m_serverThread->setObjectName("CanServer");
     m_serverThread->start();
 }
-
 CanServerManager::~CanServerManager()
 {
-   if (m_readNotifier && m_writeNotifier) {
-       delete m_readNotifier;
-       m_readNotifier = nullptr;
-       delete m_writeNotifier;
-       m_writeNotifier = nullptr;
-       shutdown(m_socketFd, SHUT_RDWR);
-       close(m_socketFd);
-   }
+   shutdown(m_socketFd, SHUT_RDWR);
+   close(m_socketFd);
 
     if (m_serverThread) {
        m_serverThread->quit();
@@ -187,7 +180,7 @@ CanServerManager::~CanServerManager()
 void CanServerManager::sendFrame(quint8 ch,quint16 uart,const QByteArray &param)
 {
     // Queue rate limiting (to prevent infinite growth)
-    if (ConfigManager::s_remoteSt.load()==1 && m_sendQueue.size() <= 9999){
+    if (ConfigManager::control_Mode.load()==1 && m_sendQueue.size() <= 9999){
         quint32 cmf = m_uartToCan.value(uart); // default 0
 
         if (cmf != 0){
@@ -218,11 +211,11 @@ void CanServerManager::sendFrame(quint8 ch,quint16 uart,const QByteArray &param)
             return;
         }
 
-        qCWarning(can_server)<<"[sendFrame]:ERROR uart command!!!";
+        qCWarning(canSer)<<"[sendFrame]:ERROR uart command!!!";
         return;
     }
 
-    qCWarning(can_server)<<"[sendFrame]:Send queue overflow!!!";
+    qCWarning(canSer)<<"[sendFrame]:Send queue overflow!!!";
     return;
 }
 
@@ -362,17 +355,17 @@ void CanServerManager::processFrame(const QByteArray &data)
     // output
         case 0x01:{
             quint8 func = static_cast<quint8>(data[7]);
-            ChannelBus::instance()->to_Channel(channel,func,func,"");
+            ChannelBus::instance().to_Channel(channel,func,func,"",true);
             return;
         }
         case 0x0108:
         case 0x0109:
-            ChannelBus::instance()->to_Channel(channel,cmd,func,one);
+            ChannelBus::instance().to_Channel(channel,cmd,func,one,true);
             return;
         case 0x0180:
         case 0x0188:
         case 0x0189:
-            ChannelBus::instance()->to_Channel(channel,cmd,func,"");
+            ChannelBus::instance().to_Channel(channel,cmd,func,"",true);
             return;
     // setting
         case 0x0200:
@@ -381,7 +374,7 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x0203:
         case 0x0204:
         case 0x0205:
-            ChannelBus::instance()->to_Channel(channel,cmd,func,four);
+            ChannelBus::instance().to_Channel(channel,cmd,func,four,true);
             return;
         case 0x0280:
         case 0x0281:
@@ -389,7 +382,7 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x0283:
         case 0x0284:
         case 0x0285:
-            ChannelBus::instance()->to_Channel(channel,cmd,func,"");
+            ChannelBus::instance().to_Channel(channel,cmd,func,"",true);
             return;
     // control
         case 0x0300:
@@ -400,7 +393,7 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x0305:
         case 0x0308:
         case 0x0309:
-            ChannelBus::instance()->to_Channel(channel,cmd,func,one);
+            ChannelBus::instance().to_Channel(channel,cmd,func,one,true);
             return;
         case 0x0380:
         case 0x0381:
@@ -410,14 +403,14 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x0385:
         case 0x0388:
         case 0x0389:
-            ChannelBus::instance()->to_Channel(channel,cmd,func,"");
+            ChannelBus::instance().to_Channel(channel,cmd,func,"",true);
             return;
     // measurement
         case 0x040F:
-            ChannelBus::instance()->to_Channel(channel,cmd,func,four);
+            ChannelBus::instance().to_Channel(channel,cmd,func,four,true);
             return;
         case 0x0410:
-            ChannelBus::instance()->to_Channel(channel,cmd,func,one);
+            ChannelBus::instance().to_Channel(channel,cmd,func,one,true);
             return;
         case 0x048F:
         case 0x0480:
@@ -444,7 +437,7 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x049A:
         case 0x049B:
         case 0x049C:
-            ChannelBus::instance()->to_Channel(channel,cmd,func,"");
+            ChannelBus::instance().to_Channel(channel,cmd,func,"",true);
             return;
     // register
         case 0x0580:
@@ -454,24 +447,24 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x0503:
         case 0x0584:
         case 0x0585:
-            ChannelBus::instance()->to_Channel(channel,cmd,func,"");
+            ChannelBus::instance().to_Channel(channel,cmd,func,"",true);
             return;
     // trigger
         case 0x0801:
         case 0x0802:
         case 0x0805:
         case 0x0809:
-            ChannelBus::instance()->to_Channel(channel,cmd,func,one);
+            ChannelBus::instance().to_Channel(channel,cmd,func,one,true);
             return;
         case 0x0806:
-            ChannelBus::instance()->to_Channel(channel,cmd,func,two);
+            ChannelBus::instance().to_Channel(channel,cmd,func,two,true);
             return;
         case 0x0807:
         case 0x0808:
         case 0x080A:
         case 0x080B:
         case 0x080C:
-            ChannelBus::instance()->to_Channel(channel,cmd,func,four);
+            ChannelBus::instance().to_Channel(channel,cmd,func,four,true);
             return;
         case 0x0800:
         case 0x0803:
@@ -484,12 +477,12 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x088A:
         case 0x088B:
         case 0x088C:
-            ChannelBus::instance()->to_Channel(channel,cmd,func,"");
+            ChannelBus::instance().to_Channel(channel,cmd,func,"",true);
             return;
     // calibrate
         case 0x07:{
             m_calibrate_step = static_cast<quint8>(data[3]);
-            ChannelBus::instance()->to_Channel(channel,func,m_calibrate_step,four);
+            ChannelBus::instance().to_Channel(channel,func,m_calibrate_step,four,true);
             return;
         };
         case 0x0601:
@@ -499,9 +492,9 @@ void CanServerManager::processFrame(const QByteArray &data)
         case 0x0604:
         case 0x0605:
         case 0x0606:
-            ChannelBus::instance()->to_Channel(channel,cmd,func,"");
+            ChannelBus::instance().to_Channel(channel,cmd,func,"",true);
             return;
 
-        default:qCWarning(can_server)<<"[processFrame]error case";return;
+        default:qCWarning(canSer)<<"[processFrame]error case";return;
     }
 }

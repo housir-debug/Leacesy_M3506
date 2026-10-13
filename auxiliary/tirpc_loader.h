@@ -1,8 +1,5 @@
 #pragma once
 #include <QLibrary>
-#include <QLoggingCategory>
-
-Q_DECLARE_LOGGING_CATEGORY(libtripc)
 
 typedef int bool_t;
 

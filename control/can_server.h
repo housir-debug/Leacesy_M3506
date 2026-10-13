@@ -1,18 +1,14 @@
 #pragma once
+#include <QHash>
 #include <QQueue>
+#include <QObject>
 #include <linux/can/raw.h>
-#include <QSocketNotifier>
-#include <QLoggingCategory>
 
-Q_DECLARE_LOGGING_CATEGORY(can_server);
+class QSocketNotifier;
 
 class CanServerManager : public QObject
 {
     Q_OBJECT
-
-signals:
-    void isRemote(quint8 reface);
-    void baudrefresh();
 
 public:
     void sendFrame(quint8 ch,quint16 uart,const QByteArray &param);
