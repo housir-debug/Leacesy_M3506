@@ -25,15 +25,15 @@ void devicesetpage::on_canidradioButton_clicked()
     m_setmode = Setmode::canid;
     ui->canidradioButton->setChecked(true);
 }
-void devicesetpage::on_canbaudradioButton_clicked()
+void devicesetpage::on_canBaud_comboBox_clicked(int index)
 {
-    m_setmode = Setmode::canbuat;
-    ui->canbaudradioButton->setChecked(true);
+    ConfigManager::s_canBaudIndex = index;
+    emit ChannelBus::instance().set_canbaud();
 }
-void devicesetpage::on_rs232baudradioButton_clicked()
+void devicesetpage::on_rs32Baud_comboBox_clicked(int index)
 {
-    m_setmode = Setmode::rs232buat;
-    ui->rs232baudradioButton->setChecked(true);
+    ConfigManager::s_rs232BaudIndex = index;
+    emit ChannelBus::instance().set_RS232Baud();
 }
 
 void devicesetpage::on_back_pushButton_clicked(){emit backRequested();}
@@ -83,8 +83,8 @@ devicesetpage::devicesetpage(QWidget *parent) :
     ui->masklabel->setText(ConfigManager::SM);
     ui->gatelabel->setText(ConfigManager::Gate);
     ui->canidlabel->setText(QString::number(ConfigManager::s_CANid.load()));
-    ui->canbaudlabel->setText(QString::number(ConfigManager::s_canBaudRate));
-    ui->rs232baudlabel->setText(QString::number(ConfigManager::s_rs232BaudRate));
+    ui->canBaud_comboBox->setCurrentIndex(ConfigManager::s_canBaudIndex);
+    ui->rs32Baud_comboBox->setCurrentIndex(ConfigManager::s_rs232BaudIndex);
 
     if (ConfigManager::isDHCP){
         ui->dhcp_pushButton->setChecked(true);
@@ -109,7 +109,7 @@ devicesetpage::devicesetpage(QWidget *parent) :
     QObject::connect(ui->keyframe, &numberkeypad::valueEntered, this, [this](const QString &value) {
         if (!value.isEmpty()){
             switch (m_setmode) {
-                case 0:case 1:case 2:{
+                case Setmode::ip:case Setmode::mask:case Setmode::gate:{
                     QString *fields[] = { &ConfigManager::IP, &ConfigManager::SM, &ConfigManager::Gate };
                     QLabel *valueLabels[] = { ui->iplabel, ui->masklabel, ui->gatelabel };
                     valueLabels[m_setmode]->setText(value);
@@ -121,21 +121,11 @@ devicesetpage::devicesetpage(QWidget *parent) :
                     }
                     return;
                 }
-                case 3:
-                    if (ConfigManager::saveNewValue("Device/CANID",value.toUInt())){
+                case Setmode::canid:
+                    if (ConfigManager::saveNewValue(ConfAddress::CanId,value.toUInt())){
                         ConfigManager::s_CANid = value.toUInt();
                         ui->canidlabel->setText(value);
                     }
-                    return;
-                case 4:
-                    ConfigManager::s_canBaudRate = value.toUInt();
-                    emit ChannelBus::instance().set_canbaud();
-                    ui->canbaudlabel->setText(value);
-                    return;
-                case 5:
-                    ConfigManager::s_rs232BaudRate = value.toUInt();
-                    emit ChannelBus::instance().set_RS232Baud();
-                    ui->rs232baudlabel->setText(value);
                     return;
                 default:return;
             }
@@ -150,8 +140,8 @@ devicesetpage::~devicesetpage()
 void devicesetpage::responseUpdate()
 {
     ui->canidlabel->setText(QString::number(ConfigManager::s_CANid.load()));
-    ui->canbaudlabel->setText(QString::number(ConfigManager::s_canBaudRate));
-    ui->rs232baudlabel->setText(QString::number(ConfigManager::s_rs232BaudRate));
+    ui->canBaud_comboBox->setCurrentIndex(ConfigManager::s_canBaudIndex);
+    ui->rs32Baud_comboBox->setCurrentIndex(ConfigManager::s_rs232BaudIndex);
 
     if (ConfigManager::isDHCP){
         QTimer::singleShot(8100, this,[this]() {

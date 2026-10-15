@@ -1,5 +1,6 @@
 #pragma once
-#include <QSerialPort>
+#include <QObject>
+
 #define CHANNEL_COUNT \
     CHANNEL(1)  CHANNEL(2)  CHANNEL(3)  CHANNEL(4)  CHANNEL(5)  CHANNEL(6)  \
     CHANNEL(7)  CHANNEL(8)  CHANNEL(9)  CHANNEL(10) CHANNEL(11) CHANNEL(12) \
@@ -13,44 +14,42 @@ class ChannelBus : public QObject
     Q_OBJECT
 
 signals:
+    /* control,UI -> channel */
     #define CHANNEL(n) \
         void to_UartChannel##n(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi); \
         void to_UartChannel##n##Reset();
     CHANNEL_COUNT
     #undef CHANNEL
-
-    void switchRemote(int reface);
-
-    void set_network(bool isstatic);
-    void interAcUpdate();
-
+    /* channel -> control */
     void to_CanServer(quint8 ch,quint16 uart,const QByteArray &param);
-
+    /* channel -> UI */
     void CH_svChanged(int ch,const QString &ver);
     void CH_hvChanged(int ch,const QString &ver);
-
     void CH_VoltageChanged(int ch,float voltage);
     void CH_CurrentAndUnitChanged(int ch,float current);
     void CH_RangeChanged(int ch,quint8 range);
     void CH_StatusChanged(int ch,quint16 status);
-
     void CH_cvChanged(int ch,float cv);
     void CH_ccChanged(int ch,float cc);
     void CH_ovpChanged(int ch,float ovp);
     void CH_isOutputChanged(int ch,bool status);
     void CH_impChanged(int ch,float imp);
 
-
+    /* UI -> control */
     void set_canbaud();
     void set_RS232Baud();
+    void set_network(bool isstatic);
+    /* control -> UI */
+    void interAcUpdate();
+    void switchRemote(int reface);
 
 public:
     struct UartConfig {
         QString port;
-        QSerialPort::BaudRate baudRate;
+        int baudRate;
         quint8 channel;
     };
-    std::vector<UartConfig> configs;
+    static const std::vector<UartConfig> configs;
 
     static ChannelBus& instance();
     void to_ChannelReset(int channel);

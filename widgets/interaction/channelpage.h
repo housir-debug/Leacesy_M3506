@@ -4,7 +4,6 @@
 namespace Ui {class channelpage;}
 
 class channelcard;
-class BatteryModelManager;
 
 class channelpage : public QWidget
 {
@@ -54,10 +53,6 @@ public:
 
     /* web or main call function */
     QJsonArray getAllChannelsData();
-
-    bool readBatteryModel();
-    QStringList m_currentModelList;
-    std::shared_ptr<BatteryModelManager> m_modelManager{nullptr};
 };
 
 namespace ChPageCard {

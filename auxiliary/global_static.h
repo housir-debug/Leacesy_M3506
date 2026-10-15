@@ -52,8 +52,8 @@ class ConfigManager
 {
 public:
     static int log_Level;
-    static quint32 s_canBaudRate;
-    static quint32 s_rs232BaudRate;
+    static quint32 s_canBaudIndex;
+    static quint32 s_rs232BaudIndex;
     static std::atomic<quint32> s_CANid;
     static std::atomic<int> control_Mode;
     static bool init(const QString &configDir);
@@ -78,4 +78,11 @@ namespace InterSt {
     constexpr int RS232      = 0x02;
     constexpr int LAN_VXI    = 0x03;
     constexpr int LAN_WEB    = 0x04;
+}
+
+namespace ConfAddress {
+    constexpr const char*  CanId      = "Device/CANID";
+    constexpr const char*  CanBaud    = "Device/CANBaud";
+    constexpr const char*  R23Baud    = "Device/RS232Baud";
+    constexpr const char*  LogType    = "Device/LogLevel";
 }

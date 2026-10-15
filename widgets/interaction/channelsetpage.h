@@ -2,8 +2,6 @@
 #include <QWidget>
 namespace Ui {class channelsetting;}
 
-class BatteryModelManager;
-
 class channelsetting : public QWidget
 {
     Q_OBJECT
@@ -36,7 +34,6 @@ public:
 
     void setCombModel();
     void update_ChEn(int ch);
-    std::shared_ptr<BatteryModelManager> m_modelManager{nullptr};
 };
 
 namespace channelSet_mode {

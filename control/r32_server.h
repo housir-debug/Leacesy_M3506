@@ -1,16 +1,12 @@
 #pragma once
-#include <QSerialPort>
+#include <QObject>
 #include <QElapsedTimer>
+
+class QSerialPort;
 
 class UartServerManager : public QObject
 {
     Q_OBJECT
-
-public:
-    explicit UartServerManager(QObject *parent = nullptr);
-    ~UartServerManager();
-
-    void changeBaudRate();
 
 private:
     void startLoopbackTest();
@@ -20,5 +16,11 @@ private:
     QByteArray m_responsebuffer;
 
     QSerialPort *m_uartServer{nullptr};
-    QThread *m_serverThread{nullptr};
+    static const std::array<quint32,8> m_validBaudRates;
+
+public:
+    void changeBaudRate();
+
+    explicit UartServerManager(QObject *parent = nullptr);
+    ~UartServerManager();
 };

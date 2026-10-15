@@ -1,47 +1,32 @@
 #pragma once
-#include <QString>
-#include <QVector>
 #include <QMap>
-#include <QSharedPointer>
+#include <QObject>
 
 struct BatteryDataPoint {float soc;float ocv;float imp;};
-
-
-class BatteryModel : public QObject
-{
-    Q_OBJECT
-
-private:
-    float interpolate(float soc, bool isocv)  const;
-
-public:
-    explicit BatteryModel(QObject *parent = nullptr);
-    QVector<BatteryDataPoint> data_points;
-    QString name;
-
-    float getOCV(float soc) const;
-    float getESR(float soc) const;
-    bool isOver(float soc) const;
-};
 
 class BatteryModelManager : public QObject
 {
     Q_OBJECT
 
 public:
-    BatteryModelManager(const QString& parentPath, QObject *parent = nullptr);
-    ~BatteryModelManager() override = default;
-
-    QSharedPointer<BatteryModel> getModel(const QString &modelName) const;
-    QStringList getAvailableModels() const;
-
-    QMap<QString, QSharedPointer<BatteryModel>> m_models;
-
-    bool saveModel(QSharedPointer<BatteryModel> model, const QString &modelName);
+    bool saveModel(QVector<BatteryDataPoint>& pts, const QString &modelName);
     bool removeModel(const QString &modelName);
+
+    QStringList getAvailableModels() const;
     bool loadAllModels();
 
+    QMap<QString, QVector<BatteryDataPoint>> m_models;
+    static BatteryModelManager& instance();
+    QString m_modelDirectory{""};
+
+    bool isOver(QString model,float soc) const;
+    float getOCV(QString model,float soc) const;
+    float getESR(QString model,float soc) const;
+
 private:
-    QSharedPointer<BatteryModel> parseCSV(const QString &filePath);
-    QString m_modelDirectory;
+    float interpolate(const QVector<BatteryDataPoint>& pts,float soc, bool isocv)  const;
+
+    BatteryModelManager(QObject *parent = nullptr);
+    ~BatteryModelManager() = default;
+    Q_DISABLE_COPY(BatteryModelManager)
 };

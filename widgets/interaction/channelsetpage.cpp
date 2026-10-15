@@ -113,9 +113,7 @@ void channelsetting::sendModecmd(float val,quint8 func){
 /* update card style */
 void channelsetting::setCombModel()
 {
-    if (m_modelManager){
-        ui->model_comboBox->addItems(m_modelManager->getAvailableModels());
-    }
+    ui->model_comboBox->addItems(BatteryModelManager::instance().getAvailableModels());
 }
 void channelsetting::update_ChEn(int ch)
 {

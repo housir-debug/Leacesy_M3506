@@ -2,8 +2,6 @@
 #include <QWidget>
 namespace Ui {class Mainwindow;}
 
-class BatteryModelManager;
-
 class UartChannelManager;
 class UartServerManager;
 class CanServerManager;
@@ -31,20 +29,19 @@ public:
     void ishow();
 
 private:
-    std::shared_ptr<BatteryModelManager> batteryModel;
-
     std::vector<std::unique_ptr<UartChannelManager>> channels;
-    std::unique_ptr<UartServerManager> uartServer;
-    std::unique_ptr<CanServerManager> canServer;
-    std::unique_ptr<VxiServerManager> vxiServer;
-    std::unique_ptr<WebServerManager> webServer;
+    UartServerManager* uartServer{nullptr};
+    CanServerManager* canServer{nullptr};
+    VxiServerManager* vxiServer{nullptr};
+    WebServerManager* webServer{nullptr};
+    QThread* m_serThread{nullptr};
 
-    remoteoverlay* m_RemoteOverlay;
-    devicesetpage* m_DeviceSetPage;
-    channelsetting* m_ChSetPage;
-    channelpage* m_ChPage;
+    remoteoverlay* m_RemoteOverlay{nullptr};
+    devicesetpage* m_DeviceSetPage{nullptr};
+    channelsetting* m_ChSetPage{nullptr};
+    channelpage* m_ChPage{nullptr};
     Ui::Mainwindow *ui;
 
-    QGraphicsScene* scene;
-    QGraphicsView* view;
+    QGraphicsScene* scene{nullptr};
+    QGraphicsView* view{nullptr};
 };

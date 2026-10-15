@@ -2,6 +2,7 @@
 #include "interaction/devicesetpage.h"
 #include "interaction/channelpage.h"
 #include "component/remoteoverlay.h"
+#include "auxiliary/battery_model.h"
 #include "auxiliary/global_static.h"
 #include "auxiliary/signal_bus.h"
 #include "channel/uart_protocol.h"
@@ -14,14 +15,15 @@
 #include "appmain.h"
 #include <QGraphicsProxyWidget>
 #include <QGraphicsView>
+#include <QThread>
 #include <QDir>
 
 Mainwindow::Mainwindow(QWidget *parent) : QWidget(parent), ui(new Ui::Mainwindow)
 {
     QString configPath = QDir(QApplication::applicationDirPath()).filePath("..");
     if (QDir(configPath).exists() && ConfigManager::init(configPath)) {
-        batteryModel = std::make_shared<BatteryModelManager>(configPath);
-        batteryModel->loadAllModels();
+        BatteryModelManager::instance().m_modelDirectory = configPath + "/battery_models";
+        BatteryModelManager::instance().loadAllModels();
 
         initUi();
         ishow();
@@ -31,6 +33,13 @@ Mainwindow::Mainwindow(QWidget *parent) : QWidget(parent), ui(new Ui::Mainwindow
 Mainwindow::~Mainwindow()
 {
     delete ui;
+
+    if (m_serThread) {
+       m_serThread->quit();
+       m_serThread->wait(1000); // wait 1s
+       m_serThread->deleteLater();
+       delete m_serThread;
+   }
 }
 
 void Mainwindow::initUi()
@@ -39,12 +48,9 @@ void Mainwindow::initUi()
 
     m_ChPage =  new channelpage(this);
     ui->stackedwidget->addWidget(m_ChPage);// 0
-    m_ChPage->m_modelManager = batteryModel;
-    m_ChPage->readBatteryModel();
 
     m_ChSetPage = new channelsetting(this);
     ui->stackedwidget->addWidget(m_ChSetPage);// 1
-    m_ChSetPage->m_modelManager = batteryModel;
     m_ChSetPage->setCombModel();
 
     QObject::connect(&ChannelBus::instance(),&ChannelBus::CH_svChanged,this,[this](int ch,const QString &ver){
@@ -116,27 +122,37 @@ void Mainwindow::initO()
         }
     }
 
-    if (Module::enable_UartSer){
-        uartServer = std::make_unique<UartServerManager>();
-        QObject::connect(&ChannelBus::instance(),&ChannelBus::set_RS232Baud,uartServer.get(),&UartServerManager::changeBaudRate,Qt::QueuedConnection);
-    }
+    m_serThread = new QThread(this);
+    m_serThread->setObjectName("ServerThread");
+    QObject::connect(m_serThread, &QThread::started, this,[this](){
+        if (Module::enable_UartSer){
+            uartServer = new UartServerManager();
+            QObject::connect(&ChannelBus::instance(),&ChannelBus::set_RS232Baud,uartServer,&UartServerManager::changeBaudRate,Qt::QueuedConnection);
+        }
 
-    if (Module::enable_CanSer){
-        canServer = std::make_unique<CanServerManager>();
-        QObject::connect(&ChannelBus::instance(),&ChannelBus::to_CanServer,canServer.get(),&CanServerManager::sendFrame,Qt::QueuedConnection);
-        QObject::connect(&ChannelBus::instance(),&ChannelBus::set_canbaud,canServer.get(),&CanServerManager::changebaudandid,Qt::QueuedConnection);
-    }
+        if (Module::enable_CanSer){
+            canServer = new CanServerManager();
+            QObject::connect(&ChannelBus::instance(),&ChannelBus::to_CanServer,canServer,&CanServerManager::sendFrame,Qt::QueuedConnection);
+            QObject::connect(&ChannelBus::instance(),&ChannelBus::set_canbaud,canServer,&CanServerManager::changebaud,Qt::QueuedConnection);
+        }
 
-    if (Module::enable_VxiSer){
-        vxiServer = std::make_unique<VxiServerManager>();
-    }
+        if (Module::enable_VxiSer){
+            vxiServer = new VxiServerManager();
+        }
 
-    if (Module::enable_WebSer){
-        webServer = std::make_unique<WebServerManager>();
-        webServer->m_BatteryManager = batteryModel;
-        webServer->m_ChPage = m_ChPage;
-        QObject::connect(&ChannelBus::instance(),&ChannelBus::set_network,webServer.get(),&WebServerManager::set_network,Qt::QueuedConnection);
-    }
+        if (Module::enable_WebSer){
+            webServer = new WebServerManager();
+            webServer->m_ChPage = m_ChPage;
+            QObject::connect(&ChannelBus::instance(),&ChannelBus::set_network,webServer,&WebServerManager::set_network,Qt::QueuedConnection);
+        }});
+    QObject::connect(m_serThread, &QThread::finished, this, [this](){
+        if (uartServer){uartServer->deleteLater();}
+        if (canServer){canServer->deleteLater();}
+        if (vxiServer){vxiServer->deleteLater();}
+        if (webServer){webServer->deleteLater();}
+        });
+
+    m_serThread->start();
 }
 
 void Mainwindow::ishow()

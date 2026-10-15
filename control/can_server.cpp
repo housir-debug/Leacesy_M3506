@@ -5,220 +5,20 @@
 #include <net/if.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <QtCore>
 #include <QSocketNotifier>
 
-
-void CanServerManager::changebaudandid()
+constexpr std::array<quint32, 9> CanServerManager::m_validBaudRates =
 {
-    static const QList<int> validBaudRates = {10000, 20000, 50000, 100000, 125000, 250000, 500000, 800000, 1000000};
-
-    if (validBaudRates.contains(ConfigManager::s_canBaudRate) && OpeningCanN()) {
-        ConfigManager::saveNewValue("Device/CANBaud",ConfigManager::s_canBaudRate);
-        emit ChannelBus::instance().interAcUpdate();
-    }
-}
-
-bool CanServerManager::OpeningCanN()
-{
-    QStringList commands;
-    commands << QString("ip link set %1 down").arg(m_interface);
-    commands << QString("ip link set %1 txqueuelen 1000").arg(m_interface);
-    //commands << QString("ip link set %1 type can bitrate 500000 restart-ms 18 dbitrate 2000000 fd on loopback on").arg(interface);
-    commands << QString("ip link set %1 type can bitrate %2 restart-ms 18 fd off loopback on").arg(m_interface).arg(ConfigManager::s_canBaudRate);
-    commands << QString("ip link set %1 up").arg(m_interface);
-
-    for (const QString &cmd : qAsConst(commands)) {
-        if (system(cmd.toUtf8().constData()) != 0) {
-            qCCritical(canSer)<<"[OpeningCanN]:Command failed: "<<cmd;
-            return false;
-        }
-    }
-
-    return true;
-}
-
-bool CanServerManager::createSocket()
-{
-    m_socketFd = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-    if (m_socketFd < 0) {
-        qCCritical(canSer)<<"[createSocket]:Failed to create CAN socket: "<<strerror(errno);
-        return false;
-    }
-
-    struct ifreq ifr;
-    strncpy(ifr.ifr_name, m_interface.toUtf8().constData(), IFNAMSIZ - 1);
-    ifr.ifr_name[IFNAMSIZ - 1] = '\0';
-
-    if (ioctl(m_socketFd, SIOCGIFINDEX, &ifr) < 0) {
-        qCCritical(canSer)<<"[createSocket]:Failed to get interface index: "<<strerror(errno);
-        close(m_socketFd);
-        m_socketFd = -1;
-        return false;
-    }
-
-    struct sockaddr_can addr{};
-    addr.can_family = AF_CAN;
-    addr.can_ifindex = ifr.ifr_ifindex;
-
-    if (bind(m_socketFd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-        qCCritical(canSer)<<"[createSocket]:Failed to bind socket: "<<strerror(errno);
-        close(m_socketFd);
-        m_socketFd = -1;
-        return false;
-    }
-
-    // Set non-blocking mode
-    int flags = fcntl(m_socketFd, F_GETFL, 0);
-    if (fcntl(m_socketFd, F_SETFL, flags | O_NONBLOCK) < 0) {
-        qCCritical(canSer)<<"[createSocket]:Failed to set non-blocking mode: "<<strerror(errno);
-        close(m_socketFd);
-        m_socketFd = -1;
-        return false;
-    }
-
-    int sndbuf = 1024 * 1024;  // send buffer -> 1MB = 62500frame
-    setsockopt(m_socketFd, SOL_SOCKET, SO_SNDBUF, &sndbuf, sizeof(sndbuf));
-
-    int rcvbuf = 1024 * 1024;  // receive buffer -> 1MB = 62500frame
-    setsockopt(m_socketFd, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
-    // The event loop's operation of handling other events also leads to timeout receive buffer overflow.
-
-    int recv_own_msgs = 0;
-    setsockopt(m_socketFd, SOL_CAN_RAW, CAN_RAW_RECV_OWN_MSGS,&recv_own_msgs, sizeof(recv_own_msgs));
-    // {0|1} Return directly to the receiving buffer---Does not affect physical transmission
-
-    m_readNotifier = new QSocketNotifier(m_socketFd, QSocketNotifier::Read, this);
-    m_readNotifier->setEnabled(true);
-
-    m_writeNotifier = new QSocketNotifier(m_socketFd, QSocketNotifier::Write, this);
-    m_writeNotifier->setEnabled(false);
-    // Initially disabled, enabled only when there is data.
-
-    return true;
-}
-
-CanServerManager::CanServerManager(QObject *parent): QObject(parent)
-{
-    m_serverThread = new QThread(this);
-    this->moveToThread(m_serverThread);
-
-    connect(m_serverThread, &QThread::started, this, [this]() {
-        for (auto it = m_canToUart.begin(); it != m_canToUart.end(); ++it) {
-            m_uartToCan[it.value()] = it.key();
-        }
-
-        if (OpeningCanN() && createSocket()) {
-            connect(m_readNotifier, &QSocketNotifier::activated,this, [this](){
-                m_readNotifier->setEnabled(false);
-                struct can_frame frame;
-
-                while (true) {
-                    ssize_t nbytes = read(m_socketFd, &frame, sizeof(frame));
-
-                    if (nbytes == sizeof(frame)) { // always 16Bytes
-                        if(frame.can_id == 0 || frame.can_id == ConfigManager::s_CANid.load()){
-                            QByteArray data(reinterpret_cast<const char*>(frame.data), frame.can_dlc);
-                            qCDebug(canSer)<<"[CanServerManager]:Received Data: "<<data.toHex();
-
-                            switch (ConfigManager::control_Mode.load()) {
-                                case InterSt::LOCAL:emit ChannelBus::instance().switchRemote(InterSt::CAN);// fall through
-                                case InterSt::CAN:processFrame(data); break;
-                                default:
-                                    qCDebug(canSer)<<"[CanServerManager]: remoteMode[!=can-1]: "<<ConfigManager::control_Mode.load();
-                                    quint8 channel = static_cast<quint8>(data[0]);
-                                    sendFrame(channel,0xffff,""); break;
-                            }
-                        }
-                    }
-
-                    qCWarning(canSer)<<"[CanServerManager]:Read error: "<<strerror(errno);
-                }
-
-                m_readNotifier->setEnabled(true);
-            }, Qt::DirectConnection);
-            connect(m_writeNotifier, &QSocketNotifier::activated,this, [this](){
-                m_writeNotifier->setEnabled(false);
-
-                while (!m_sendQueue.isEmpty()) {
-                    const struct can_frame &frame = m_sendQueue.head();
-                    ssize_t sent = write(m_socketFd, &frame, sizeof(frame));
-
-                    if (sent == sizeof(frame)) {
-                        m_sendQueue.dequeue();
-                        QByteArray data(reinterpret_cast<const char*>(frame.data), frame.can_dlc);
-                        qCDebug(canSer)<<"[CanServerManager]:Sent Data: "<<data.toHex()<<", QueueRemain: "<<m_sendQueue.size();
-                        break;
-                    }
-
-                    qCWarning(canSer)<<"[CanServerManager]:Write error: "<<strerror(errno);
-                }
-                m_writeNotifier->setEnabled(true);
-            }, Qt::DirectConnection);
-
-            return;
-        }});
-
-    m_serverThread->setObjectName("CanServer");
-    m_serverThread->start();
-}
-CanServerManager::~CanServerManager()
-{
-   shutdown(m_socketFd, SHUT_RDWR);
-   close(m_socketFd);
-
-    if (m_serverThread) {
-       m_serverThread->quit();
-       m_serverThread->wait(1000); // wait 1s
-       m_serverThread->deleteLater();
-       delete m_serverThread;
-       m_serverThread = nullptr;
-   }
-}
-
-
-void CanServerManager::sendFrame(quint8 ch,quint16 uart,const QByteArray &param)
-{
-    // Queue rate limiting (to prevent infinite growth)
-    if (ConfigManager::control_Mode.load()==1 && m_sendQueue.size() <= 9999){
-        quint32 cmf = m_uartToCan.value(uart); // default 0
-
-        if (cmf != 0){
-            if (cmf < 0x10000) {
-                cmf = (cmf << 8) | static_cast<quint32>(m_calibrate_step);
-            }else{
-                cmf = (cmf & 0x00FFFFFF) | (static_cast<quint32>(ch) << 24);
-            }
-
-            QByteArray data;
-            data.append(static_cast<char>((cmf >> 24) & 0xFF));
-            data.append(static_cast<char>((cmf >> 16) & 0xFF));
-            data.append(static_cast<char>((cmf >> 8) & 0xFF));
-            data.append(static_cast<char>(cmf & 0xFF));
-
-            QByteArray paddedParam(4, 0);
-            int copyLen = qMin(param.size(), 4);
-            memcpy(paddedParam.data() + (4 - copyLen), param.data(), copyLen);
-            data.append(paddedParam);
-
-            struct can_frame frame;
-            frame.can_id = ConfigManager::s_CANid.load();
-            frame.can_dlc = static_cast<quint8>(data.size());
-            memcpy(frame.data, data.constData(), data.size());
-
-            if (m_sendQueue.isEmpty()) {m_writeNotifier->setEnabled(true);}
-            m_sendQueue.enqueue(frame);
-            return;
-        }
-
-        qCWarning(canSer)<<"[sendFrame]:ERROR uart command!!!";
-        return;
-    }
-
-    qCWarning(canSer)<<"[sendFrame]:Send queue overflow!!!";
-    return;
-}
-
+    1000000,//0
+    800000,//1
+    500000,//2
+    250000,//3
+    125000,//4
+    100000,//5
+    50000,//6
+    20000,//7
+    10000,//8
+};
 const QHash<quint32, quint16> CanServerManager::m_canToUart =
 {
     // output
@@ -332,6 +132,14 @@ const QHash<quint32, quint16> CanServerManager::m_canToUart =
     // error
     {0xffffff,0xffff},
 };
+const QHash<quint16, quint32> CanServerManager::m_uartToCan = []
+{
+    QHash<quint16, quint32> reverse;
+    for (auto it = m_canToUart.constBegin(); it != m_canToUart.constEnd(); ++it) {
+        reverse.insert(it.value(), it.key());
+    }
+    return reverse;
+}();
 
 void CanServerManager::processFrame(const QByteArray &data)
 {
@@ -497,4 +305,193 @@ void CanServerManager::processFrame(const QByteArray &data)
 
         default:qCWarning(canSer)<<"[processFrame]error case";return;
     }
+}
+void CanServerManager::changebaud()
+{
+    if (OpeningCanN()) {
+        ConfigManager::saveNewValue(ConfAddress::CanBaud,ConfigManager::s_canBaudIndex);
+        emit ChannelBus::instance().interAcUpdate();
+    }
+}
+void CanServerManager::sendFrame(quint8 ch,quint16 uart,const QByteArray &param)
+{
+    // Queue rate limiting (to prevent infinite growth)
+    if (ConfigManager::control_Mode.load()==InterSt::CAN && m_sendQueue.size() <= 9999){
+        quint32 cmf = m_uartToCan.value(uart); // default 0
+
+        if (cmf != 0){
+            if (cmf < 0x10000) {
+                cmf = (cmf << 8) | static_cast<quint32>(m_calibrate_step);
+            }else{
+                cmf = (cmf & 0x00FFFFFF) | (static_cast<quint32>(ch) << 24);
+            }
+
+            QByteArray data;
+            data.append(static_cast<char>((cmf >> 24) & 0xFF));
+            data.append(static_cast<char>((cmf >> 16) & 0xFF));
+            data.append(static_cast<char>((cmf >> 8) & 0xFF));
+            data.append(static_cast<char>(cmf & 0xFF));
+
+            QByteArray paddedParam(4, 0);
+            int copyLen = qMin(param.size(), 4);
+            memcpy(paddedParam.data() + (4 - copyLen), param.data(), copyLen);
+            data.append(paddedParam);
+
+            struct can_frame frame;
+            frame.can_id = ConfigManager::s_CANid.load();
+            frame.can_dlc = static_cast<quint8>(data.size());
+            memcpy(frame.data, data.constData(), data.size());
+
+            if (m_sendQueue.isEmpty()) {m_writeNotifier->setEnabled(true);}
+            m_sendQueue.enqueue(frame);
+            return;
+        }
+
+        qCWarning(canSer)<<"[sendFrame]:ERROR uart command!!!";
+        return;
+    }
+
+    qCWarning(canSer)<<"[sendFrame]:Send queue overflow!!!";
+    return;
+}
+
+CanServerManager::CanServerManager(QObject *parent): QObject(parent)
+{
+    if (OpeningCanN() && createSocket()) {
+        connect(m_readNotifier, &QSocketNotifier::activated,this, [this](){
+            m_readNotifier->setEnabled(false);
+            struct can_frame frame;
+
+            while (true) {
+                ssize_t nbytes = read(m_socketFd, &frame, sizeof(frame));
+
+                if (nbytes == sizeof(frame)) { // always 16Bytes
+                    if(frame.can_id == 0 || frame.can_id == ConfigManager::s_CANid.load()){
+                        QByteArray data(reinterpret_cast<const char*>(frame.data), frame.can_dlc);
+                        qCDebug(canSer)<<"[CanServerManager]:Received Data: "<<data.toHex();
+
+                        switch (ConfigManager::control_Mode.load()) {
+                            case InterSt::LOCAL:emit ChannelBus::instance().switchRemote(InterSt::CAN);// fall through
+                            case InterSt::CAN:processFrame(data); break;
+                            default:
+                                qCDebug(canSer)<<"[CanServerManager]: remoteMode[!=can-1]: "<<ConfigManager::control_Mode.load();
+                                quint8 channel = static_cast<quint8>(data[0]);
+                                sendFrame(channel,0xffff,""); break;
+                        }
+                    }
+                }
+
+                qCWarning(canSer)<<"[CanServerManager]:Read error: "<<strerror(errno);
+            }
+
+            m_readNotifier->setEnabled(true);
+        }, Qt::DirectConnection);
+        connect(m_writeNotifier, &QSocketNotifier::activated,this, [this](){
+            m_writeNotifier->setEnabled(false);
+
+            while (!m_sendQueue.isEmpty()) {
+                const struct can_frame &frame = m_sendQueue.head();
+                ssize_t sent = write(m_socketFd, &frame, sizeof(frame));
+
+                if (sent == sizeof(frame)) {
+                    m_sendQueue.dequeue();
+                    QByteArray data(reinterpret_cast<const char*>(frame.data), frame.can_dlc);
+                    qCDebug(canSer)<<"[CanServerManager]:Sent Data: "<<data.toHex()<<", QueueRemain: "<<m_sendQueue.size();
+                    break;
+                }
+
+                qCWarning(canSer)<<"[CanServerManager]:Write error: "<<strerror(errno);
+            }
+            m_writeNotifier->setEnabled(true);
+        }, Qt::DirectConnection);
+
+        return;
+    }
+}
+CanServerManager::~CanServerManager()
+{
+   shutdown(m_socketFd, SHUT_RDWR);
+   close(m_socketFd);
+
+   delete m_readNotifier;
+   delete m_writeNotifier;
+}
+
+bool CanServerManager::OpeningCanN()
+{
+    QStringList commands;
+    commands << QString("ip link set %1 down").arg(m_interface);
+    commands << QString("ip link set %1 txqueuelen 1000").arg(m_interface);
+    //commands << QString("ip link set %1 type can bitrate 500000 restart-ms 18 dbitrate 2000000 fd on loopback on").arg(interface);
+    commands << QString("ip link set %1 type can bitrate %2 restart-ms 18 fd off loopback on")
+                .arg(m_interface).arg(m_validBaudRates[ConfigManager::s_canBaudIndex]);
+    commands << QString("ip link set %1 up").arg(m_interface);
+
+    for (const QString &cmd : qAsConst(commands)) {
+        if (system(cmd.toUtf8().constData()) != 0) {
+            qCCritical(canSer)<<"[OpeningCanN]:Command failed: "<<cmd;
+            return false;
+        }
+    }
+
+    return true;
+}
+bool CanServerManager::createSocket()
+{
+    m_socketFd = socket(PF_CAN, SOCK_RAW, CAN_RAW);
+    if (m_socketFd < 0) {
+        qCCritical(canSer)<<"[createSocket]:Failed to create CAN socket: "<<strerror(errno);
+        return false;
+    }
+
+    struct ifreq ifr;
+    strncpy(ifr.ifr_name, m_interface.toUtf8().constData(), IFNAMSIZ - 1);
+    ifr.ifr_name[IFNAMSIZ - 1] = '\0';
+
+    if (ioctl(m_socketFd, SIOCGIFINDEX, &ifr) < 0) {
+        qCCritical(canSer)<<"[createSocket]:Failed to get interface index: "<<strerror(errno);
+        close(m_socketFd);
+        m_socketFd = -1;
+        return false;
+    }
+
+    struct sockaddr_can addr{};
+    addr.can_family = AF_CAN;
+    addr.can_ifindex = ifr.ifr_ifindex;
+
+    if (bind(m_socketFd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        qCCritical(canSer)<<"[createSocket]:Failed to bind socket: "<<strerror(errno);
+        close(m_socketFd);
+        m_socketFd = -1;
+        return false;
+    }
+
+    // Set non-blocking mode
+    int flags = fcntl(m_socketFd, F_GETFL, 0);
+    if (fcntl(m_socketFd, F_SETFL, flags | O_NONBLOCK) < 0) {
+        qCCritical(canSer)<<"[createSocket]:Failed to set non-blocking mode: "<<strerror(errno);
+        close(m_socketFd);
+        m_socketFd = -1;
+        return false;
+    }
+
+    int sndbuf = 1024 * 1024;  // send buffer -> 1MB = 62500frame
+    setsockopt(m_socketFd, SOL_SOCKET, SO_SNDBUF, &sndbuf, sizeof(sndbuf));
+
+    int rcvbuf = 1024 * 1024;  // receive buffer -> 1MB = 62500frame
+    setsockopt(m_socketFd, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
+    // The event loop's operation of handling other events also leads to timeout receive buffer overflow.
+
+    int recv_own_msgs = 0;
+    setsockopt(m_socketFd, SOL_CAN_RAW, CAN_RAW_RECV_OWN_MSGS,&recv_own_msgs, sizeof(recv_own_msgs));
+    // {0|1} Return directly to the receiving buffer---Does not affect physical transmission
+
+    m_readNotifier = new QSocketNotifier(m_socketFd, QSocketNotifier::Read, this);
+    m_readNotifier->setEnabled(true);
+
+    m_writeNotifier = new QSocketNotifier(m_socketFd, QSocketNotifier::Write, this);
+    m_writeNotifier->setEnabled(false);
+    // Initially disabled, enabled only when there is data.
+
+    return true;
 }

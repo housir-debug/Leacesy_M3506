@@ -3,8 +3,6 @@
 #include <QStackedWidget>
 namespace Ui {class channelcard;}
 
-class BatteryModel;
-
 class channelcard : public QStackedWidget
 {
     Q_OBJECT
@@ -63,11 +61,11 @@ public:
     QString getChmodelname() const;
     void setModelValue(const QString &model);
 
-    int m_modelindex{0};
+    //int m_modelindex{0};
     QElapsedTimer m_integralTimer;
-    QSharedPointer<BatteryModel> m_activeModel;
     float getcurrentOCV() const;
     float getcurrentESR() const;
+    float getcurrentIsOver() const;
     void updateSocValue(float current);
 
     /* status */

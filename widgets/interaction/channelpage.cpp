@@ -148,19 +148,20 @@ void channelpage::update_Voltage(int ch,float voltage)
         if (itcard.value()->getChmode() == ChCardindex::Digital){
             itcard.value()->setVoltage(voltage);
         }else if (itcard.value()->getChmode() == ChCardindex::Battery && itcard.value()->getChstatus()){
-            float ocvval = itcard.value()->getcurrentOCV();
-            float esrval = itcard.value()->getcurrentESR();
-            QByteArray data(4,0);
+            if (!itcard.value()->getcurrentIsOver()){
+                QByteArray data(4,0);
 
-            if (ocvval == 0.0f || esrval == 0.0f){
-                ChannelBus::instance().to_Channel(itcard.value()->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "",false);
-                return;
-            }else{
+                float ocvval = itcard.value()->getcurrentOCV();
                 qToBigEndian(ocvval, reinterpret_cast<uint8_t*>(data.data()));
                 ChannelBus::instance().to_Channel(ch,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURVOLT, data,false);
+
+                float esrval = itcard.value()->getcurrentESR();
                 qToBigEndian(esrval, reinterpret_cast<uint8_t*>(data.data()));
                 ChannelBus::instance().to_Channel(ch,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURIMP, data,false);
+                return;
             }
+
+            ChannelBus::instance().to_Channel(itcard.value()->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "",false);
         }
     }
 }
@@ -284,30 +285,4 @@ QJsonArray channelpage::getAllChannelsData()
     }
 
     return channels;
-}
-
-bool channelpage::readBatteryModel()
-{
-    for (auto it = m_channels.cbegin(); it != m_channels.cend(); ++it) {
-        if (it.value()->getChstatus()){
-            return false;
-        }
-    }
-
-    if (m_modelManager) {
-        m_currentModelList = m_modelManager->getAvailableModels();
-        if (!m_currentModelList.isEmpty()){
-            QString batteryModel = m_currentModelList[0]; // load = true -> exist at least 1
-
-            for (auto it = m_channels.cbegin(); it != m_channels.cend(); ++it) {
-                it.value()->m_modelindex = 0;
-                it.value()->setModelValue(batteryModel);
-                it.value()->m_activeModel = m_modelManager->getModel(batteryModel);
-            }
-
-            return true;
-        }
-    }
-
-    return false;
 }

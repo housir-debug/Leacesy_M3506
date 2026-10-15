@@ -40,6 +40,9 @@ void channelcard::mouseReleaseEvent(QMouseEvent *event)
 channelcard::channelcard(QWidget *parent) : QStackedWidget(parent),
     ui(new Ui::channelcard)
 {
+    QStringList models = BatteryModelManager::instance().getAvailableModels();
+    if (!models.isEmpty()){setModelValue(models[0]);}
+
     ui->setupUi(this);
 
     m_longPressTimer = new QTimer(this);
@@ -145,21 +148,11 @@ QString channelcard::getChmodelname() const{return ui->modelnamelabel->text();}
 void channelcard::setModelValue(const QString &model){ui->modelnamelabel->setText(model);}
 
 float channelcard::getcurrentOCV() const
-{
-    if (!m_activeModel.isNull() && !m_activeModel->isOver(m_soc.load())){
-        return m_activeModel->getOCV(m_soc.load());
-    }else{
-        return 0.0f;
-    }
-}
+{return BatteryModelManager::instance().getOCV(getChmodelname(),m_soc.load());}
 float channelcard::getcurrentESR() const
-{
-    if (!m_activeModel.isNull() && !m_activeModel->isOver(m_soc.load())){
-        return m_activeModel->getESR(m_soc.load());
-    }else{
-        return 0.0f;
-    }
-}
+{return BatteryModelManager::instance().getESR(getChmodelname(),m_soc.load());}
+float channelcard::getcurrentIsOver() const
+{return BatteryModelManager::instance().isOver(getChmodelname(),m_soc.load());}
 void channelcard::updateSocValue(float current)
 {
     float deltaTimeHours = m_integralTimer.elapsed() / 3600000.0f; // ms -> hours

@@ -42,8 +42,8 @@ namespace LogLevel {
     constexpr const int Debug     = 0x03;
 }
 int ConfigManager::log_Level{LogLevel::Normal};
-quint32 ConfigManager::s_canBaudRate{500000};
-quint32 ConfigManager::s_rs232BaudRate{115200};
+quint32 ConfigManager::s_canBaudIndex{0};
+quint32 ConfigManager::s_rs232BaudIndex{0};
 std::atomic<quint32> ConfigManager::s_CANid{0};
 
 bool ConfigManager::init(const QString &configDir)
@@ -53,11 +53,13 @@ bool ConfigManager::init(const QString &configDir)
     if (QFile::exists(fullPath) && !s_settings && getNetworkConfig()){
         s_settings = std::make_unique<QSettings>(fullPath, QSettings::IniFormat);
 
-        s_CANid = s_settings->value("Device/CANID").toUInt();
-        s_canBaudRate = s_settings->value("Device/CANBaud").toUInt();
-        s_rs232BaudRate = s_settings->value("Device/RS232Baud").toUInt();
+        s_CANid = s_settings->value(ConfAddress::CanId).toUInt();
+        s_canBaudIndex = s_settings->value(ConfAddress::CanBaud).toUInt();
+        if (s_canBaudIndex > 8) {s_canBaudIndex = 0;}
+        s_rs232BaudIndex = s_settings->value(ConfAddress::R23Baud).toUInt();
+        if (s_rs232BaudIndex > 7) {s_rs232BaudIndex = 0;}
 
-        log_Level = s_settings->value("Device/LogLevel").toUInt();// default-0
+        log_Level = s_settings->value(ConfAddress::LogType).toUInt();// default-0
         if (log_Level != LogLevel::Normal){
             QString rules;
             switch (log_Level) {

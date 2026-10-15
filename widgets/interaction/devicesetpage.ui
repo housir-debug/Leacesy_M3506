@@ -32,6 +32,45 @@
 	border: none;
 }
 
+#devicesetpage QComboBox {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 #1A2D50, stop:1 #142442);
+    border: 1px solid #304b82;
+    border-radius: 6px;
+    color: #9CB8E8;
+    font-size: 14px;
+    font-weight: bold;
+}
+#devicesetpage QComboBox:disabled {
+    background: #111928;
+    border: 1px solid #202b40;
+    color: #445470;
+}
+#devicesetpage QComboBox::drop-down {
+    background: transparent;
+}
+#devicesetpage QComboBox QAbstractItemView {
+    background-color: #142442;
+    border: 1px solid #304b82;
+    border-radius: 9px;
+    font-weight: bold;
+	font-size: 14px;
+	color: #9CB8E8;
+    outline: none;
+    selection-background-color: #2A4A7A;
+    selection-color: #FFFFFF;
+}
+#devicesetpage QComboBox QAbstractItemView::item {
+    background: transparent;
+ 	border-radius: 6px;
+	color: #9CB8E8;
+	min-height: 27px;
+    padding: 2px 8px;
+}
+#devicesetpage QComboBox QAbstractItemView::item:selected {
+    background-color: #2A4A7A;
+    color: #FFFFFF;
+}
 
 #devicesetpage QRadioButton {
     background: transparent;
@@ -825,174 +864,6 @@
          <number>0</number>
         </property>
         <layout class="QGridLayout" name="gridLayout_2" rowstretch="3,2" columnstretch="1,1,1">
-         <property name="leftMargin">
-          <number>9</number>
-         </property>
-         <property name="topMargin">
-          <number>9</number>
-         </property>
-         <property name="rightMargin">
-          <number>9</number>
-         </property>
-         <property name="bottomMargin">
-          <number>9</number>
-         </property>
-         <property name="spacing">
-          <number>6</number>
-         </property>
-         <item row="1" column="1">
-          <widget class="QLabel" name="canbaudlabel">
-           <property name="font">
-            <font>
-             <family>WenQuanYi Micro Hei</family>
-             <pointsize>-1</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>BlankCursor</cursorShape>
-           </property>
-           <property name="contextMenuPolicy">
-            <enum>Qt::NoContextMenu</enum>
-           </property>
-           <property name="lineWidth">
-            <number>0</number>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QRadioButton" name="canbaudradioButton">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <family>WenQuanYi Micro Hei</family>
-             <pointsize>-1</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>BlankCursor</cursorShape>
-           </property>
-           <property name="mouseTracking">
-            <bool>false</bool>
-           </property>
-           <property name="focusPolicy">
-            <enum>Qt::NoFocus</enum>
-           </property>
-           <property name="contextMenuPolicy">
-            <enum>Qt::NoContextMenu</enum>
-           </property>
-           <property name="text">
-            <string>CAN BaudRate</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-           <attribute name="buttonGroup">
-            <string notr="true">buttonGroup_2</string>
-           </attribute>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QLabel" name="rs232baudlabel">
-           <property name="font">
-            <font>
-             <family>WenQuanYi Micro Hei</family>
-             <pointsize>-1</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>BlankCursor</cursorShape>
-           </property>
-           <property name="contextMenuPolicy">
-            <enum>Qt::NoContextMenu</enum>
-           </property>
-           <property name="lineWidth">
-            <number>0</number>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="canidlabel">
-           <property name="font">
-            <font>
-             <family>WenQuanYi Micro Hei</family>
-             <pointsize>-1</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>BlankCursor</cursorShape>
-           </property>
-           <property name="contextMenuPolicy">
-            <enum>Qt::NoContextMenu</enum>
-           </property>
-           <property name="lineWidth">
-            <number>0</number>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QRadioButton" name="rs232baudradioButton">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <family>WenQuanYi Micro Hei</family>
-             <pointsize>-1</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>BlankCursor</cursorShape>
-           </property>
-           <property name="mouseTracking">
-            <bool>false</bool>
-           </property>
-           <property name="focusPolicy">
-            <enum>Qt::NoFocus</enum>
-           </property>
-           <property name="contextMenuPolicy">
-            <enum>Qt::NoContextMenu</enum>
-           </property>
-           <property name="text">
-            <string>RS-232 BaudRate</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-           <attribute name="buttonGroup">
-            <string notr="true">buttonGroup_2</string>
-           </attribute>
-          </widget>
-         </item>
          <item row="0" column="0">
           <widget class="QRadioButton" name="canidradioButton">
            <property name="sizePolicy">
@@ -1030,6 +901,265 @@
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup_2</string>
            </attribute>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QRadioButton" name="canbaudradioButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <family>WenQuanYi Micro Hei</family>
+             <pointsize>-1</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="mouseTracking">
+            <bool>false</bool>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="text">
+            <string>CAN Baud</string>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroup_2</string>
+           </attribute>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QRadioButton" name="rs232baudradioButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <family>WenQuanYi Micro Hei</family>
+             <pointsize>-1</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="mouseTracking">
+            <bool>false</bool>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="text">
+            <string>RS-232 Baud</string>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroup_2</string>
+           </attribute>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="canidlabel">
+           <property name="font">
+            <font>
+             <family>WenQuanYi Micro Hei</family>
+             <pointsize>-1</pointsize>
+            </font>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="lineWidth">
+            <number>0</number>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="canBaud_comboBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <property name="maxVisibleItems">
+            <number>9</number>
+           </property>
+           <property name="maxCount">
+            <number>9</number>
+           </property>
+           <property name="insertPolicy">
+            <enum>QComboBox::InsertAtBottom</enum>
+           </property>
+           <item>
+            <property name="text">
+             <string>1M</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>800K</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>500K</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>250K</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>125K</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>100K</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>50K</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>20K</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>10K</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QComboBox" name="rs32Baud_comboBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <property name="maxVisibleItems">
+            <number>8</number>
+           </property>
+           <property name="maxCount">
+            <number>8</number>
+           </property>
+           <property name="insertPolicy">
+            <enum>QComboBox::InsertAtBottom</enum>
+           </property>
+           <item>
+            <property name="text">
+             <string>115200</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>57600</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>38400</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>19200</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>9600</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>4800</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>2400</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>1200</string>
+            </property>
+           </item>
           </widget>
          </item>
         </layout>
