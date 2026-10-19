@@ -379,9 +379,13 @@ CanServerManager::CanServerManager(QObject *parent): QObject(parent)
                                 sendFrame(channel,0xffff,""); break;
                         }
                     }
+
+                    continue;
+                }else if(nbytes < 0 && errno != EAGAIN && errno != EWOULDBLOCK){
+                    qCWarning(canSer)<<"[CanServerManager]:Read error: "<<strerror(errno);
                 }
 
-                qCWarning(canSer)<<"[CanServerManager]:Read error: "<<strerror(errno);
+                break;
             }
 
             m_readNotifier->setEnabled(true);
@@ -397,10 +401,12 @@ CanServerManager::CanServerManager(QObject *parent): QObject(parent)
                     m_sendQueue.dequeue();
                     QByteArray data(reinterpret_cast<const char*>(frame.data), frame.can_dlc);
                     qCDebug(canSer)<<"[CanServerManager]:Sent Data: "<<data.toHex()<<", QueueRemain: "<<m_sendQueue.size();
-                    break;
+                    continue;
+                }else if(sent < 0 && errno != EAGAIN && errno != EWOULDBLOCK){
+                    qCWarning(canSer)<<"[CanServerManager]:Write error: "<<strerror(errno);
                 }
 
-                qCWarning(canSer)<<"[CanServerManager]:Write error: "<<strerror(errno);
+                break;
             }
             m_writeNotifier->setEnabled(true);
         }, Qt::DirectConnection);
@@ -419,7 +425,6 @@ bool CanServerManager::OpeningCanN()
     QStringList commands;
     commands << QString("ip link set %1 down").arg(m_interface);
     commands << QString("ip link set %1 txqueuelen 1000").arg(m_interface);
-    //commands << QString("ip link set %1 type can bitrate 500000 restart-ms 18 dbitrate 2000000 fd on loopback on").arg(interface);
     commands << QString("ip link set %1 type can bitrate %2 restart-ms 18 fd off loopback on")
                 .arg(m_interface).arg(m_validBaudRates[ConfigManager::s_canBaudIndex]);
     commands << QString("ip link set %1 up").arg(m_interface);

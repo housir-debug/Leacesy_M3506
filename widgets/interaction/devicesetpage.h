@@ -8,7 +8,7 @@ class devicesetpage : public QWidget
 
 private:
     Ui::devicesetpage *ui;
-    int m_setmode{0};
+    int m_Inmode{0};
 
 signals:
     void backRequested();
@@ -38,4 +38,6 @@ namespace Setmode {
     constexpr const int mask           = 1;
     constexpr const int gate           = 2;
     constexpr const int canid          = 3;
+    constexpr const int canbaud        = 4;
+    constexpr const int rs32baud       = 5;
 }

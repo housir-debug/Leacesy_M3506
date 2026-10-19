@@ -81,7 +81,6 @@ bool ConfigManager::saveNewValue(const QString &key,const QVariant &val)
 {
     if (s_settings) {
         s_settings->setValue(key, val);
-        // s_settings->sync();
         return true;
     }
 

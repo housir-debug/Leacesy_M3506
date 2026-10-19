@@ -40,10 +40,10 @@ void channelcard::mouseReleaseEvent(QMouseEvent *event)
 channelcard::channelcard(QWidget *parent) : QStackedWidget(parent),
     ui(new Ui::channelcard)
 {
+    ui->setupUi(this);
+
     QStringList models = BatteryModelManager::instance().getAvailableModels();
     if (!models.isEmpty()){setModelValue(models[0]);}
-
-    ui->setupUi(this);
 
     m_longPressTimer = new QTimer(this);
     m_longPressTimer->setSingleShot(true);

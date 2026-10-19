@@ -41,10 +41,10 @@ namespace Module {
     constexpr const bool enable_UartCh       = false;
     /* control */
     constexpr const bool enable_UartSer      = false;
-    constexpr const bool enable_CanSer       = false;
-    constexpr const bool enable_VxiSer       = false;
-    constexpr const bool enable_WebSer       = false;
-    constexpr const bool enable_DisPlay      = false;
+    constexpr const bool enable_CanSer       = true;
+    constexpr const bool enable_VxiSer       = true;
+    constexpr const bool enable_WebSer       = true;
+    constexpr const bool enable_DisPlay      = true;
 }
 
 class QSettings;

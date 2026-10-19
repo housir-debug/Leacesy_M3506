@@ -58,6 +58,7 @@ Mainwindow::~Mainwindow()
         }
     }
 
+    delete view;
     delete ui;
 }
 
@@ -205,7 +206,7 @@ void Mainwindow::ishow()
 {
     if (Module::enable_DisPlay) {
         scene = new QGraphicsScene(this);
-        view  = new QGraphicsView(scene,this);
+        view  = new QGraphicsView(scene);//,this - don`t display
         QGraphicsProxyWidget* proxy = scene->addWidget(this);
         proxy->setFocusPolicy(Qt::NoFocus);
         proxy->setRotation(0);

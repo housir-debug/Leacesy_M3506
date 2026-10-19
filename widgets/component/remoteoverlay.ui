@@ -46,22 +46,25 @@
 	border: none;
 }
 
-#remoteoverlay #gobackpushButton {
-    background-color: rgba(26, 42, 69, 0.85);
-    border: 2px solid rgba(74, 74, 90, 0.5);
-    border-radius: 12px;
- 	font-weight: bold;
-    font-size: 18px;
-	color: #C9C9C9;
-	padding-left:6px;
-    padding-right:6px;
-    padding-top:6px;
-    padding-bottom:6px;
+#remoteoverlay QPushButton {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #1A2D50, stop:1 #142442);
+    border: 1px solid #304b82;
+    border-radius: 9px;
+    font-weight: bold;
+	font-size: 18px;
+	color: #9CB8E8;
+	padding-top:9px;
+    padding-bottom:9px;
 }
-#remoteoverlay #gobackpushButton:pressed {
-    background-color: #0D1525;
-    border-color: #4A8EC0;
-    color: #B0C8E0;
+#remoteoverlay QPushButton:pressed {
+    background: #195c3c;
+    border-color: #37b677;
+    color: #ffffff;
+}
+#remoteoverlay QPushButton:disabled {
+    background: #111928;
+    border: 1px solid #202b40;
+    color: #445470;
 }</string>
   </property>
   <property name="locale">
@@ -71,6 +74,21 @@
    <number>0</number>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QLabel" name="remotelogo">
      <property name="font">
@@ -129,13 +147,13 @@
        <number>336</number>
       </property>
       <property name="topMargin">
-       <number>9</number>
+       <number>6</number>
       </property>
       <property name="rightMargin">
        <number>336</number>
       </property>
       <property name="bottomMargin">
-       <number>9</number>
+       <number>6</number>
       </property>
       <item>
        <widget class="QPushButton" name="gobackpushButton">

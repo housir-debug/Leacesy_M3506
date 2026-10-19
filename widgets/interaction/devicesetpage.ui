@@ -938,7 +938,7 @@
             <string>CAN Baud</string>
            </property>
            <property name="checkable">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="checked">
             <bool>false</bool>
@@ -983,7 +983,7 @@
             <string>RS-232 Baud</string>
            </property>
            <property name="checkable">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="checked">
             <bool>false</bool>
@@ -1036,13 +1036,16 @@
             <number>0</number>
            </property>
            <property name="maxVisibleItems">
-            <number>9</number>
+            <number>10</number>
            </property>
            <property name="maxCount">
-            <number>9</number>
+            <number>10</number>
            </property>
            <property name="insertPolicy">
             <enum>QComboBox::InsertAtBottom</enum>
+           </property>
+           <property name="placeholderText">
+            <string/>
            </property>
            <item>
             <property name="text">
@@ -1089,6 +1092,11 @@
              <string>10K</string>
             </property>
            </item>
+           <item>
+            <property name="text">
+             <string>###</string>
+            </property>
+           </item>
           </widget>
          </item>
          <item row="1" column="2">
@@ -1112,10 +1120,10 @@
             <number>0</number>
            </property>
            <property name="maxVisibleItems">
-            <number>8</number>
+            <number>9</number>
            </property>
            <property name="maxCount">
-            <number>8</number>
+            <number>9</number>
            </property>
            <property name="insertPolicy">
             <enum>QComboBox::InsertAtBottom</enum>
@@ -1158,6 +1166,11 @@
            <item>
             <property name="text">
              <string>1200</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>###</string>
             </property>
            </item>
           </widget>
