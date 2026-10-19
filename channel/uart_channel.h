@@ -19,7 +19,6 @@ private:
     };
     static const QVector<Command> m_commands;
     static const QVector<Command> m_initCommands;
-    static QThread* getWorkerThread(quint32 channel);
 
 public:
     void initUartchannel(quint8 ch, const QString &portName,qint32 baudRate);
@@ -27,7 +26,7 @@ public:
 
     void writeFrame(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
     explicit UartChannelManager(QObject *parent = nullptr);
-    ~UartChannelManager();
+    ~UartChannelManager() = default;;
 
 private:
     QSerialPort *m_serialPort{nullptr};

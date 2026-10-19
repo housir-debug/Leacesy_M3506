@@ -41,6 +41,7 @@ signals:
     void set_network(bool isstatic);
     /* control -> UI */
     void interAcUpdate();
+    void interModelUpdate();
     void switchRemote(int reface);
 
 public:

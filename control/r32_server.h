@@ -22,5 +22,5 @@ public:
     void changeBaudRate();
 
     explicit UartServerManager(QObject *parent = nullptr);
-    ~UartServerManager();
+    ~UartServerManager() = default;
 };

@@ -53,6 +53,7 @@ public:
 
     /* web or main call function */
     QJsonArray getAllChannelsData();
+    bool existBatteryOutPut();
 };
 
 namespace ChPageCard {

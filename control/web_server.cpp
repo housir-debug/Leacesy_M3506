@@ -250,15 +250,21 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
 }
 WebServerManager::~WebServerManager()
 {
-    for (QTcpSocket *client : qAsConst(m_clients)) {
-        delete client;
+    for (QTcpSocket* client : qAsConst(m_clients)) {
+        if (client) {
+            client->disconnect(this);
+            client->deleteLater();
+        }
     }
-    delete m_httpServer;
+    m_clients.clear();
 
     for (QWebSocket* socket : qAsConst(m_sockets)) {
-        delete socket;
+        if (socket) {
+            socket->disconnect(this);
+            socket->deleteLater();
+        }
     }
-    delete m_wsServer;
+    m_sockets.clear();
 }
 
 void WebServerManager::set_network(bool isstatic)
@@ -395,9 +401,9 @@ void WebServerManager::setupWSRoutes()
         QJsonArray modelData = content["data"].toArray();
 
         if (addModelFromNetwork(modelName,modelData)) {
-            //m_qmlbridge->load_BatteryModel();
             response = getModelsInfo();
             response["type"] = "model_sync";
+            emit ChannelBus::instance().interModelUpdate();
             socket->sendTextMessage(QJsonDocument(response).toJson());
         } else {
             response["type"] = "error";
@@ -410,14 +416,14 @@ void WebServerManager::setupWSRoutes()
         QJsonObject response;
         QString modelName = obj["name"].toString();
 
-        if (BatteryModelManager::instance().removeModel(modelName)) {
-            //m_qmlbridge->load_BatteryModel();
+        if (m_ChPage && !m_ChPage->existBatteryOutPut() && BatteryModelManager::instance().removeModel(modelName)) {
             response = getModelsInfo();
             response["type"] = "model_sync";
+            emit ChannelBus::instance().interModelUpdate();
             socket->sendTextMessage(QJsonDocument(response).toJson());
-        } else {
+        }else {
             response["type"] = "error";
-            response["message"] = QString("Failed to delete model \"%1\"").arg(modelName);
+            response["message"] = QString("Now Work in Bettary mode OR Failed to delete model \"%1\"").arg(modelName);
             socket->sendTextMessage(QJsonDocument(response).toJson());
         }
     };

@@ -25,12 +25,12 @@ void devicesetpage::on_canidradioButton_clicked()
     m_setmode = Setmode::canid;
     ui->canidradioButton->setChecked(true);
 }
-void devicesetpage::on_canBaud_comboBox_clicked(int index)
+void devicesetpage::on_canBaud_comboBox_activated(int index)
 {
     ConfigManager::s_canBaudIndex = index;
     emit ChannelBus::instance().set_canbaud();
 }
-void devicesetpage::on_rs32Baud_comboBox_clicked(int index)
+void devicesetpage::on_rs32Baud_comboBox_activated(int index)
 {
     ConfigManager::s_rs232BaudIndex = index;
     emit ChannelBus::instance().set_RS232Baud();
@@ -129,7 +129,7 @@ devicesetpage::devicesetpage(QWidget *parent) :
                     return;
                 default:return;
             }
-        }});
+        }}, Qt::DirectConnection);
 }
 devicesetpage::~devicesetpage()
 {

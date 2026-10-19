@@ -18,8 +18,8 @@ private slots:
     void on_maskradioButton_clicked();
     void on_gateradioButton_clicked();
     void on_canidradioButton_clicked();
-    void on_canBaud_comboBox_clicked(int index);
-    void on_rs32Baud_comboBox_clicked(int index);
+    void on_canBaud_comboBox_activated(int index);
+    void on_rs32Baud_comboBox_activated(int index);
 
     void on_back_pushButton_clicked();
     void on_dhcp_pushButton_clicked();

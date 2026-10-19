@@ -5,7 +5,6 @@
 #include "scpi_handle.h"
 #include <QSerialPort>
 #include <QtEndian>
-#include <QThread>
 #include <QTimer>
 
 const QVector<UartChannelManager::Command> UartChannelManager::m_commands =
@@ -30,69 +29,49 @@ const QVector<UartChannelManager::Command> UartChannelManager::m_initCommands =
     {0x02, 0x02, QByteArray::fromHex("00 00 00 00"),false},// set Output impedance =0 -> cv model
     //{0x04, 0x1f, QByteArray::fromHex("ff ff ff ff")},// set relarge, not vaild parameter
 };
-QThread* UartChannelManager::getWorkerThread(quint32 channel)
-{
-    static QThread threads[JV6xxx::CHThread_NUM];
-    static std::once_flag flag;
-
-    std::call_once(flag, [] {
-        for (int i = 0; i < JV6xxx::CHThread_NUM; i++) {
-            threads[i].setObjectName(QString("UartChThread_%1").arg(i));
-            threads[i].start();
-        }});
-
-    return &threads[channel % JV6xxx::CHThread_NUM];
-}
 
 void UartChannelManager::initUartchannel(quint8 ch, const QString &portName,qint32 baudRate)
 {
+    m_serialPort = new QSerialPort(this);
+    // Set the data bit to 8 bits, For example: Data5 - Data8
+    m_serialPort->setDataBits(QSerialPort::Data8);
+    // Not use parity check bits, the upper-level protocol ensures data integrity.
+    m_serialPort->setParity(QSerialPort::NoParity);
+    // Use 1 stop bit, Mark the end of A data byte
+    m_serialPort->setStopBits(QSerialPort::OneStop);
+    // HardwareControl: Requires wiring support | SoftwareControl: Applicable only to written text
+    m_serialPort ->setFlowControl(QSerialPort::NoFlowControl);
+    // setting QSerialPort::Baud38400 and QSerialPort - name
+    m_serialPort->setBaudRate(baudRate);
+    m_serialPort->setPortName(portName);
     m_channel = ch;
-    QThread* worker = getWorkerThread(ch);
-    this->moveToThread(worker); // The child object will follow the parent class.
 
-    QMetaObject::invokeMethod(this, [this,portName,baudRate]() {
-        m_serialPort = new QSerialPort(this);
-        // Set the data bit to 8 bits, For example: Data5 - Data8
-        m_serialPort->setDataBits(QSerialPort::Data8);
-        // Not use parity check bits, the upper-level protocol ensures data integrity.
-        m_serialPort->setParity(QSerialPort::NoParity);
-        // Use 1 stop bit, Mark the end of A data byte
-        m_serialPort->setStopBits(QSerialPort::OneStop);
-        // HardwareControl: Requires wiring support | SoftwareControl: Applicable only to written text
-        m_serialPort ->setFlowControl(QSerialPort::NoFlowControl);
-        // setting QSerialPort::Baud38400 and QSerialPort - name
-        m_serialPort->setBaudRate(baudRate);
-        m_serialPort->setPortName(portName);
+    if (m_serialPort->open(QIODevice::ReadWrite)) {
+        connect(m_serialPort, &QSerialPort::readyRead, this, &UartChannelManager::handleReadyRead, Qt::DirectConnection);
+        connect(m_serialPort, &QSerialPort::errorOccurred, this, [this]() {
+            qCWarning(uartCh)<<"[initUartchannel]:Channel_"<<m_channel<<" Error: "<<m_serialPort->errorString();
+            }, Qt::DirectConnection);
 
-        if (m_serialPort->open(QIODevice::ReadWrite)) {
-            connect(m_serialPort, &QSerialPort::readyRead, this, &UartChannelManager::handleReadyRead, Qt::DirectConnection);
-            connect(m_serialPort, &QSerialPort::errorOccurred, this, [this]() {
-                qCWarning(uartCh)<<"[initUartchannel]:Channel_"<<m_channel<<" Error: "<<m_serialPort->errorString();
-                }, Qt::DirectConnection);
+        m_refreshTimer = new QTimer(this);
+        m_refreshTimer->setInterval(180); // ms -> 60ms < target < at will
+        connect(m_refreshTimer,&QTimer::timeout,this,[this]{
+            m_timeindex = (m_timeindex + 1) % m_commands.size();
+            const Command &cmd = m_commands[m_timeindex];
+            writeFrame(cmd.cmd, cmd.func, cmd.param, false);
+            }, Qt::DirectConnection);
 
-            m_refreshTimer = new QTimer(this);
-            m_refreshTimer->setInterval(180); // ms -> 60ms < target < at will
-            connect(m_refreshTimer,&QTimer::timeout,this,[this]{
-                m_timeindex = (m_timeindex + 1) % m_commands.size();
-                const Command &cmd = m_commands[m_timeindex];
-                writeFrame(cmd.cmd, cmd.func, cmd.param, false);
-                }, Qt::DirectConnection);
+        m_outTimer = new QTimer(this);
+        m_outTimer->setSingleShot(true);
+        m_outTimer->setInterval(120); // 120 ms
+        connect(m_outTimer, &QTimer::timeout, this, [this]{
+            m_waitR = false;
+            sendNextCmd();
+        }, Qt::DirectConnection);
 
-            m_outTimer = new QTimer(this);
-            m_outTimer->setSingleShot(true);
-            m_outTimer->setInterval(120); // 120 ms
-            connect(m_outTimer, &QTimer::timeout, this, [this]{
-                m_waitR = false;
-                sendNextCmd();
-            });
-
-            // Channel initialization command
-            sendInitCommand();
-            return;
-        }
-
-        qCWarning(uartCh)<<"[initUartchannel]:failed Open SerialPort: "<<portName;
-        }, Qt::QueuedConnection);
+        // Channel initialization command
+        sendInitCommand();
+        return;
+    }
 }
 void UartChannelManager::sendInitCommand()
 {
@@ -117,16 +96,10 @@ void UartChannelManager::writeFrame(quint8 cmd, quint8 func, const QByteArray& p
 }
 UartChannelManager::UartChannelManager(QObject *parent):QObject(parent)
 {}
-UartChannelManager::~UartChannelManager()
-{
-    delete m_serialPort;
-    delete m_refreshTimer;
-    delete m_outTimer;
-}
 
 /*
- * 1，队列等待（收一发一）+ 丢包超时（跳过），保证正常状态一收一发
- * 2，超时-过期响应，加入校验码，跳过过期响应，避免污染应答
+ * 1，队列等待-控制发送速度（收一发一）+ 丢包超时（跳过），保证正常状态一收一发
+ * 2，超时-过期响应，加入校验码，跳过过期响应，避免污染应答-可以延长超时限制，去包含它
  * 3，状态判断是否发送远程模块
  *
  * */

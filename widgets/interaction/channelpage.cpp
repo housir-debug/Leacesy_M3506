@@ -286,3 +286,13 @@ QJsonArray channelpage::getAllChannelsData()
 
     return channels;
 }
+bool channelpage::existBatteryOutPut()
+{
+     for (auto itcard = m_channels.begin(); itcard != m_channels.end(); ++itcard) {
+         if (itcard.value()->getChmode() == ChCardindex::Battery && itcard.value()->getChstatus()){
+             return true;
+         }
+     }
+
+     return false;
+}

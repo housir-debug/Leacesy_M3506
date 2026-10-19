@@ -2,7 +2,7 @@
 #include <QString>
 
 namespace JV6xxx {
-    constexpr int CHThread_NUM   = 0x04;
+    constexpr int Thread_CHSUM   = 0x09;
     constexpr quint8 HEADER_HIGH = 0xAA;
     constexpr quint8 HEADER_LOW  = 0x55;
     constexpr quint8 END_MARKER  = 0xEE;

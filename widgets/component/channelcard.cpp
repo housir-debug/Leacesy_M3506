@@ -55,7 +55,7 @@ channelcard::channelcard(QWidget *parent) : QStackedWidget(parent),
             // emit longPressed(m_channel);
             setCurrentIndex(ChCardindex::Selected);
         }
-    });
+    }, Qt::DirectConnection);
 }
 channelcard::~channelcard()
 {
@@ -148,11 +148,17 @@ QString channelcard::getChmodelname() const{return ui->modelnamelabel->text();}
 void channelcard::setModelValue(const QString &model){ui->modelnamelabel->setText(model);}
 
 float channelcard::getcurrentOCV() const
-{return BatteryModelManager::instance().getOCV(getChmodelname(),m_soc.load());}
+{
+    return BatteryModelManager::instance().getOCV(getChmodelname(),m_soc.load());
+}
 float channelcard::getcurrentESR() const
-{return BatteryModelManager::instance().getESR(getChmodelname(),m_soc.load());}
-float channelcard::getcurrentIsOver() const
-{return BatteryModelManager::instance().isOver(getChmodelname(),m_soc.load());}
+{
+    return BatteryModelManager::instance().getESR(getChmodelname(),m_soc.load());
+}
+bool channelcard::getcurrentIsOver() const
+{
+    return BatteryModelManager::instance().isOver(getChmodelname(),m_soc.load());
+}
 void channelcard::updateSocValue(float current)
 {
     float deltaTimeHours = m_integralTimer.elapsed() / 3600000.0f; // ms -> hours

@@ -16,18 +16,18 @@ numberkeypad::numberkeypad(QWidget *parent) :
         m_longPressTriggered = false;
         m_longPressTimer->start();
         m_isPressed = true;
-    });
+    }, Qt::DirectConnection);
     connect(ui->deletebtn, &QPushButton::released, this, [this]() {
         m_longPressTimer->stop();
         m_isPressed = false;
-    });
+    }, Qt::DirectConnection);
 
     connect(m_longPressTimer, &QTimer::timeout, this, [this]{
         if (m_isPressed && !m_longPressTriggered) {
             m_longPressTriggered = true;
             ui->displayfield->clear();
         }
-    });
+    }, Qt::DirectConnection);
 }
 numberkeypad::~numberkeypad()
 {

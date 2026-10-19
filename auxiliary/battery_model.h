@@ -2,7 +2,12 @@
 #include <QMap>
 #include <QObject>
 
-struct BatteryDataPoint {float soc;float ocv;float imp;};
+struct BatteryDataPoint
+{
+    float soc;
+    float ocv;
+    float imp;
+};
 
 class BatteryModelManager : public QObject
 {

@@ -29,11 +29,12 @@ public:
     void ishow();
 
 private:
-    std::vector<std::unique_ptr<UartChannelManager>> channels;
+    std::vector<std::unique_ptr<QThread>> threads;
+    std::vector<UartChannelManager*> channels;
     UartServerManager* uartServer{nullptr};
     CanServerManager* canServer{nullptr};
-    VxiServerManager* vxiServer{nullptr};
     WebServerManager* webServer{nullptr};
+    VxiServerManager* vxiServer{nullptr};
     QThread* m_serThread{nullptr};
 
     remoteoverlay* m_RemoteOverlay{nullptr};

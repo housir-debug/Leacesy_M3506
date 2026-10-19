@@ -65,7 +65,7 @@ public:
     QElapsedTimer m_integralTimer;
     float getcurrentOCV() const;
     float getcurrentESR() const;
-    float getcurrentIsOver() const;
+    bool getcurrentIsOver() const;
     void updateSocValue(float current);
 
     /* status */

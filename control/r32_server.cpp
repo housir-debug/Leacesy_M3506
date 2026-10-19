@@ -85,7 +85,3 @@ UartServerManager::UartServerManager(QObject *parent): QObject(parent)
         return;
     }
 }
-UartServerManager::~UartServerManager()
-{
-    delete m_uartServer;
-}

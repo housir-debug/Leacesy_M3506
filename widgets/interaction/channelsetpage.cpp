@@ -28,6 +28,7 @@ channelsetting::channelsetting(QWidget *parent) :
     ui(new Ui::channelsetting)
 {
     ui->setupUi(this);
+    setCombModel();
 
     QObject::connect(ui->onoff_comboBox, &QComboBox::currentTextChanged,this,[this](const QString &text){
         if (text == "OFF"){ // 1-off outputed==true
@@ -41,7 +42,7 @@ channelsetting::channelsetting(QWidget *parent) :
         ui->onoff_comboBox->style()->unpolish(ui->onoff_comboBox);
         ui->onoff_comboBox->style()->polish(ui->onoff_comboBox);
         on_allFO_pushButton_clicked();
-        });
+        }, Qt::DirectConnection);
     QObject::connect(ui->unit_comboBox, &QComboBox::currentTextChanged,this, [this](const QString &text){
         if(text == "A"){
             ChannelBus::instance().to_Channel(0,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1,JV6xxx::Param::A),false);
@@ -52,7 +53,7 @@ channelsetting::channelsetting(QWidget *parent) :
         }
 
         on_allFO_pushButton_clicked();
-        });
+        }, Qt::DirectConnection);
     QObject::connect(ui->model_comboBox, &QComboBox::currentTextChanged,this,[this](const QString &text){
         for (int i = 1; i <= 36; ++i) {
             auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
@@ -62,7 +63,7 @@ channelsetting::channelsetting(QWidget *parent) :
         }
 
         on_allFO_pushButton_clicked();
-        });
+        }, Qt::DirectConnection);
 
     QObject::connect(ui->keyframe, &numberkeypad::valueEntered, this, [this](const QString &value) {
         if (!value.isEmpty()){
@@ -92,7 +93,7 @@ channelsetting::channelsetting(QWidget *parent) :
             }
 
             on_allFO_pushButton_clicked();
-        }});
+        }}, Qt::DirectConnection);
 }
 channelsetting::~channelsetting()
 {
@@ -113,6 +114,7 @@ void channelsetting::sendModecmd(float val,quint8 func){
 /* update card style */
 void channelsetting::setCombModel()
 {
+    ui->model_comboBox->clear();
     ui->model_comboBox->addItems(BatteryModelManager::instance().getAvailableModels());
 }
 void channelsetting::update_ChEn(int ch)

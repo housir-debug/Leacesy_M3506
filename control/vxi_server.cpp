@@ -63,11 +63,14 @@ VxiServerManager::VxiServerManager(QObject *parent):QObject(parent)
 }
 VxiServerManager::~VxiServerManager()
 {
-    for (QTcpSocket *client : qAsConst(m_clients)) {
-        delete client;
+    for (QTcpSocket* client : qAsConst(m_clients)) {
+        if (client) {
+            client->disconnect(this);
+            client->deleteLater();
+        }
     }
-
-    delete m_tcpServer;
+    m_clients.clear();
+    m_deviceLinks.clear();
 }
 
 void VxiServerManager::processClientData(QTcpSocket *client)
@@ -170,7 +173,7 @@ VxiServerManager::DeviceLink* VxiServerManager::checkRequest(QTcpSocket* client,
 
     buildfoundResponse(xid, Vxi11::INVALID_LINK_IDENTIFIER);
     client->write(m_responsebuffer);
-    return nullptr;
+    return nullptr; // & not if nullptr
 }
 
 void VxiServerManager::handleDeviceWrite(QTcpSocket* client,const quint32 xid,const uchar* address)

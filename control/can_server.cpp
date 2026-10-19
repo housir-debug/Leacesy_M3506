@@ -412,9 +412,6 @@ CanServerManager::~CanServerManager()
 {
    shutdown(m_socketFd, SHUT_RDWR);
    close(m_socketFd);
-
-   delete m_readNotifier;
-   delete m_writeNotifier;
 }
 
 bool CanServerManager::OpeningCanN()

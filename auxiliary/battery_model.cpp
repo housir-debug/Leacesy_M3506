@@ -148,7 +148,7 @@ bool BatteryModelManager::isOver(QString model,float soc) const
         }
     }
 
-    return true;
+    return true; // model not exist OR value not normal
 }
 float BatteryModelManager::getOCV(QString model,float soc) const
 {
