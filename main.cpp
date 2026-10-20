@@ -1,8 +1,6 @@
 #include "widgets/appmain.h"
-#include "widgets/apptest.h"
 #include <QFontDatabase>
 #include <QApplication>
-
 
 int main(int argc, char *argv[])
 {
@@ -20,9 +18,6 @@ int main(int argc, char *argv[])
             app.setFont(QFont(families.at(0)));
         }
     }
-
-    /*test tw;
-    tw.show();*/
 
     Mainwindow mw; // inside -> show
     return app.exec();

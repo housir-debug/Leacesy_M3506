@@ -27,7 +27,6 @@ HEADERS += \
     control/vxi_protocol.h \
     control/vxi_server.h \
     control/web_server.h \
-    widgets/apptest.h \
     widgets/component/channelcard.h \
     widgets/component/numberkeypad.h \
     widgets/component/remoteoverlay.h \
@@ -48,7 +47,6 @@ SOURCES += \
     control/r32_server.cpp \
     control/vxi_server.cpp \
     control/web_server.cpp \
-    widgets/apptest.cpp \
     widgets/component/channelcard.cpp \
     widgets/component/numberkeypad.cpp \
     widgets/component/remoteoverlay.cpp \
@@ -59,7 +57,6 @@ SOURCES += \
     main.cpp
 
 FORMS += \
-    widgets/apptest.ui \
     widgets/component/channelcard.ui \
     widgets/component/numberkeypad.ui \
     widgets/component/remoteoverlay.ui \

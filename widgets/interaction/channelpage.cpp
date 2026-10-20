@@ -12,7 +12,7 @@
 void channelpage::on_dig_pushButton_clicked()
 {
     for (channelcard *card :  qAsConst(m_channels)) {
-        if (card->getChstatus()){
+        if (card->getChmode() == ChCardindex::Battery && card->getChstatus()){
             ChannelBus::instance().to_Channel(card->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "",false);
         }
 
@@ -22,7 +22,7 @@ void channelpage::on_dig_pushButton_clicked()
 void channelpage::on_batt_pushButton_clicked()
 {
     for (channelcard *card :  qAsConst(m_channels)) {
-        if (card->getChstatus()){
+        if (card->getChmode() == ChCardindex::Digital && card->getChstatus()){
             ChannelBus::instance().to_Channel(card->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "",false);
         }
 
@@ -32,20 +32,12 @@ void channelpage::on_batt_pushButton_clicked()
 void channelpage::on_stat_pushButton_clicked()
 {
     for (channelcard *card :  qAsConst(m_channels)) {
-        if (card->getChstatus()){
-            ChannelBus::instance().to_Channel(card->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "",false);
-        }
-
         card->setChannelmode(ChCardindex::Status);
     }
 }
 void channelpage::on_ver_pushButton_clicked()
 {
     for (channelcard *card :  qAsConst(m_channels)) {
-        if (card->getChstatus()){
-            ChannelBus::instance().to_Channel(card->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "",false);
-        }
-
         card->setChannelmode(ChCardindex::Version);
     }
 }
@@ -67,8 +59,7 @@ void channelpage::to_channelpage(int newindex)
     ui->next_pushButton->setEnabled(newindex < total - 1);
 }
 
-channelpage::channelpage(QWidget *parent) :
-    QWidget(parent),
+channelpage::channelpage(QWidget *parent) :QWidget(parent),
     ui(new Ui::channelpage)
 {
     ui->setupUi(this);
@@ -196,6 +187,7 @@ void channelpage::update_Range(int ch,int range)
         itcard.value()->m_curange = range;
     }
 }
+
 void channelpage::update_Imp(int ch,float imp)
 {
     auto itcard = m_channels.find(ch);
@@ -233,12 +225,7 @@ void channelpage::update_Status(int ch,quint16 status)
     auto itcard = m_channels.find(ch);
     if (itcard != m_channels.end()) {
         QString binaryStr = QString("%1").arg(status, 16, 2, QLatin1Char('0'));
-
-        if (itcard.value()->getChmode() == ChCardindex::Digital){
-            itcard.value()->setOutChecked(binaryStr);
-        }else if(itcard.value()->getChmode() == ChCardindex::Status){
-            itcard.value()->setChtatus(binaryStr);
-        }
+        itcard.value()->setChtatus(binaryStr);
     }
 }
 void channelpage::update_Soc(int ch,float soc)

@@ -38,7 +38,7 @@ namespace Device {
 }
 namespace Module {
     constexpr const bool enable_CanCh        = false;
-    constexpr const bool enable_UartCh       = false;
+    constexpr const bool enable_UartCh       = true;
     /* control */
     constexpr const bool enable_UartSer      = false;
     constexpr const bool enable_CanSer       = true;

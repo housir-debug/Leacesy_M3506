@@ -27,8 +27,7 @@ void channelcard::mouseReleaseEvent(QMouseEvent *event)
 {
     if (m_isPressed && !m_longPressTriggered){
         if (currentIndex() == ChCardindex::Battery || currentIndex() == ChCardindex::Digital){
-            bool status = property("outputed").toBool();
-            emit clicked(m_channel,!status);
+            emit clicked(!property("Outputed").toBool());
         }
     }
 
@@ -52,7 +51,7 @@ channelcard::channelcard(QWidget *parent) : QStackedWidget(parent),
     connect(m_longPressTimer, &QTimer::timeout, this, [this]{
         if (m_isPressed && !m_longPressTriggered) {
             m_longPressTriggered = true;
-            // emit longPressed(m_channel);
+            // emit longPressed();
             setCurrentIndex(ChCardindex::Selected);
         }
     }, Qt::DirectConnection);
@@ -96,20 +95,6 @@ void channelcard::setOvpValue(float value)
 bool channelcard::getChCVChecked() const{return ui->cv_frame->property("Status").toBool();}
 bool channelcard::getChCCChecked() const{return ui->cc_frame->property("Status").toBool();}
 bool channelcard::getChOVPChecked() const{return ui->ovp_frame->property("Status").toBool();}
-void channelcard::setOutChecked(const QString &status)
-{
-    if (status.size() == 16){
-        ui->cv_frame->setProperty("Status",status.at(14) == "1");
-        ui->cv_frame->style()->unpolish(this);
-        ui->cv_frame->style()->polish(this);
-        ui->cc_frame->setProperty("Status",status.at(13) == "1");
-        ui->cc_frame->style()->unpolish(this);
-        ui->cc_frame->style()->polish(this);
-        ui->ovp_frame->setProperty("Status",status.at(11) == "1");
-        ui->ovp_frame->style()->unpolish(this);
-        ui->ovp_frame->style()->polish(this);
-    }
-}
 
 /* battery */
 void channelcard::setSocValue(float value)
@@ -175,22 +160,6 @@ void channelcard::updateSocValue(float current)
     m_integralTimer.restart();
 }
 
-/* status */
-void channelcard::setChtatus(const QString &status)
-{
-    if (status.size() == 16){
-        for (int i = 0; i < 16; ++i) {
-            QString btnName = QString("pushButton%1").arg(i+1);
-            QPushButton *btn = ui->statuschframe->findChild<QPushButton*>(btnName);
-
-            btn->setProperty("status", status.at(i) == "1");
-            btn->style()->unpolish(btn);
-            btn->style()->polish(btn);
-            //btn->update();
-        }
-    }
-}
-
 /* version */
 void channelcard::setChSWVersion(const QString &ver){ui->chswvaluelabel->setText(ver);}
 void channelcard::setChHWVersion(const QString &ver){ui->chhwvaluelabel->setText(ver);}
@@ -206,23 +175,60 @@ void channelcard::setChannel(int ch)
     ui->statusch_label->setText(channel);
     ui->versionch_label->setText(channel);
 }
+void channelcard::setChtatus(const QString &status)
+{
+    if (status.size() == 16){
+        ui->cv_frame->setProperty("Status",status.at(14) == "1");
+        ui->cv_frame->style()->unpolish(ui->cv_frame);
+        ui->cv_frame->style()->polish(ui->cv_frame);
+        ui->cc_frame->setProperty("Status",status.at(13) == "1");
+        ui->cc_frame->style()->unpolish(ui->cc_frame);
+        ui->cc_frame->style()->polish(ui->cc_frame);
+        ui->ovp_frame->setProperty("Status",status.at(11) == "1");
+        ui->ovp_frame->style()->unpolish(ui->ovp_frame);
+        ui->ovp_frame->style()->polish(ui->ovp_frame);
+
+        for (int i = 0; i < 16; ++i) {
+            QString btnName = QString("pushButton%1").arg(i+1);
+            QPushButton *btn = ui->statuschframe->findChild<QPushButton*>(btnName);
+
+            btn->setProperty("status", status.at(i) == "1");
+            btn->style()->unpolish(btn);
+            btn->style()->polish(btn);
+        }
+    }
+}
 
 bool channelcard::getChstatus() const{return property("Outputed").toBool();}
 void channelcard::setChannelState(bool state)
 {
-    setProperty("Outputed",state);
-    style()->unpolish(this);
-    style()->polish(this);
-    // update();
-
     m_integralTimer.restart();
+    setProperty("Outputed",state);
+    ui->digital->style()->unpolish(ui->digital);
+    ui->digital->style()->polish(ui->digital);
+    ui->battery->style()->unpolish(ui->battery);
+    ui->battery->style()->polish(ui->battery);
 }
 
 int channelcard::getChmode(){return currentIndex();}
 void channelcard::setChannelmode(int index){setCurrentIndex(index);}
 
 /* slots */
-void channelcard::on_digt_pushButton_clicked(){setCurrentIndex(ChCardindex::Digital);}
-void channelcard::on_batt_pushButton_clicked(){setCurrentIndex(ChCardindex::Battery);}
+void channelcard::on_digt_pushButton_clicked()
+{
+    setCurrentIndex(ChCardindex::Digital);
+
+    if (currentIndex() == ChCardindex::Battery && getChstatus()){
+        emit clicked(false);
+    }
+}
+void channelcard::on_batt_pushButton_clicked()
+{
+    setCurrentIndex(ChCardindex::Battery);
+
+    if (currentIndex() == ChCardindex::Digital && getChstatus()){
+        emit clicked(false);
+    }
+}
 void channelcard::on_stat_pushButton_clicked(){setCurrentIndex(ChCardindex::Status);}
 void channelcard::on_vers_pushButton_clicked(){setCurrentIndex(ChCardindex::Version);}

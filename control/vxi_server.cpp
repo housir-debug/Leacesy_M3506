@@ -149,7 +149,7 @@ void VxiServerManager::handleCreateLink(QTcpSocket* client,const quint32 xid)
     DeviceLink link;
     link.client = client;
     link.id = m_nextLinkId++; // Assign the value first and then increment.
-    m_deviceLinks.insert(link.id, link);
+    m_deviceLinks.append(link);
     qCDebug(vxiSer)<<"[handleCreateLink]:Create VXI-Link: "<<link.id<<" Client: "<<client->objectName();
 
     buildfoundResponse(xid,Vxi11::NO_ERROR,12);

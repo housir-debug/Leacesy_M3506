@@ -15,8 +15,8 @@ private:
     bool m_longPressTriggered;
 
 signals:
-    // void longPressed(quint8 ch);
-    void clicked(quint8 ch,bool status);
+    // void longPressed();
+    void clicked(bool status);
 
 protected:
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -47,7 +47,6 @@ public:
     bool getChCVChecked() const;
     bool getChCCChecked() const;
     bool getChOVPChecked() const;
-    void setOutChecked(const QString &status);
 
     /* battery */
     void setSocValue(float value);
@@ -61,15 +60,11 @@ public:
     QString getChmodelname() const;
     void setModelValue(const QString &model);
 
-    //int m_modelindex{0};
     QElapsedTimer m_integralTimer;
     float getcurrentOCV() const;
     float getcurrentESR() const;
     bool getcurrentIsOver() const;
     void updateSocValue(float current);
-
-    /* status */
-    void setChtatus(const QString &status);
 
     /* version */
     void setChSWVersion(const QString &ver);
@@ -77,6 +72,7 @@ public:
 
     /* share */
     void setChannel(int ch);
+    void setChtatus(const QString &status);
     bool getChstatus() const;
     void setChannelState(bool state);
     int getChmode();

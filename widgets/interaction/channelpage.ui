@@ -246,11 +246,11 @@
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="text">
-         <string/>
+         <string> 通道</string>
         </property>
         <property name="icon">
          <iconset resource="../../resources/master.qrc">
-          <normaloff>:/web/icon/promotion.png</normaloff>:/web/icon/promotion.png</iconset>
+          <normaloff>:/web/icon/setsliders.png</normaloff>:/web/icon/setsliders.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -295,7 +295,7 @@
          <string notr="true"/>
         </property>
         <property name="text">
-         <string/>
+         <string> 设备</string>
         </property>
         <property name="icon">
          <iconset resource="../../resources/master.qrc">

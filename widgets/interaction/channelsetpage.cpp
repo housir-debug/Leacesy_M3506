@@ -23,8 +23,7 @@ void channelsetting::setAllChannelsChecked(bool checked){
     }
 }
 
-channelsetting::channelsetting(QWidget *parent) :
-    QWidget(parent),
+channelsetting::channelsetting(QWidget *parent) :QWidget(parent),
     ui(new Ui::channelsetting)
 {
     ui->setupUi(this);

@@ -229,7 +229,11 @@
          <enum>Qt::NoContextMenu</enum>
         </property>
         <property name="text">
-         <string>返回</string>
+         <string> 返回</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../resources/master.qrc">
+          <normaloff>:/web/icon/undo.png</normaloff>:/web/icon/undo.png</iconset>
         </property>
        </widget>
       </item>
@@ -2022,7 +2026,9 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../../resources/master.qrc"/>
+ </resources>
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroup"/>

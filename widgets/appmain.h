@@ -24,9 +24,9 @@ public:
     explicit Mainwindow(QWidget *parent = nullptr);
     ~Mainwindow();
 
+    void testUi();
     void initUi();
     void initO();
-    void ishow();
 
 private:
     std::vector<std::unique_ptr<QThread>> threads;

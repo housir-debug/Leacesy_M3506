@@ -1255,9 +1255,10 @@
     color: #808090;
 }
 #statuschframe QPushButton[status=true] {
-	background-color: #0D1F35;
-    border: 1.8px solid #2A6EB0;
-    color: #60A8E0;
+	background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #1A2D50, stop:1 #142442);
+    border: 1px solid #304b82;
+    font-weight: bold;
+	color: #9CB8E8;
 }</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_8" stretch="1,6">

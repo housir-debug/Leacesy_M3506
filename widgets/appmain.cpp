@@ -25,8 +25,8 @@ Mainwindow::Mainwindow(QWidget *parent) : QWidget(parent), ui(new Ui::Mainwindow
         BatteryModelManager::instance().m_modelDirectory = configPath + "/battery_models";
         BatteryModelManager::instance().loadAllModels();
 
+        // testUi();
         initUi();
-        ishow();
         initO();
     }
 }
@@ -62,6 +62,34 @@ Mainwindow::~Mainwindow()
     delete ui;
 }
 
+void Mainwindow::testUi()
+{
+    ui->setupUi(this);
+
+    channelpage* m_ChPage = new channelpage(this);
+    ui->stackedwidget->addWidget(m_ChPage);
+
+    /*channelsetting* m_ChSetPage = new channelsetting(this);
+    ui->stackedwidget->addWidget(m_ChSetPage);*/
+
+    QList<int> channels = {3, 1, 4,2,8,9,24,15,32,12,18};
+    //for (int i = 1; i <= 36; i++) {channels.append(i);}
+    std::sort(channels.begin(), channels.end());
+
+    for (const int ch : channels) {
+        m_ChPage->update_SoftVer(ch,"1.2.3.4");
+        m_ChPage->update_HardVer(ch,"4.3.2.1");
+        //m_ChSetPage->update_ChEn(ch);
+    }
+
+    /*devicesetpage* m_DeviceSetPage = new devicesetpage(this);
+    ui->stackedwidget->addWidget(m_DeviceSetPage);// 2*/
+
+    qCDebug(aPTest) << "objectName:" << m_ChPage->objectName();
+
+    //numberkeypad *key = new numberkeypad(this);
+    //key->setContentsMargins(0, 0, 0, 0);
+}
 void Mainwindow::initUi()
 {
     ui->setupUi(this);
@@ -114,6 +142,36 @@ void Mainwindow::initUi()
                 m_RemoteOverlay->show();
             }
         }},Qt::QueuedConnection);
+
+    if (Module::enable_DisPlay) {
+        scene = new QGraphicsScene(this);
+        view  = new QGraphicsView(scene);//,this - don`t display
+        QGraphicsProxyWidget* proxy = scene->addWidget(this);
+        proxy->setFocusPolicy(Qt::NoFocus);
+        proxy->setRotation(0);
+
+        view->viewport()->setAttribute(Qt::WA_AcceptTouchEvents, false);
+        view->setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
+        view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        view->setDragMode(QGraphicsView::NoDrag);
+        view->setFrameShape(QFrame::NoFrame);
+        //view.rotate(0);
+        //this->show();
+        view->show();
+
+        /* test UI view */
+        QList<int> channels = {3, 1, 4,2,8,9,24,15,32,12,18};
+        //for (int i = 1; i <= 36; i++) {channels.append(i);}
+        std::sort(channels.begin(), channels.end());
+        for (const int ch : channels) {
+            if (m_ChPage && m_ChSetPage){
+                m_ChPage->update_SoftVer(ch,"1.2.3.4");
+                m_ChPage->update_HardVer(ch,"4.3.2.1");
+                m_ChSetPage->update_ChEn(ch);
+            }
+        }
+    }
 }
 
 void Mainwindow::initO()
@@ -200,37 +258,4 @@ void Mainwindow::initO()
         }, Qt::DirectConnection);
 
     m_serThread->start();
-}
-
-void Mainwindow::ishow()
-{
-    if (Module::enable_DisPlay) {
-        scene = new QGraphicsScene(this);
-        view  = new QGraphicsView(scene);//,this - don`t display
-        QGraphicsProxyWidget* proxy = scene->addWidget(this);
-        proxy->setFocusPolicy(Qt::NoFocus);
-        proxy->setRotation(0);
-
-        view->viewport()->setAttribute(Qt::WA_AcceptTouchEvents, false);
-        view->setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
-        view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        view->setDragMode(QGraphicsView::NoDrag);
-        view->setFrameShape(QFrame::NoFrame);
-        //view.rotate(0);
-        //this->show();
-        view->show();
-
-        /* test UI view */
-        QList<int> channels = {3, 1, 4,2,8,9,24,15,32,12,18};
-        //for (int i = 1; i <= 36; i++) {channels.append(i);}
-        std::sort(channels.begin(), channels.end());
-        for (const int ch : channels) {
-            if (m_ChPage && m_ChSetPage){
-                m_ChPage->update_SoftVer(ch,"1.2.3.4");
-                m_ChPage->update_HardVer(ch,"4.3.2.1");
-                m_ChSetPage->update_ChEn(ch);
-            }
-        }
-    }
 }

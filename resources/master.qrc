@@ -16,8 +16,8 @@
         <file>js/import.js</file>
         <file>js/header.js</file>
         <file>icon/settings.png</file>
-        <file>icon/battery.png</file>
-        <file>icon/promotion.png</file>
+        <file>icon/setsliders.png</file>
+        <file>icon/undo.png</file>
         <file>icon/leacesyicon.png</file>
         <file>icon/leacesylogo.png</file>
     </qresource>
