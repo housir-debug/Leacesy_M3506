@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>200</width>
-    <height>310</height>
+    <height>300</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>200</width>
-    <height>310</height>
+    <height>300</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>240</width>
-    <height>372</height>
+    <height>360</height>
    </size>
   </property>
   <property name="font">
@@ -85,37 +85,31 @@
    <property name="styleSheet">
     <string notr="true">#measureframe{
 	background-color: #080810;
-  	border-radius: 12px;
+  	border-radius: 9px;
  	border: 1.2px solid #3A3A4E;
-}
-#curr_label{
+}#curr_label{
 	font-weight: bold;
 	font-size: 32px;
 	color: #D23040;
-}
-#currunit_label{
+}#currunit_label{
 	font-size: 16px;
 	color: #D23040;
-}
-#volt_label{
+}#volt_label{
 	font-weight: bold;
 	font-size: 32px;
 	color: #10B870;
-}
-#voltunit_label{
+}#voltunit_label{
 	font-size: 16px;
 	color: #10B870;
 }
-
 
 #cv_frame ,
 #cc_frame,
 #ovp_frame{ 
     background-color: rgba(255,255,255,0.035);
     border: 1px solid rgba(90,100,125,0.32);
-	border-radius:9px;
-}
-#cv_frame QLabel,
+	border-radius:12px;
+}#cv_frame QLabel,
 #cc_frame QLabel,
 #ovp_frame QLabel{
 	font-size: 12px;
@@ -125,19 +119,17 @@
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
         stop:0 rgba(13, 175, 101, 0.36),
         stop:1 rgba(13, 175, 101, 0.12));
-    border: 1px solid rgba(13,175,101,0.84);
-}
-#cc_frame[Status=true] { 
+    border: 1.2px solid rgba(13,175,101,0.84);
+}#cc_frame[Status=true] { 
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
         stop:0 rgba(223, 29, 50, 0.36),
         stop:1 rgba(223, 29, 50, 0.12));
-    border: 1px solid rgba(223, 29, 50, 0.84);
-}
-#ovp_frame[Status=true] { 
+    border: 1.2px solid rgba(223, 29, 50, 0.84);
+}#ovp_frame[Status=true] { 
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
         stop:0 rgba(229, 194, 125, 0.36),
         stop:1 rgba(229, 194, 125, 0.12));
-    border: 1px solid rgba(229, 194, 125, 0.84);
+    border: 1.2px solid rgba(229, 194, 125, 0.84);
 }</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout" stretch="2,6,2,2,2">
@@ -215,21 +207,21 @@
       <property name="lineWidth">
        <number>0</number>
       </property>
-      <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0" columnstretch="4,1">
+      <layout class="QGridLayout" name="gridLayout_2" rowstretch="1,1" columnstretch="14,4">
        <property name="leftMargin">
-        <number>9</number>
+        <number>6</number>
        </property>
        <property name="topMargin">
         <number>9</number>
        </property>
        <property name="rightMargin">
-        <number>9</number>
+        <number>6</number>
        </property>
        <property name="bottomMargin">
         <number>9</number>
        </property>
        <property name="horizontalSpacing">
-        <number>9</number>
+        <number>6</number>
        </property>
        <property name="verticalSpacing">
         <number>0</number>
@@ -721,38 +713,22 @@
    font-weight: bold;
 	font-size: 18px;
    color: #5A5A6A;
-}
-#socprogressBar::chunk {
+}#socprogressBar::chunk {
 	border-radius: 6px;
    margin: 2.7px;
-}
-#socprogressBar[Power=&quot;high&quot;]::chunk {
+}#socprogressBar[Power=&quot;high&quot;]::chunk {
 	background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
         stop:0 #00C696,stop:1 #0DAF65
     );
-}
-#socprogressBar[Power=&quot;mid&quot;]::chunk {
+}#socprogressBar[Power=&quot;mid&quot;]::chunk {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
         stop:0 #B88C2E,stop:1 #94681A
     );
-}
-#socprogressBar[Power=&quot;low&quot;]::chunk {
+}#socprogressBar[Power=&quot;low&quot;]::chunk {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
         stop:0 #A83238, stop:1 #822025
     );
 }
-
-
-#modelframe{
- 	background: rgba(255, 255, 255, 0.036);
-	border: 1px solid #2A2A3A;
-	border-radius: 9px;
-}
-#modelframe QLabel{
-	font-size: 12px;
-	color: #C9C9C9;
-}
-
 
 #ocvframe,
 #esrframe,
@@ -760,18 +736,25 @@
 	background: rgba(255,255,255,0.036);
 	border: 1px solid rgba(90,100,125,0.32);
 	border-radius: 6px;
-}
-#caplabel,
+}#caplabel,
 #esrlabel,
 #ocvlabel{
-	font-size: 12px;
+	font-size: 9px;
 	color: #C9C9C9;
-}
-#capvaluelabel,
+}#capvaluelabel,
 #esrvaluelabel,
 #ocvvaluelabel{
 	font-size: 18px;
  	color: #D0D0D0;
+}
+
+#modelframe{
+ 	background: rgba(255, 255, 255, 0.036);
+	border: 1.8px solid #2A2A3A;
+	border-radius: 9px;
+}#modelframe QLabel{
+	font-size: 12px;
+	color: #C9C9C9;
 }</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,5,1">
@@ -812,7 +795,7 @@
      </widget>
     </item>
     <item>
-     <layout class="QGridLayout" name="gridLayout_3" rowstretch="1,1,1" columnstretch="2,3">
+     <layout class="QGridLayout" name="gridLayout_3" rowstretch="1,1,1" columnstretch="3,4">
       <property name="spacing">
        <number>6</number>
       </property>
@@ -875,7 +858,7 @@
             <number>0</number>
            </property>
            <property name="text">
-            <string>CAP</string>
+            <string>CAP :</string>
            </property>
           </widget>
          </item>
@@ -1020,7 +1003,7 @@
             <number>0</number>
            </property>
            <property name="text">
-            <string>OCV</string>
+            <string>OCV :</string>
            </property>
           </widget>
          </item>
@@ -1108,7 +1091,7 @@
             <number>0</number>
            </property>
            <property name="text">
-            <string>ESR</string>
+            <string>ESR :</string>
            </property>
           </widget>
          </item>
@@ -1195,7 +1178,7 @@
           <number>0</number>
          </property>
          <property name="text">
-          <string>Model</string>
+          <string>Model :</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -1247,16 +1230,14 @@
 	background-color: #101C30;
 	border: 1.8px solid rgba(63, 63, 90, 0.81);
 	border-radius: 12px;
-}
-#statuschframe QPushButton {
+}#statuschframe QPushButton {
 	border: 1px solid rgba(63, 63, 90, 0.81);
 	border-radius: 6px;
-	font-size: 12px;
+	font-size: 9px;
     color: #808090;
-}
-#statuschframe QPushButton[status=true] {
+}#statuschframe QPushButton[status=true] {
 	background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #1A2D50, stop:1 #142442);
-    border: 1px solid #304b82;
+    border: 1.2px solid #304b82;
     font-weight: bold;
 	color: #9CB8E8;
 }</string>
@@ -1868,21 +1849,36 @@
     <enum>Qt::NoContextMenu</enum>
    </property>
    <property name="styleSheet">
-    <string notr="true">#channelframe{
+    <string notr="true">#version QPushButton {
+	background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #1A2D50, stop:1 #142442);
+    border: 1.2px solid #304b82;
+    border-radius: 6px;
+    font-weight: bold;
+	font-size: 12px;
+	color: #9CB8E8;
+}#version QPushButton:pressed{
+	background: #195c3c;
+    border-color: #37b677;
+    color: #ffffff;
+}#version QPushButton:disabled {
+    background: #111928;
+    border: 1px solid #202b40;
+    color: #445470;
+}
+
+#channelframe{
     border: 1.8px solid #2A2A3A; 
     border-radius: 9px; 
-}
-#channelswlabel,
-#channelhwlabel{
-    color: #808090;
-    font-size: 12px;
-}
-#chswvaluelabel,
+}#chswvaluelabel,
 #chhwvaluelabel{
     background: rgba(255, 255, 255, 0.06); 
     border-radius: 6px;
 	font-size: 18px;
 	color: #D0D0D0;
+}#channelswlabel,
+#channelhwlabel{
+    color: #808090;
+    font-size: 12px;
 }</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_7" stretch="1,6">
@@ -1959,7 +1955,7 @@
       <property name="lineWidth">
        <number>0</number>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_6" stretch="1,3,1,3">
+      <layout class="QVBoxLayout" name="verticalLayout_6" stretch="1,2,1,2,2">
        <item>
         <widget class="QLabel" name="channelswlabel">
          <property name="font">
@@ -2072,141 +2068,29 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="stat_pushButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="cursor">
+          <cursorShape>BlankCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>状态</string>
+         </property>
+        </widget>
+       </item>
       </layout>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="select">
-   <property name="cursor">
-    <cursorShape>BlankCursor</cursorShape>
-   </property>
-   <property name="contextMenuPolicy">
-    <enum>Qt::NoContextMenu</enum>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">#select QPushButton {
-	background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #1A2D50, stop:1 #142442);
-    border: 1px solid #304b82;
-    border-radius: 9px;
-    font-weight: bold;
-	font-size: 12px;
-	color: #9CB8E8;
-}
-#select QPushButton:pressed{
-	background: #195c3c;
-    border-color: #37b677;
-    color: #ffffff;
-}
-#select QPushButton:disabled {
-    background: #111928;
-    border: 1px solid #202b40;
-    color: #445470;
-}
-</string>
-   </property>
-   <layout class="QVBoxLayout" name="verticalLayout_9" stretch="1,1,1,1">
-    <property name="spacing">
-     <number>18</number>
-    </property>
-    <property name="leftMargin">
-     <number>18</number>
-    </property>
-    <property name="topMargin">
-     <number>18</number>
-    </property>
-    <property name="rightMargin">
-     <number>18</number>
-    </property>
-    <property name="bottomMargin">
-     <number>18</number>
-    </property>
-    <item>
-     <widget class="QPushButton" name="digt_pushButton">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="cursor">
-       <cursorShape>BlankCursor</cursorShape>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="contextMenuPolicy">
-       <enum>Qt::NoContextMenu</enum>
-      </property>
-      <property name="text">
-       <string>正常</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="batt_pushButton">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="cursor">
-       <cursorShape>BlankCursor</cursorShape>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="contextMenuPolicy">
-       <enum>Qt::NoContextMenu</enum>
-      </property>
-      <property name="text">
-       <string>电池</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="stat_pushButton">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="cursor">
-       <cursorShape>BlankCursor</cursorShape>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="contextMenuPolicy">
-       <enum>Qt::NoContextMenu</enum>
-      </property>
-      <property name="text">
-       <string>状态</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="vers_pushButton">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="cursor">
-       <cursorShape>BlankCursor</cursorShape>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="contextMenuPolicy">
-       <enum>Qt::NoContextMenu</enum>
-      </property>
-      <property name="text">
-       <string>版本</string>
-      </property>
      </widget>
     </item>
    </layout>

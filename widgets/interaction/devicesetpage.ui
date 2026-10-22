@@ -16,6 +16,12 @@
     <height>400</height>
    </size>
   </property>
+  <property name="maximumSize">
+   <size>
+    <width>1280</width>
+    <height>400</height>
+   </size>
+  </property>
   <property name="cursor">
    <cursorShape>BlankCursor</cursorShape>
   </property>
@@ -28,28 +34,140 @@
   <property name="styleSheet">
    <string notr="true">*{
 	font-family: &quot;WenQuanYi Micro Hei&quot;;
-	background-color: #0A1220;
 	border: none;
+}#devicesetpage{
+	background-color: #0A1220;
+}
+
+#devicesetpage #page_label {
+	background: qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 #122032,stop:1 #0C1A2E);
+	font-weight: bold;
+	font-size: 18px;
+	color: #E6EDF7;
+	border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+}#devicesetpage #macaddress_label, 
+#devicesetpage #mac_label {
+	background: transparent;
+	font-size: 12px;
+	font-weight: bold;
+	color: #9CB8E8;
+}#devicesetpage #back_pushButton{
+	background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #1A2D50, stop:1 #142442);
+	border: 1.2px solid #34528c;
+    font-weight: bold;
+	font-size: 16px;
+	color: #9CB8E8;
+	border-top-right-radius: 12px;
+	border-bottom-left-radius: 12px;
+	border-bottom-right-radius: 30px;
+}
+
+#devicesetpage #LAN_frame,
+#devicesetpage #other_frame{
+	background-color: transparent;
+    border: 1.8px solid #1E2E4A;
+    border-radius: 9px;
+}#devicesetpage #settingLANlabel {
+	background: transparent;
+	font-weight: bold;
+	font-size: 14px;
+    color: #C0C8D5;
+}#devicesetpage #LANbut_frame {
+    background-color: #142442;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}#devicesetpage #other_label {
+	background-color: #142442;
+    font-weight: bold;
+	font-size: 14px;
+	color: #C0C8D5;
+	border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+#devicesetpage #net_frame {
+    background-color: #0E1A2E; 
+    border: 1.2px solid #1E2E4A;
+    border-radius: 9px;
+}#devicesetpage #net_frame QPushButton {
+    background-color: transparent; 
+    border-radius: 9px; 
+    font-weight: bold;
+	font-size: 9px;
+	color: #6A7288; 
+}#devicesetpage #net_frame QPushButton:checked{
+    background-color: rgba(255, 255, 255, 0.06);
+	color: #B0B8C5;
+}#devicesetpage #refreshpushButton{
+    background-color: rgba(40, 65, 110, 0.45);
+    border: 1.2px solid #34528c;
+    border-radius: 9px;
+    font-weight: bold;
+	font-size: 12px;
+	color: #9CB8E8;
+}#devicesetpage #refreshpushButton:pressed {
+    background-color: #195c3c;
+    border-color: #37b677;
+}#devicesetpage #refreshpushButton:disabled {
+    background-color: rgba(28, 32, 44, 0.36);
+    border: 1px solid #42485c;
+    color: #646e82;
+}
+
+#devicesetpage #iplabel, 
+#devicesetpage #masklabel, 
+#devicesetpage #gatelabel ,
+#devicesetpage #canidlabel, 
+#devicesetpage #canbaudlabel, 
+#devicesetpage #rs232baudlabel {
+	background-color: #1A2840;
+    border: 1.2px solid rgba(90, 180, 160, 0.35);
+    border-radius: 6px;
+    color: #E0E8F0;
+	font-size: 14px;
+}#devicesetpage #networkframe,
+#devicesetpage #deviceidframe  {
+    background-color: #111B2C;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+#devicesetpage QRadioButton {
+    background: transparent;
+ 	font-weight: bold;
+ 	font-size: 12px;
+	color: #8A90A0;
+}#devicesetpage QRadioButton:disabled {
+    color: #4A4E5A;
+}#devicesetpage QRadioButton::indicator {
+    background-color: #151D2E;
+	border: 2px solid #3A3E50;
+	border-radius: 8px;
+	height: 12px;
+	width: 12px;
+}#devicesetpage QRadioButton::indicator:checked {
+    background-color: #288A78;
+}#devicesetpage QRadioButton::indicator:disabled {
+    background-color: #0A0F16;
+	border: 2px solid #252836;
 }
 
 #devicesetpage QComboBox {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                 stop:0 #1A2D50, stop:1 #142442);
-    border: 1px solid #304b82;
+    border: 1.2px solid #304b82;
     border-radius: 6px;
     color: #9CB8E8;
     font-size: 14px;
     font-weight: bold;
-}
-#devicesetpage QComboBox:disabled {
+}#devicesetpage QComboBox:disabled {
     background: #111928;
     border: 1px solid #202b40;
     color: #445470;
-}
-#devicesetpage QComboBox::drop-down {
+}#devicesetpage QComboBox::drop-down {
     background: transparent;
-}
-#devicesetpage QComboBox QAbstractItemView {
+}#devicesetpage QComboBox QAbstractItemView {
     background-color: #142442;
     border: 1px solid #304b82;
     border-radius: 9px;
@@ -59,163 +177,27 @@
     outline: none;
     selection-background-color: #2A4A7A;
     selection-color: #FFFFFF;
-}
-#devicesetpage QComboBox QAbstractItemView::item {
+}#devicesetpage QComboBox QAbstractItemView::item {
     background: transparent;
  	border-radius: 6px;
 	color: #9CB8E8;
 	min-height: 27px;
     padding: 2px 8px;
-}
-#devicesetpage QComboBox QAbstractItemView::item:selected {
+}#devicesetpage QComboBox QAbstractItemView::item:selected {
     background-color: #2A4A7A;
     color: #FFFFFF;
 }
 
-#devicesetpage QRadioButton {
-    background: transparent;
- 	font-weight: bold;
- 	font-size: 14px;
-	color: #8A90A0;
-}
-#devicesetpage QRadioButton:disabled {
-    color: #4A4E5A;
-}
-#devicesetpage QRadioButton::indicator {
-    background-color: #151D2E;
-	border: 2px solid #3A3E50;
-	border-radius: 8px;
-	height: 12px;
-	width: 12px;
-}
-#devicesetpage QRadioButton::indicator:checked {
-    background-color: #288A78;
-}
-#devicesetpage QRadioButton::indicator:disabled {
-    background-color: #0A0F16;
-	border: 2px solid #252836;
-}
-
-#devicesetpage QPushButton{
-    background-color: rgba(40, 65, 110, 0.45);
-    border: 1px solid #34528c;
-    border-radius: 9px;
-    font-weight: bold;
-	font-size: 14px;
-	color: #9CB8E8;
-}
-#devicesetpage QPushButton:pressed {
-    background-color: #195c3c;
-    border-color: #37b677;
-}
-#devicesetpage QPushButton:disabled {
-    background-color: rgba(28, 32, 44, 0.35);
-    border: 1px solid #42485c;
-    color: #646e82;
-}
-
-#devicesetpage #page_label {
-	background: transparent;
-    border: none;
-    font-weight: bold;
-	font-size: 18px;
-	 color: #E6EDF7;
-}
-#devicesetpage #top_frame,
-#devicesetpage #bot_frame {
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #172847, stop:1 #0E1B33);
-    border: none;
-    border-radius: 12px;
-}
-#devicesetpage #mac_label, 
-#devicesetpage #hard_label, 
-#devicesetpage #soft_label {
-    background: transparent;
-    border: none;
-	font-size: 15px;
-	color: #808090;
-}
-#devicesetpage #macaddress_label, 
-#devicesetpage #hardver_label, 
-#devicesetpage #softver_label {
-    background: transparent;
-    border: none;
-	font-weight: bold;
-	font-size: 14px;
-	color: #D0D0D0;
-}
-
-#devicesetpage #LAN_frame,
-#devicesetpage #other_frame,
 #devicesetpage #keyframe {
     background-color: #0E1A2E;
     border: 1px solid #1E2E4A;
     border-radius: 14px;
-}
-#devicesetpage #LANbut_frame {
-    background-color: #142442;
-    border: none;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-}
-#devicesetpage #settingLANlabel {
-    color: #C0C8D5;
-    font-size: 18px;
-    font-weight: bold;
-    background: transparent;
-    border: none;
-}
-#devicesetpage #other_label {
-	background-color: #142442;
-	border: none;
-    font-weight: bold;
-	font-size: 18px;
-	color: #C0C8D5;
-	border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-}
-
-#devicesetpage #net_frame {
-    background-color: #0E1A2E; 
-    border: 1px solid #1E2E4A;
-    border-radius: 9px;
-}
-#devicesetpage #net_frame QPushButton {
-    background-color: transparent; 
-    border: none;
-    border-radius: 9px; 
-    font-weight: bold;
-	font-size: 14px;
-	color: #6A7288; 
-}
-#devicesetpage #net_frame QPushButton:checked{
-    background-color: rgba(255, 255, 255, 0.04);
-	color: #B0B8C5;
-}
-
-#devicesetpage #networkframe,
-#devicesetpage #deviceidframe  {
-    background-color: #111B2C;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
-}
-#devicesetpage #iplabel, 
-#devicesetpage #masklabel, 
-#devicesetpage #gatelabel ,
-#devicesetpage #canidlabel, 
-#devicesetpage #canbaudlabel, 
-#devicesetpage #rs232baudlabel {
-    color: #E0E8F0;
-	font-size: 14px;
-    background-color: #1A2840;
-    border: 1px solid rgba(90, 180, 160, 0.35);
-    border-radius: 6px;
 }</string>
   </property>
   <property name="locale">
    <locale language="Chinese" country="China"/>
   </property>
-  <layout class="QGridLayout" name="gridLayout_3" rowstretch="1,4,4,1" columnstretch="5,1">
+  <layout class="QGridLayout" name="gridLayout_3" rowstretch="4,13,12" columnstretch="13,3">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -228,7 +210,10 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <property name="spacing">
+   <property name="horizontalSpacing">
+    <number>1</number>
+   </property>
+   <property name="verticalSpacing">
     <number>3</number>
    </property>
    <item row="0" column="0" colspan="2">
@@ -248,38 +233,22 @@
      <property name="lineWidth">
       <number>0</number>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="12,1">
-      <property name="leftMargin">
+     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="2,6,4,6,2">
+      <property name="spacing">
        <number>6</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
       </property>
       <property name="topMargin">
-       <number>6</number>
+       <number>0</number>
       </property>
       <property name="rightMargin">
-       <number>6</number>
+       <number>0</number>
       </property>
       <property name="bottomMargin">
-       <number>6</number>
+       <number>0</number>
       </property>
-      <item>
-       <widget class="QLabel" name="page_label">
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="lineWidth">
-         <number>0</number>
-        </property>
-        <property name="text">
-         <string>设置/设备</string>
-        </property>
-        <property name="scaledContents">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
       <item>
        <widget class="QPushButton" name="back_pushButton">
         <property name="sizePolicy">
@@ -306,6 +275,79 @@
         </property>
        </widget>
       </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="page_label">
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string>远程设置</string>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="mac_label">
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string>MAC Address :</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="macaddress_label">
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string>00.00.00.00.00.00</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -326,7 +368,7 @@
      <property name="lineWidth">
       <number>0</number>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,2">
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="2,5">
       <property name="spacing">
        <number>0</number>
       </property>
@@ -796,7 +838,7 @@
      <property name="lineWidth">
       <number>0</number>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="1,2">
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="2,5">
       <property name="spacing">
        <number>0</number>
       </property>
@@ -1180,159 +1222,6 @@
           </widget>
          </item>
         </layout>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="QFrame" name="bot_frame">
-     <property name="cursor">
-      <cursorShape>BlankCursor</cursorShape>
-     </property>
-     <property name="contextMenuPolicy">
-      <enum>Qt::NoContextMenu</enum>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
-     </property>
-     <property name="lineWidth">
-      <number>0</number>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2,1,2,2,4">
-      <property name="spacing">
-       <number>0</number>
-      </property>
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-      <item>
-       <widget class="QLabel" name="hard_label">
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="lineWidth">
-         <number>0</number>
-        </property>
-        <property name="text">
-         <string>Hard Ver :</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="hardver_label">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="lineWidth">
-         <number>0</number>
-        </property>
-        <property name="text">
-         <string>0.0.0.0</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="soft_label">
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="lineWidth">
-         <number>0</number>
-        </property>
-        <property name="text">
-         <string>Soft Ver :</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="softver_label">
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="lineWidth">
-         <number>0</number>
-        </property>
-        <property name="text">
-         <string>0.0.0.0</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="mac_label">
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="lineWidth">
-         <number>0</number>
-        </property>
-        <property name="text">
-         <string>MAC :</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="macaddress_label">
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="lineWidth">
-         <number>0</number>
-        </property>
-        <property name="text">
-         <string>00.00.00.00.00.00</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
        </widget>
       </item>
      </layout>

@@ -86,6 +86,8 @@ devicesetpage::devicesetpage(QWidget *parent) :QWidget(parent),
     ui(new Ui::devicesetpage)
 {
     ui->setupUi(this);
+    ui->macaddress_label->setText(ConfigManager::MAC);
+
     auto* canmodel = qobject_cast<QStandardItemModel*>(ui->canBaud_comboBox->model());
     if (canmodel) {
         QStandardItem* item = canmodel->item(9);
@@ -96,10 +98,6 @@ devicesetpage::devicesetpage(QWidget *parent) :QWidget(parent),
         QStandardItem* item = r23model->item(8);
         if (item){item->setEnabled(false);}
     }
-
-    ui->hardver_label->setText(Device::HardVer);
-    ui->softver_label->setText(Device::SoftVer);
-    ui->macaddress_label->setText(ConfigManager::MAC);
 
     ui->iplabel->setText(ConfigManager::IP);
     ui->masklabel->setText(ConfigManager::SM);

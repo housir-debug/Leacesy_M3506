@@ -42,11 +42,65 @@
   <property name="styleSheet">
    <string notr="true">* {
     font-family: &quot;WenQuanYi Micro Hei&quot;;
-	background-color: #0A1220;
 	border: none;
+}#channelsetting{
+	background-color: #0A1220;
 }
 
-#channelsetting QComboBox {
+#channelsetting #page_label {
+	background: qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 #122032,stop:1 #0C1A2E);
+	font-weight: bold;
+	font-size: 18px;
+	color: #E6EDF7;
+	border-bottom-left-radius: 27px;
+    border-bottom-right-radius: 27px;
+}#channelsetting #softver_label,
+#channelsetting #hardver_label{
+	background: transparent;
+	font-size: 12px;
+	font-weight: bold;
+	color: #9CB8E8;
+}#channelsetting #back_pushButton{
+	background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #1A2D50, stop:1 #142442);
+	border: 1.2px solid #34528c;
+    font-weight: bold;
+	font-size: 16px;
+	color: #9CB8E8;
+	border-top-right-radius: 12px;
+	border-bottom-left-radius: 12px;
+	border-bottom-right-radius: 27px;
+}
+
+#channelsetting #chselectframe,
+#channelsetting #frame_3{
+    background-color: #101C30;
+    border: 1.8px solid #1E2E4A; 
+    border-radius: 9px;
+}#channelsetting QLabel{
+	background: #111928;
+	border-radius: 9px;
+	font-weight: bold;
+	font-size: 12px;
+	color: #9CB8E8;
+}#channelsetting #chselectframe QPushButton {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #16294C, stop:1 #10203D);
+    border: 1px solid #304b82;
+    border-radius: 9px;
+    font-weight: bold;
+	font-size: 14px;
+	color: #808090;
+}#channelsetting #chselectframe QPushButton:checked,
+#channelsetting #chselectframe QPushButton:pressed {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #2A4A7A, stop:1 #1E3A62);
+    border: 1.8px solid #4269ad;
+    color: #FFFFFF;
+}#channelsetting #chselectframe QPushButton:disabled {
+    background: #111928;
+    border: 1px solid #202b40;
+    color: #445470;
+}
+
+#channelsetting #frame_3 QComboBox {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                 stop:0 #1A2D50, stop:1 #142442);
     border: 1px solid #304b82;
@@ -54,17 +108,13 @@
     color: #9CB8E8;
     font-size: 14px;
     font-weight: bold;
-}
-#channelsetting QComboBox:disabled {
+}#channelsetting #frame_3 QComboBox:disabled {
     background: #111928;
     border: 1px solid #202b40;
     color: #445470;
-}
-#channelsetting QComboBox::drop-down {
+}#channelsetting #frame_3 QComboBox::drop-down {
     background: transparent;
-}
-
-#channelsetting QComboBox QAbstractItemView {
+}#channelsetting #frame_3 QComboBox QAbstractItemView {
     background-color: #142442;
     border: 1px solid #304b82;
     border-radius: 9px;
@@ -74,82 +124,49 @@
     outline: none;
     selection-background-color: #2A4A7A;
     selection-color: #FFFFFF;
-}
-#channelsetting QComboBox QAbstractItemView::item {
+}#channelsetting #frame_3 QComboBox QAbstractItemView::item {
     background: transparent;
  	border-radius: 6px;
 	color: #9CB8E8;
 	min-height: 27px;
     padding: 2px 8px;
-}
-#channelsetting QComboBox QAbstractItemView::item:selected {
+}#channelsetting #frame_3 QComboBox QAbstractItemView::item:selected {
     background-color: #2A4A7A;
     color: #FFFFFF;
+}#channelsetting #frame_3 #onoff_comboBox{
+    color: #e65454;
+    border-color: #702424;
+}#channelsetting #frame_3 #onoff_comboBox[Outputed=true]{
+    color: #34b979;
+    border-color: #1f5c40;
 }
 
-#channelsetting QPushButton {
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #1A2D50, stop:1 #142442);
-    border: 1px solid #304b82;
-    border-radius: 9px;
+#channelsetting #frame_3 #frame_2,
+#channelsetting #frame_3 #frame{
+	background-color: #0E1A2E;
+	border: 1.2px solid #304b82;
+	border-radius: 9px;
+}#channelsetting #frame_3  #frame QPushButton {
+	background-color: transparent; 
+	border-radius: 9px;
     font-weight: bold;
-	font-size: 14px;
-	color: #9CB8E8;
-}
-#channelsetting QPushButton:pressed {
-    background: #195c3c;
-    border-color: #37b677;
-    color: #ffffff;
-}
-#channelsetting QPushButton:disabled {
-    background: #111928;
-    border: 1px solid #202b40;
-    color: #445470;
+	font-size: 12px;
+	color: #6A7288; 
+}#channelsetting #frame_3  #frame QPushButton:checked{
+    background-color: rgba(255, 255, 255, 0.04);
+	color: #B0B8C5;
 }
 
-#channelsetting #page_label {
-    background: transparent;
-    border: none;
-	font-weight: bold;
-	font-size: 18px;
-	color: #E6EDF7;
-}
-#channelsetting #frame_5,
-#channelsetting #frame_6 {
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #172847, stop:1 #0E1B33);
- 	border-radius: 12px;
-    border: none;
-}
-
-#channelsetting #chselectframe,
-#channelsetting #frame_3,
 #channelsetting #keyframe {
     background-color: #101C30;
     border: 1px solid #1E2E4A; 
     border-radius: 16px;
-}
-#channelsetting #chselectframe QPushButton {
-    color: #808090;
-}
-#channelsetting #frame_3 QPushButton:checked,
-#channelsetting #chselectframe QPushButton:checked {
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #2A4A7A, stop:1 #1E3A62);
-    border: 1px solid #4269ad;
-    color: #FFFFFF;
-}
-
-#channelsetting #onoff_comboBox{
-    color: #e65454;
-    border-color: #702424;
-}
-#channelsetting #onoff_comboBox[Outputed=true]{
-    color: #34b979;
-    border-color: #1f5c40;
 }</string>
   </property>
   <property name="locale">
    <locale language="Chinese" country="China"/>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2" rowstretch="1,8,1" columnstretch="4,1,1">
+  <layout class="QGridLayout" name="gridLayout_2" rowstretch="1,7" columnstretch="7,6,3">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -162,9 +179,34 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <property name="spacing">
-    <number>3</number>
+   <property name="horizontalSpacing">
+    <number>1</number>
    </property>
+   <property name="verticalSpacing">
+    <number>6</number>
+   </property>
+   <item row="1" column="2">
+    <widget class="numberkeypad" name="keyframe">
+     <property name="cursor">
+      <cursorShape>BlankCursor</cursorShape>
+     </property>
+     <property name="contextMenuPolicy">
+      <enum>Qt::NoContextMenu</enum>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0" colspan="3">
     <widget class="QFrame" name="frame_5">
      <property name="cursor">
@@ -182,35 +224,22 @@
      <property name="lineWidth">
       <number>0</number>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="12,1">
-      <property name="leftMargin">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,6,4,6,2">
+      <property name="spacing">
        <number>6</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
       </property>
       <property name="topMargin">
-       <number>6</number>
+       <number>0</number>
       </property>
       <property name="rightMargin">
-       <number>6</number>
+       <number>0</number>
       </property>
       <property name="bottomMargin">
-       <number>6</number>
+       <number>0</number>
       </property>
-      <item>
-       <widget class="QLabel" name="page_label">
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="lineWidth">
-         <number>0</number>
-        </property>
-        <property name="text">
-         <string>设置/通道</string>
-        </property>
-       </widget>
-      </item>
       <item>
        <widget class="QPushButton" name="back_pushButton">
         <property name="sizePolicy">
@@ -237,6 +266,76 @@
         </property>
        </widget>
       </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="page_label">
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string>本地设置</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="softver_label">
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string>SoftVer :   1.0.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="hardver_label">
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string>HardVer :   1.0.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -260,23 +359,45 @@
      <property name="lineWidth">
       <number>0</number>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
+     <layout class="QGridLayout" name="gridLayout" rowstretch="1,1,1,1,1,1" columnstretch="1,1,1,1,1,1,1,1">
       <property name="leftMargin">
-       <number>9</number>
+       <number>12</number>
       </property>
       <property name="topMargin">
-       <number>9</number>
+       <number>12</number>
       </property>
       <property name="rightMargin">
-       <number>9</number>
+       <number>12</number>
       </property>
       <property name="bottomMargin">
-       <number>9</number>
+       <number>12</number>
       </property>
-      <property name="spacing">
-       <number>6</number>
-      </property>
-      <item row="0" column="0">
+      <item row="0" column="0" rowspan="6">
+       <widget class="QLabel" name="selectch_label">
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string>选
+择
+目
+标
+通
+道
+</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
        <widget class="QPushButton" name="pushButton1">
         <property name="enabled">
          <bool>false</bool>
@@ -315,7 +436,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="0" column="2">
        <widget class="QPushButton" name="pushButton2">
         <property name="enabled">
          <bool>false</bool>
@@ -354,7 +475,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
+      <item row="0" column="3">
        <widget class="QPushButton" name="pushButton3">
         <property name="enabled">
          <bool>false</bool>
@@ -393,7 +514,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="3">
+      <item row="0" column="4">
        <widget class="QPushButton" name="pushButton4">
         <property name="enabled">
          <bool>false</bool>
@@ -432,7 +553,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="4">
+      <item row="0" column="5">
        <widget class="QPushButton" name="pushButton5">
         <property name="enabled">
          <bool>false</bool>
@@ -471,7 +592,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="5">
+      <item row="0" column="6">
        <widget class="QPushButton" name="pushButton6">
         <property name="enabled">
          <bool>false</bool>
@@ -510,7 +631,30 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="0" column="7" rowspan="3">
+       <widget class="QPushButton" name="allFO_pushButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="text">
+         <string>重
+置</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
        <widget class="QPushButton" name="pushButton7">
         <property name="enabled">
          <bool>false</bool>
@@ -549,7 +693,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="1" column="2">
        <widget class="QPushButton" name="pushButton8">
         <property name="enabled">
          <bool>false</bool>
@@ -588,7 +732,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
+      <item row="1" column="3">
        <widget class="QPushButton" name="pushButton9">
         <property name="enabled">
          <bool>false</bool>
@@ -627,7 +771,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
+      <item row="1" column="4">
        <widget class="QPushButton" name="pushButton10">
         <property name="enabled">
          <bool>false</bool>
@@ -666,7 +810,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="4">
+      <item row="1" column="5">
        <widget class="QPushButton" name="pushButton11">
         <property name="enabled">
          <bool>false</bool>
@@ -702,7 +846,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="5">
+      <item row="1" column="6">
        <widget class="QPushButton" name="pushButton12">
         <property name="enabled">
          <bool>false</bool>
@@ -738,7 +882,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="2" column="1">
        <widget class="QPushButton" name="pushButton13">
         <property name="enabled">
          <bool>false</bool>
@@ -774,7 +918,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="2" column="2">
        <widget class="QPushButton" name="pushButton14">
         <property name="enabled">
          <bool>false</bool>
@@ -810,7 +954,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
+      <item row="2" column="3">
        <widget class="QPushButton" name="pushButton15">
         <property name="enabled">
          <bool>false</bool>
@@ -846,7 +990,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="3">
+      <item row="2" column="4">
        <widget class="QPushButton" name="pushButton16">
         <property name="enabled">
          <bool>false</bool>
@@ -885,7 +1029,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="4">
+      <item row="2" column="5">
        <widget class="QPushButton" name="pushButton17">
         <property name="enabled">
          <bool>false</bool>
@@ -921,7 +1065,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="5">
+      <item row="2" column="6">
        <widget class="QPushButton" name="pushButton18">
         <property name="enabled">
          <bool>false</bool>
@@ -957,7 +1101,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="3" column="1">
        <widget class="QPushButton" name="pushButton19">
         <property name="enabled">
          <bool>false</bool>
@@ -993,7 +1137,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="3" column="2">
        <widget class="QPushButton" name="pushButton20">
         <property name="enabled">
          <bool>false</bool>
@@ -1029,7 +1173,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="2">
+      <item row="3" column="3">
        <widget class="QPushButton" name="pushButton21">
         <property name="enabled">
          <bool>false</bool>
@@ -1068,7 +1212,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="3">
+      <item row="3" column="4">
        <widget class="QPushButton" name="pushButton22">
         <property name="enabled">
          <bool>false</bool>
@@ -1104,7 +1248,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="4">
+      <item row="3" column="5">
        <widget class="QPushButton" name="pushButton23">
         <property name="enabled">
          <bool>false</bool>
@@ -1140,7 +1284,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="5">
+      <item row="3" column="6">
        <widget class="QPushButton" name="pushButton24">
         <property name="enabled">
          <bool>false</bool>
@@ -1176,7 +1320,30 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
+      <item row="3" column="7" rowspan="3">
+       <widget class="QPushButton" name="allNO_pushButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="text">
+         <string>全
+选</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
        <widget class="QPushButton" name="pushButton25">
         <property name="enabled">
          <bool>false</bool>
@@ -1212,7 +1379,7 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="4" column="2">
        <widget class="QPushButton" name="pushButton26">
         <property name="enabled">
          <bool>false</bool>
@@ -1248,7 +1415,7 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="2">
+      <item row="4" column="3">
        <widget class="QPushButton" name="pushButton27">
         <property name="enabled">
          <bool>false</bool>
@@ -1284,7 +1451,7 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="3">
+      <item row="4" column="4">
        <widget class="QPushButton" name="pushButton28">
         <property name="enabled">
          <bool>false</bool>
@@ -1323,7 +1490,7 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="4">
+      <item row="4" column="5">
        <widget class="QPushButton" name="pushButton29">
         <property name="enabled">
          <bool>false</bool>
@@ -1359,7 +1526,7 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="5">
+      <item row="4" column="6">
        <widget class="QPushButton" name="pushButton30">
         <property name="enabled">
          <bool>false</bool>
@@ -1395,7 +1562,7 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0">
+      <item row="5" column="1">
        <widget class="QPushButton" name="pushButton31">
         <property name="enabled">
          <bool>false</bool>
@@ -1431,7 +1598,7 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
+      <item row="5" column="2">
        <widget class="QPushButton" name="pushButton32">
         <property name="enabled">
          <bool>false</bool>
@@ -1467,7 +1634,7 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="2">
+      <item row="5" column="3">
        <widget class="QPushButton" name="pushButton33">
         <property name="enabled">
          <bool>false</bool>
@@ -1503,7 +1670,7 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="3">
+      <item row="5" column="4">
        <widget class="QPushButton" name="pushButton34">
         <property name="enabled">
          <bool>false</bool>
@@ -1539,7 +1706,7 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="4">
+      <item row="5" column="5">
        <widget class="QPushButton" name="pushButton35">
         <property name="enabled">
          <bool>false</bool>
@@ -1578,7 +1745,7 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="5">
+      <item row="5" column="6">
        <widget class="QPushButton" name="pushButton36">
         <property name="enabled">
          <bool>false</bool>
@@ -1637,380 +1804,426 @@
      <property name="lineWidth">
       <number>0</number>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QPushButton" name="cv_pushButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="text">
-         <string>CV</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">buttonGroup</string>
-        </attribute>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="cc_pushButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="text">
-         <string>CC</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">buttonGroup</string>
-        </attribute>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="ovp_pushButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="text">
-         <string>OVP</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">buttonGroup</string>
-        </attribute>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="soc_pushButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="text">
-         <string>SOC</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">buttonGroup</string>
-        </attribute>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="cap_pushButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="text">
-         <string>CAP</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">buttonGroup</string>
-        </attribute>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="1" column="2">
-    <widget class="numberkeypad" name="keyframe">
-     <property name="cursor">
-      <cursorShape>BlankCursor</cursorShape>
-     </property>
-     <property name="contextMenuPolicy">
-      <enum>Qt::NoContextMenu</enum>
-     </property>
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
-     </property>
-     <property name="lineWidth">
-      <number>0</number>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0" colspan="3">
-    <widget class="QFrame" name="frame_6">
-     <property name="cursor">
-      <cursorShape>BlankCursor</cursorShape>
-     </property>
-     <property name="contextMenuPolicy">
-      <enum>Qt::NoContextMenu</enum>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
-     </property>
-     <property name="lineWidth">
-      <number>0</number>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,3,1,1,1">
+     <layout class="QGridLayout" name="gridLayout_4" rowstretch="1,5" columnstretch="1,1">
       <property name="spacing">
-       <number>3</number>
+       <number>1</number>
       </property>
-      <property name="leftMargin">
-       <number>6</number>
-      </property>
-      <property name="topMargin">
-       <number>6</number>
-      </property>
-      <property name="rightMargin">
-       <number>6</number>
-      </property>
-      <property name="bottomMargin">
-       <number>6</number>
-      </property>
-      <item>
-       <widget class="QPushButton" name="allFO_pushButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="selectmode_label">
         <property name="cursor">
          <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
         </property>
         <property name="contextMenuPolicy">
          <enum>Qt::NoContextMenu</enum>
         </property>
-        <property name="text">
-         <string>重置</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="allNO_pushButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="text">
-         <string>全选</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="onoff_comboBox">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="currentText">
-         <string>ON</string>
-        </property>
-        <property name="currentIndex">
+        <property name="lineWidth">
          <number>0</number>
         </property>
-        <property name="maxVisibleItems">
-         <number>6</number>
+        <property name="text">
+         <string>选择目标设置</string>
         </property>
-        <property name="maxCount">
-         <number>9</number>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
-        <property name="Outputed" stdset="0">
-         <bool>true</bool>
-        </property>
-        <item>
-         <property name="text">
-          <string>ON</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>OFF</string>
-         </property>
-        </item>
        </widget>
       </item>
-      <item>
-       <widget class="QComboBox" name="unit_comboBox">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+      <item row="1" column="0">
+       <widget class="QFrame" name="frame_2">
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
         </property>
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
         </property>
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="currentText">
-         <string>A</string>
-        </property>
-        <property name="maxVisibleItems">
-         <number>6</number>
-        </property>
-        <property name="maxCount">
-         <number>9</number>
-        </property>
-        <property name="modelColumn">
+        <property name="lineWidth">
          <number>0</number>
         </property>
-        <item>
-         <property name="text">
-          <string>A</string>
+        <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,1,1,1,1">
+         <property name="spacing">
+          <number>3</number>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>mA</string>
+         <property name="leftMargin">
+          <number>6</number>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>AUTO</string>
+         <property name="topMargin">
+          <number>6</number>
          </property>
-        </item>
+         <property name="rightMargin">
+          <number>6</number>
+         </property>
+         <property name="bottomMargin">
+          <number>6</number>
+         </property>
+         <item>
+          <widget class="QComboBox" name="onoff_comboBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="currentText">
+            <string>ON</string>
+           </property>
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <property name="maxVisibleItems">
+            <number>6</number>
+           </property>
+           <property name="maxCount">
+            <number>9</number>
+           </property>
+           <property name="Outputed" stdset="0">
+            <bool>true</bool>
+           </property>
+           <item>
+            <property name="text">
+             <string>ON</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>OFF</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="unit_comboBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="currentText">
+            <string>A</string>
+           </property>
+           <property name="maxVisibleItems">
+            <number>6</number>
+           </property>
+           <property name="maxCount">
+            <number>9</number>
+           </property>
+           <property name="modelColumn">
+            <number>0</number>
+           </property>
+           <item>
+            <property name="text">
+             <string>A</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>mA</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>AUTO</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="model_comboBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="maxVisibleItems">
+            <number>6</number>
+           </property>
+           <property name="maxCount">
+            <number>9</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cardpage_comboBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <item>
+            <property name="text">
+             <string>status</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>version</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="combo_label">
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="lineWidth">
+            <number>0</number>
+           </property>
+           <property name="text">
+            <string>点击下拉设置</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item>
-       <widget class="QComboBox" name="model_comboBox">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+      <item row="1" column="1">
+       <widget class="QFrame" name="frame">
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
         </property>
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
         </property>
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
+        <property name="lineWidth">
+         <number>0</number>
         </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="maxVisibleItems">
-         <number>6</number>
-        </property>
-        <property name="maxCount">
-         <number>9</number>
-        </property>
+        <layout class="QGridLayout" name="gridLayout_3" rowstretch="1,1,1,1,1" columnstretch="1,3">
+         <property name="leftMargin">
+          <number>6</number>
+         </property>
+         <property name="topMargin">
+          <number>6</number>
+         </property>
+         <property name="rightMargin">
+          <number>6</number>
+         </property>
+         <property name="bottomMargin">
+          <number>6</number>
+         </property>
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <item row="0" column="0" rowspan="5">
+          <widget class="QLabel" name="keyinput_label">
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="lineWidth">
+            <number>0</number>
+           </property>
+           <property name="text">
+            <string>选
+择
+输
+入
+模
+式</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="cv_pushButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="text">
+            <string>CV</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QPushButton" name="cc_pushButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="text">
+            <string>CC</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QPushButton" name="ovp_pushButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="text">
+            <string>OVP</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QPushButton" name="soc_pushButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="text">
+            <string>SOC</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QPushButton" name="cap_pushButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="cursor">
+            <cursorShape>BlankCursor</cursorShape>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::NoContextMenu</enum>
+           </property>
+           <property name="text">
+            <string>CAP</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroup</string>
+           </attribute>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>

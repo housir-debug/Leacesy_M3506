@@ -55,13 +55,11 @@
 	color: #9CB8E8;
 	padding-top:9px;
     padding-bottom:9px;
-}
-#remoteoverlay QPushButton:pressed {
+}#remoteoverlay QPushButton:pressed {
     background: #195c3c;
     border-color: #37b677;
     color: #ffffff;
-}
-#remoteoverlay QPushButton:disabled {
+}#remoteoverlay QPushButton:disabled {
     background: #111928;
     border: 1px solid #202b40;
     color: #445470;
@@ -144,16 +142,16 @@
        <number>0</number>
       </property>
       <property name="leftMargin">
-       <number>336</number>
+       <number>360</number>
       </property>
       <property name="topMargin">
-       <number>6</number>
+       <number>0</number>
       </property>
       <property name="rightMargin">
-       <number>336</number>
+       <number>360</number>
       </property>
       <property name="bottomMargin">
-       <number>6</number>
+       <number>0</number>
       </property>
       <item>
        <widget class="QPushButton" name="gobackpushButton">

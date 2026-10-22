@@ -24,8 +24,8 @@ public:
     explicit Mainwindow(QWidget *parent = nullptr);
     ~Mainwindow();
 
-    void testUi();
     void initUi();
+    void testUi();
     void initO();
 
 private:

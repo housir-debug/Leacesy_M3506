@@ -12,6 +12,7 @@ private:
 
 signals:
     void to_chModel(int ch,const QString model);
+    void to_chpage(int ch,int index);
     void to_chCAP(int ch,float val);
     void to_chSOC(int ch,float val);
     void backRequested();

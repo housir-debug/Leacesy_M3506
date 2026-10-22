@@ -52,7 +52,7 @@ channelcard::channelcard(QWidget *parent) : QStackedWidget(parent),
         if (m_isPressed && !m_longPressTriggered) {
             m_longPressTriggered = true;
             // emit longPressed();
-            setCurrentIndex(ChCardindex::Selected);
+            setCurrentIndex(ChCardindex::Version);
         }
     }, Qt::DirectConnection);
 }
@@ -214,21 +214,4 @@ int channelcard::getChmode(){return currentIndex();}
 void channelcard::setChannelmode(int index){setCurrentIndex(index);}
 
 /* slots */
-void channelcard::on_digt_pushButton_clicked()
-{
-    setCurrentIndex(ChCardindex::Digital);
-
-    if (currentIndex() == ChCardindex::Battery && getChstatus()){
-        emit clicked(false);
-    }
-}
-void channelcard::on_batt_pushButton_clicked()
-{
-    setCurrentIndex(ChCardindex::Battery);
-
-    if (currentIndex() == ChCardindex::Digital && getChstatus()){
-        emit clicked(false);
-    }
-}
 void channelcard::on_stat_pushButton_clicked(){setCurrentIndex(ChCardindex::Status);}
-void channelcard::on_vers_pushButton_clicked(){setCurrentIndex(ChCardindex::Version);}

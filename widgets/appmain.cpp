@@ -62,34 +62,6 @@ Mainwindow::~Mainwindow()
     delete ui;
 }
 
-void Mainwindow::testUi()
-{
-    ui->setupUi(this);
-
-    channelpage* m_ChPage = new channelpage(this);
-    ui->stackedwidget->addWidget(m_ChPage);
-
-    /*channelsetting* m_ChSetPage = new channelsetting(this);
-    ui->stackedwidget->addWidget(m_ChSetPage);*/
-
-    QList<int> channels = {3, 1, 4,2,8,9,24,15,32,12,18};
-    //for (int i = 1; i <= 36; i++) {channels.append(i);}
-    std::sort(channels.begin(), channels.end());
-
-    for (const int ch : channels) {
-        m_ChPage->update_SoftVer(ch,"1.2.3.4");
-        m_ChPage->update_HardVer(ch,"4.3.2.1");
-        //m_ChSetPage->update_ChEn(ch);
-    }
-
-    /*devicesetpage* m_DeviceSetPage = new devicesetpage(this);
-    ui->stackedwidget->addWidget(m_DeviceSetPage);// 2*/
-
-    qCDebug(aPTest) << "objectName:" << m_ChPage->objectName();
-
-    //numberkeypad *key = new numberkeypad(this);
-    //key->setContentsMargins(0, 0, 0, 0);
-}
 void Mainwindow::initUi()
 {
     ui->setupUi(this);
@@ -103,6 +75,7 @@ void Mainwindow::initUi()
 
     QObject::connect(m_ChSetPage,&channelsetting::to_chSOC,m_ChPage,&channelpage::update_Soc,Qt::DirectConnection);
     QObject::connect(m_ChSetPage,&channelsetting::to_chCAP,m_ChPage,&channelpage::update_Cap,Qt::DirectConnection);
+    QObject::connect(m_ChSetPage,&channelsetting::to_chpage,m_ChPage,&channelpage::update_Page,Qt::DirectConnection);
     QObject::connect(m_ChSetPage,&channelsetting::to_chModel,m_ChPage,&channelpage::update_Model,Qt::DirectConnection);
     QObject::connect(m_ChPage,&channelpage::jump_chsetpage,this,[this]{ui->stackedwidget->setCurrentIndex(1);}, Qt::DirectConnection);
     QObject::connect(m_ChPage,&channelpage::jump_devicesetpage,this,[this]{ui->stackedwidget->setCurrentIndex(2);}, Qt::DirectConnection);
@@ -172,6 +145,34 @@ void Mainwindow::initUi()
             }
         }
     }
+}
+void Mainwindow::testUi()
+{
+    ui->setupUi(this);
+
+    channelpage* m_ChPage = new channelpage(this);
+    ui->stackedwidget->addWidget(m_ChPage);
+
+    /*channelsetting* m_ChSetPage = new channelsetting(this);
+    ui->stackedwidget->addWidget(m_ChSetPage);*/
+
+    QList<int> channels = {3, 1, 4,2,8,9,24,15,32,12,18};
+    //for (int i = 1; i <= 36; i++) {channels.append(i);}
+    std::sort(channels.begin(), channels.end());
+
+    for (const int ch : channels) {
+        m_ChPage->update_SoftVer(ch,"1.2.3.4");
+        m_ChPage->update_HardVer(ch,"4.3.2.1");
+        //m_ChSetPage->update_ChEn(ch);
+    }
+
+    /*devicesetpage* m_DeviceSetPage = new devicesetpage(this);
+    ui->stackedwidget->addWidget(m_DeviceSetPage);// 2*/
+
+    qCDebug(aPTest) << "objectName:" << m_ChPage->objectName();
+
+    //numberkeypad *key = new numberkeypad(this);
+    //key->setContentsMargins(0, 0, 0, 0);
 }
 
 void Mainwindow::initO()

@@ -15,9 +15,11 @@
         <file>js/channels.js</file>
         <file>js/import.js</file>
         <file>js/header.js</file>
+        <file>icon/undo.png</file>
+        <file>icon/left.png</file>
+        <file>icon/right.png</file>
         <file>icon/settings.png</file>
         <file>icon/setsliders.png</file>
-        <file>icon/undo.png</file>
         <file>icon/leacesyicon.png</file>
         <file>icon/leacesylogo.png</file>
     </qresource>

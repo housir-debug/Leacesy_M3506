@@ -29,18 +29,6 @@ void channelpage::on_batt_pushButton_clicked()
         card->setChannelmode(ChCardindex::Battery);
     }
 }
-void channelpage::on_stat_pushButton_clicked()
-{
-    for (channelcard *card :  qAsConst(m_channels)) {
-        card->setChannelmode(ChCardindex::Status);
-    }
-}
-void channelpage::on_ver_pushButton_clicked()
-{
-    for (channelcard *card :  qAsConst(m_channels)) {
-        card->setChannelmode(ChCardindex::Version);
-    }
-}
 
 void channelpage::on_setDe_pushButton_clicked(){emit jump_devicesetpage();}
 void channelpage::on_setCh_pushButton_clicked(){emit jump_chsetpage();}
@@ -247,6 +235,13 @@ void channelpage::update_Model(int ch,const QString model)
     auto itcard = m_channels.find(ch);
     if (itcard != m_channels.end()) {
         itcard.value()->setModelValue(model);
+    }
+}
+void channelpage::update_Page(int ch,int index)
+{
+    auto itcard = m_channels.find(ch);
+    if (itcard != m_channels.end()) {
+        itcard.value()->setCurrentIndex(index);
     }
 }
 

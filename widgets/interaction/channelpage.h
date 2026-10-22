@@ -20,8 +20,6 @@ signals:
 private slots:
     void on_dig_pushButton_clicked();
     void on_batt_pushButton_clicked();
-    void on_stat_pushButton_clicked();
-    void on_ver_pushButton_clicked();
     void on_setDe_pushButton_clicked();
     void on_setCh_pushButton_clicked();
     void on_pre_pushButton_clicked();
@@ -50,6 +48,7 @@ public:
     void update_Soc(int ch,float soc);
     void update_Cap(int ch,float cap);
     void update_Model(int ch,const QString model);
+    void update_Page(int ch,int index);
 
     /* web or main call function */
     QJsonArray getAllChannelsData();
@@ -58,8 +57,9 @@ public:
 
 namespace ChPageCard {
 // (1138,316) 220*5=1100 1138-1100=38 38/6=6-2
-    constexpr int PageCard     = 0x05;
+// (1280,306) 201*6=1206 1280-1206=74 74/7=10-4
+    constexpr int PageCard     = 0x06;
     constexpr int CardSpace    = 0x06;
-    constexpr int TBMargin     = 0x02;
-    constexpr int RLMargin     = 0x07;
+    constexpr int RLMargin     = 0x16;
+    constexpr int TBMargin     = 0x03;
 }

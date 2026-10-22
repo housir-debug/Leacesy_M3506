@@ -80,10 +80,7 @@ public:
     std::atomic<quint8> m_channel{0};
 
 private slots:
-    void on_digt_pushButton_clicked();
-    void on_batt_pushButton_clicked();
     void on_stat_pushButton_clicked();
-    void on_vers_pushButton_clicked();
 };
 
 namespace ChCardindex {
@@ -91,5 +88,4 @@ namespace ChCardindex {
     constexpr int Battery      = 0x01;
     constexpr int Status       = 0x02;
     constexpr int Version      = 0x03;
-    constexpr int Selected     = 0x04;
 }
