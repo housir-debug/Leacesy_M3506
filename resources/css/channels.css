@@ -254,3 +254,102 @@
 @media (max-width: 480px) {
     .channels-detailed { grid-template-columns: 1fr; }
 }
+
+/* Graphite glass finish */
+.controls {
+    margin: 0 0 18px;
+    color: var(--text-soft);
+}
+
+.controls label {
+    color: var(--text-soft);
+}
+
+.controls input {
+    accent-color: var(--titanium);
+}
+
+.channel-detailed-card,
+.channel-detailed-card.enabled,
+.channel-detailed-card.disabled {
+    border: 1px solid var(--glass-line);
+    border-radius: 18px;
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.012) 62%),
+        rgba(47, 50, 53, 0.78);
+    box-shadow: inset 0 1px var(--glass-highlight), 0 12px 30px rgba(0, 0, 0, 0.16);
+    opacity: 1;
+    animation: none;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.channel-detailed-card::before {
+    display: none;
+}
+
+.channel-detailed-card.enabled {
+    border-color: rgba(145, 170, 184, 0.34);
+}
+
+.channel-detailed-card.disabled {
+    background: rgba(43, 46, 49, 0.62);
+}
+
+.channel-detailed-card:hover {
+    border-color: rgba(176, 197, 208, 0.46);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.08), 0 16px 36px rgba(0, 0, 0, 0.22);
+    transform: translateY(-2px);
+}
+
+.channel-header h3 {
+    color: var(--titanium-bright);
+    text-shadow: none;
+}
+
+.channel-dot.enabled {
+    background: var(--success);
+    box-shadow: 0 0 9px rgba(143, 189, 158, 0.42);
+}
+
+.channel-dot.disabled {
+    background: #64696c;
+}
+
+.measurement-card {
+    border-color: rgba(224, 230, 233, 0.11);
+    border-radius: 12px;
+    background: rgba(27, 30, 32, 0.48);
+}
+
+.measurement-value.voltage {
+    color: #b0c5d0;
+    text-shadow: none;
+}
+
+.measurement-value.current {
+    color: #d3a39a;
+    text-shadow: none;
+}
+
+.setpoint-row {
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.setpoint-row.active {
+    border-left-color: var(--titanium);
+    background: rgba(131, 160, 176, 0.12);
+    box-shadow: none;
+}
+
+.setpoint-row.active .mode-indicator.active {
+    border-color: var(--titanium);
+    background: var(--titanium);
+    box-shadow: 0 0 7px rgba(145, 170, 184, 0.4);
+    animation: none;
+}
+
+.setpoint-label,
+.setpoint-value {
+    color: #c5c7c7;
+}

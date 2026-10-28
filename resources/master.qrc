@@ -3,9 +3,9 @@
         <file>wqy-microhei.ttc</file>
     </qresource>
     <qresource prefix="/web">
-        <file>html/index.html</file>
-        <file>html/channels.html</file>
-        <file>html/import.html</file>
+        <file alias="html/index.html">index.html</file>
+        <file alias="html/channels.html">channels.html</file>
+        <file alias="html/import.html">import.html</file>
         <file>css/style.css</file>
         <file>css/index.css</file>
         <file>css/channels.css</file>

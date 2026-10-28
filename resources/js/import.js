@@ -97,6 +97,7 @@ class CSVImport {
         
         this.ws.onopen = () => {
             console.log('Connecting to Leacesy Instrument WebSocket:', wsUrl);
+            window.sharedComponents.updateServiceStatus(true);
         };
 
         this.ws.onmessage = (event) => {
@@ -123,7 +124,12 @@ class CSVImport {
 
         this.ws.onclose = () => {
             console.log('WebSocket disconnected, reconnecting...');
+            window.sharedComponents.updateServiceStatus(false);
             //setTimeout(() => this.initWebSocket(), 3000);// try reconnect every 3 seconds
+        };
+
+        this.ws.onerror = () => {
+            window.sharedComponents.updateServiceStatus(false);
         };
     }
 

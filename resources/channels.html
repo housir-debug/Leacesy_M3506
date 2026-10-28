@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leacesy-领图</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="icon" type="image/png" href="/icon/leacesylogo.png">
+    <title>Instrument</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="icon" type="image/png" href="./icon/leacesylogo.png">
 </head>
 <body>
     <div class="container">
@@ -13,9 +13,9 @@
 
         <main>
             <div class="controls">
-                <button id="refresh-button" class="secondary">Refresh</button>
+                <button id="refresh-button" class="secondary">刷新</button>
                 <label>
-                    <input type="checkbox" id="auto-refresh"> Auto refresh
+                    <input type="checkbox" id="auto-refresh"> 自动刷新
                 </label>
             </div>
 
@@ -23,8 +23,8 @@
         </main>
     </div>
 
-    <script src="/js/header.js"></script>
-    <script src="/js/channels.js"></script>
+    <script src="./js/header.js"></script>
+    <script src="./js/channels.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             sharedComponents.loadHeader('header-container', 'channels');
