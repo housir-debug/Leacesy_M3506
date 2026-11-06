@@ -24,10 +24,10 @@ private slots:
     void on_soc_pushButton_clicked();
     void on_cap_pushButton_clicked();
     void on_back_pushButton_clicked();
+    void on_sure_pushButton_clicked();
     void on_allFO_pushButton_clicked();
     void on_allNO_pushButton_clicked();
     void setAllChannelsChecked(bool checked);
-    void sendModecmd(float val,quint8 func);
 
 public:
     explicit channelsetting(QWidget *parent = nullptr);

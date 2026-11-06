@@ -1,7 +1,6 @@
 #pragma once
 #include <QMap>
 #include <QObject>
-
 struct BatteryDataPoint
 {
     float soc;
@@ -16,8 +15,6 @@ class BatteryModelManager : public QObject
 public:
     bool saveModel(QVector<BatteryDataPoint>& pts, const QString &modelName);
     bool removeModel(const QString &modelName);
-
-    QStringList getAvailableModels() const;
     bool loadAllModels();
 
     QMap<QString, QVector<BatteryDataPoint>> m_models;

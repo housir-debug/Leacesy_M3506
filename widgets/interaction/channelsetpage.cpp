@@ -12,37 +12,47 @@ void channelsetting::on_cv_pushButton_clicked()
 {
     ui->keyframe->setPlaceholderText("请输入CV");
     m_setmode = channelSet_mode::cv;
+    ui->keyframe->setEnabled(true);
 }
 void channelsetting::on_cc_pushButton_clicked()
 {
     ui->keyframe->setPlaceholderText("请输入CC");
     m_setmode = channelSet_mode::cc;
+    ui->keyframe->setEnabled(true);
 }
 void channelsetting::on_ovp_pushButton_clicked()
 {
     ui->keyframe->setPlaceholderText("请输入OVP");
     m_setmode = channelSet_mode::ovp;
+    ui->keyframe->setEnabled(true);
 }
 void channelsetting::on_soc_pushButton_clicked()
 {
     ui->keyframe->setPlaceholderText("请输入SOC");
     m_setmode = channelSet_mode::soc;
+    ui->keyframe->setEnabled(true);
 }
 void channelsetting::on_cap_pushButton_clicked()
 {
     ui->keyframe->setPlaceholderText("请输入CAP");
     m_setmode = channelSet_mode::cap;
+    ui->keyframe->setEnabled(true);
 }
 void channelsetting::on_back_pushButton_clicked(){emit backRequested();}
+void channelsetting::on_sure_pushButton_clicked(){ui->setselectframe->setEnabled(true);}
 void channelsetting::on_allFO_pushButton_clicked(){setAllChannelsChecked(false);}
 void channelsetting::on_allNO_pushButton_clicked(){setAllChannelsChecked(true);}
-void channelsetting::setAllChannelsChecked(bool checked){
+void channelsetting::setAllChannelsChecked(bool checked)
+{
     for (int i = 1; i <= 36; ++i) {
         auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
         if (btn && btn->isEnabled()){
             btn->setChecked(checked);
         }
     }
+
+    ui->setselectframe->setEnabled(checked);
+    ui->keyframe->setEnabled(false);
 }
 
 channelsetting::channelsetting(QWidget *parent) :QWidget(parent),
@@ -52,15 +62,27 @@ channelsetting::channelsetting(QWidget *parent) :QWidget(parent),
 
     setCombModel();
     on_cv_pushButton_clicked();
+    ui->keyframe->setEnabled(false);
+    ui->setselectframe->setEnabled(false);
     ui->hardver_label->setText(QString("HardVer :   ") + Device::HardVer);
     ui->softver_label->setText(QString("SoftVer :   ") + Device::SoftVer);
 
     QObject::connect(ui->onoff_comboBox, &QComboBox::currentTextChanged,this,[this](const QString &text){
         if (text == "OFF"){ // 1-off outputed==true
-            ChannelBus::instance().to_Channel(0,JV6xxx::OUTPUT,JV6xxx::Output::SET_OUTPSTATUS_OFF,"",false);
+            for (int i = 1; i <= 36; ++i) {
+                auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
+                if (btn && btn->isChecked()){
+                    ChannelBus::instance().to_Channel(i,JV6xxx::OUTPUT,JV6xxx::Output::SET_OUTPSTATUS_OFF,"",false);
+                }
+            }
             ui->onoff_comboBox->setProperty("Outputed",false);
         }else{
-            ChannelBus::instance().to_Channel(0,JV6xxx::OUTPUT,JV6xxx::Output::SET_OUTPSTATUS_ON,"",false);
+            for (int i = 1; i <= 36; ++i) {
+                auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
+                if (btn && btn->isChecked()){
+                    ChannelBus::instance().to_Channel(i,JV6xxx::OUTPUT,JV6xxx::Output::SET_OUTPSTATUS_ON,"",false);
+                }
+            }
             ui->onoff_comboBox->setProperty("Outputed",true);
         }
 
@@ -70,11 +92,26 @@ channelsetting::channelsetting(QWidget *parent) :QWidget(parent),
         }, Qt::DirectConnection);
     QObject::connect(ui->unit_comboBox, &QComboBox::currentTextChanged,this, [this](const QString &text){
         if(text == "A"){
-            ChannelBus::instance().to_Channel(0,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1,JV6xxx::Param::A),false);
+            for (int i = 1; i <= 36; ++i) {
+                auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
+                if (btn && btn->isChecked()){
+                    ChannelBus::instance().to_Channel(i,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1,JV6xxx::Param::A),false);
+                }
+            }
         }else if(text == "mA"){
-            ChannelBus::instance().to_Channel(0,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1,JV6xxx::Param::mA),false);
+            for (int i = 1; i <= 36; ++i) {
+                auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
+                if (btn && btn->isChecked()){
+                    ChannelBus::instance().to_Channel(i,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1,JV6xxx::Param::mA),false);
+                }
+            }
         }else{
-            ChannelBus::instance().to_Channel(0,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1,JV6xxx::Param::Auto),false);
+            for (int i = 1; i <= 36; ++i) {
+                auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
+                if (btn && btn->isChecked()){
+                    ChannelBus::instance().to_Channel(i,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1,JV6xxx::Param::Auto),false);
+                }
+            }
         }
 
         on_allFO_pushButton_clicked();
@@ -106,50 +143,35 @@ channelsetting::channelsetting(QWidget *parent) :QWidget(parent),
 
     QObject::connect(ui->keyframe, &numberkeypad::valueEntered, this, [this](const QString &value) {
         if (!value.isEmpty()){
+            QByteArray data(4,0);
             float val = value.toFloat();
+            qToBigEndian(val, reinterpret_cast<uint8_t*>(data.data()));
 
-            switch (m_setmode) {
-                case channelSet_mode::cv:
-                    sendModecmd(val,JV6xxx::Setting::SET_SOURVOLT);
-                    break;
-                case channelSet_mode::cc:
-                    sendModecmd(val,JV6xxx::Setting::SET_SOURCURR);
-                    break;
-                case channelSet_mode::ovp:
-                    sendModecmd(val,JV6xxx::Setting::SET_SOURVOLT_PROT);
-                    break;
-                case channelSet_mode::soc:
-                    for (int i = 1; i <= 36; ++i) {
-                        auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
-                        if (btn && btn->isChecked()){
+            for (int i = 1; i <= 36; ++i) {
+                auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
+                if (btn && btn->isChecked()){
+                    switch (m_setmode) {
+                        case channelSet_mode::cv:
+                            ChannelBus::instance().to_Channel(i,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURVOLT,data,false);
+                            break;
+                        case channelSet_mode::cc:
+                            ChannelBus::instance().to_Channel(i,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURCURR,data,false);
+                            break;
+                        case channelSet_mode::ovp:
+                            ChannelBus::instance().to_Channel(i,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURVOLT_PROT,data,false);
+                            break;
+                        case channelSet_mode::soc:
                             emit to_chSOC(i,val);
-                        }
-                    }
-                    break;
-                case channelSet_mode::cap:
-                    for (int i = 1; i <= 36; ++i) {
-                        auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
-                        if (btn && btn->isChecked()){
+                            break;
+                        case channelSet_mode::cap:
                             emit to_chCAP(i,val);
-                        }
+                            break;
                     }
-                    break;
-                default:break;
+                }
             }
 
             on_allFO_pushButton_clicked();
         }}, Qt::DirectConnection);
-}
-void channelsetting::sendModecmd(float val,quint8 func){
-    QByteArray data(4,0);
-    qToBigEndian(val, reinterpret_cast<uint8_t*>(data.data()));
-
-    for (int i = 1; i <= 36; ++i) {
-        auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
-        if (btn && btn->isChecked()){
-            ChannelBus::instance().to_Channel(i,JV6xxx::SETTING,func, data,false);
-        }
-    }
 }
 channelsetting::~channelsetting()
 {
@@ -161,7 +183,7 @@ channelsetting::~channelsetting()
 void channelsetting::setCombModel()
 {
     ui->model_comboBox->clear();
-    ui->model_comboBox->addItems(BatteryModelManager::instance().getAvailableModels());
+    ui->model_comboBox->addItems(BatteryModelManager::instance().m_models.keys());
 }
 void channelsetting::update_ChEn(int ch)
 {

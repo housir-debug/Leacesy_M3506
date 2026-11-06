@@ -16,7 +16,6 @@ Q_LOGGING_CATEGORY(inChPaG,"inChPaG:")
 Q_LOGGING_CATEGORY(coReOvL,"coReOvL:")
 Q_LOGGING_CATEGORY(coNuKeP,"coNuKeP:")
 Q_LOGGING_CATEGORY(coChCaD,"coChCaD:")
-
 /* control */
 Q_LOGGING_CATEGORY(canSer,"canSer:")
 Q_LOGGING_CATEGORY(r32Ser,"r32Ser:")
@@ -35,6 +34,9 @@ Q_LOGGING_CATEGORY(tirpLoad,"tirpLoad:")
 std::unique_ptr<QSettings> ConfigManager::s_settings;
 std::atomic<int> ConfigManager::control_Mode{InterSt::LOCAL};
 
+std::atomic<quint32> ConfigManager::s_CANid{0};
+quint32 ConfigManager::s_rs232BaudIndex{0};
+quint32 ConfigManager::s_canBaudIndex{0};
 namespace LogLevel {
     constexpr const int Release   = 0x00;
     constexpr const int Custom    = 0x01;
@@ -42,9 +44,6 @@ namespace LogLevel {
     constexpr const int Debug     = 0x03;
 }
 int ConfigManager::log_Level{LogLevel::Normal};
-quint32 ConfigManager::s_canBaudIndex{0};
-quint32 ConfigManager::s_rs232BaudIndex{0};
-std::atomic<quint32> ConfigManager::s_CANid{0};
 
 bool ConfigManager::init(const QString &configDir)
 {

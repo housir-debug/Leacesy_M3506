@@ -62,7 +62,7 @@ void UartChannelManager::initUartchannel(quint8 ch, const QString &portName,qint
 
         m_outTimer = new QTimer(this);
         m_outTimer->setSingleShot(true);
-        m_outTimer->setInterval(120); // 120 ms
+        m_outTimer->setInterval(360); // 360 ms
         connect(m_outTimer, &QTimer::timeout, this, [this]{
             m_waitR = false;
             sendNextCmd();
@@ -84,7 +84,7 @@ void UartChannelManager::sendInitCommand()
        m_initindex++;
        return;
    }else if(isExist){
-       m_refreshTimer->start();
+       //m_refreshTimer->start();
        m_initindex = 0;
    }
 }
@@ -153,22 +153,28 @@ void UartChannelManager::handleReadyRead()
                     quint8 Checksum = lengthB + cmd + func + ch; // The check code is taken from the lowest 8 bits.
                     for (char byte : qAsConst(m_readparam)) {Checksum += static_cast<quint8>(byte);}
 
-                    quint16 selfCheck = (static_cast<quint16>(cmd) << 8) | func;
-                    if(static_cast<quint8>(m_readbuffer[lengthB + 2]) == Checksum && m_resChecked == selfCheck){
-                        switch (cmd) {
-                            case JV6xxx::OUTPUT:               handleOutputcmd          (func);break;
-                            case JV6xxx::SETTING:              handleSettingcmd         (func);break;
-                            case JV6xxx::CONTROL:              handleControlcmd         (func);break;
-                            case JV6xxx::MEASUREMENT:          handleMeasurementcmd     (func);break;
-                            case JV6xxx::REGISTER:             handleRegistercmd        (func);break;
-                            case JV6xxx::CALIBRATE:            handleCalibratecmd       (func);break;
-                            case JV6xxx::CALIBRATION:          handleCalibrationcmd     (func);break;
-                            case JV6xxx::TRIGGER:              handleTriggercmd         (func);break;
-                            case JV6xxx::ERROR:                handleErrorcmd           (func);break;
-                        }
+                    if(static_cast<quint8>(m_readbuffer[lengthB + 2]) == Checksum){
+                        if (cmd == JV6xxx::ERROR) {
+                            handleErrorcmd(func);
+                        }else{
+                            quint16 selfCheck = (static_cast<quint16>(cmd) << 8) | func;
 
-                        if (ConfigManager::control_Mode == InterSt::CAN){
-                            emit ChannelBus::instance().to_CanServer(m_channel, selfCheck, m_readparam);
+                            if (m_resChecked == selfCheck){
+                                switch (cmd) {
+                                    case JV6xxx::OUTPUT:               handleOutputcmd          (func);break;
+                                    case JV6xxx::SETTING:              handleSettingcmd         (func);break;
+                                    case JV6xxx::CONTROL:              handleControlcmd         (func);break;
+                                    case JV6xxx::MEASUREMENT:          handleMeasurementcmd     (func);break;
+                                    case JV6xxx::REGISTER:             handleRegistercmd        (func);break;
+                                    case JV6xxx::CALIBRATE:            handleCalibratecmd       (func);break;
+                                    case JV6xxx::CALIBRATION:          handleCalibrationcmd     (func);break;
+                                    case JV6xxx::TRIGGER:              handleTriggercmd         (func);break;
+                                }
+
+                                if (ConfigManager::control_Mode == InterSt::CAN){
+                                    emit ChannelBus::instance().to_CanServer(m_channel, selfCheck, m_readparam);
+                                }
+                            }
                         }
 
                         m_readbuffer.remove(0,lengthB + 4);
@@ -194,6 +200,23 @@ void UartChannelManager::handleReadyRead()
     }
 }
 
+void UartChannelManager::handleErrorcmd(quint8 func)
+{
+    QString errstr;
+    switch (func){
+        case JV6xxx::ERR::CheckSum_Error:errstr = "JV6xxx::CheckSum Error";           break;
+        case JV6xxx::ERR::Unknow_Command:errstr = "JV6xxx::Unknow Command";           break;
+        case JV6xxx::ERR::Unknow_Function:errstr = "JV6xxx::Unknow Function";         break;
+        case JV6xxx::ERR::Error_Length:errstr = "JV6xxx::Error Length";               break;
+        case JV6xxx::ERR::Invalid_Parameter:errstr = "JV6xxx::Invalid Parameter";     break;
+        case JV6xxx::ERR::Illegal_Command:errstr = "JV6xxx::Illegal Command";         break;
+        case JV6xxx::ERR::Unsupported_Command:errstr = "JV6xxx::Unsupported Command"; break;
+        default:errstr = "JV6xxx::Unknow Error";break;
+    }
+
+    qCDebug(uartCh)<<"[handleErrorcmd]:Ch_"<<m_channel<<" Error: "<<errstr;
+    ScpiManager::instance().processCHStringResponse(errstr);
+}
 void UartChannelManager::handleOutputcmd(quint8 func)
 {
     quint32 sh = m_readparam.size()==1 ? static_cast<quint32>(m_readparam[0]) : (m_readparam.size()==4) ? qFromBigEndian<quint32>(m_readparam.constData()) : 0;
@@ -440,20 +463,4 @@ void UartChannelManager::handleTriggercmd(quint8 func)
             return;
     }
 }
-void UartChannelManager::handleErrorcmd(quint8 func)
-{
-    QString errstr;
-    switch (func){
-        case 0x00:errstr = "CheckSum Error";      break;
-        case 0x01:errstr = "Unknow Command";      break;
-        case 0x02:errstr = "Unknow Function";     break;
-        case 0x03:errstr = "Error Length";        break;
-        case 0x04:errstr = "Invalid Parameter";   break;
-        case 0x05:errstr = "Illegal Command";     break;
-        case 0x06:errstr = "Unsupported Command"; break;
-        default:  errstr = "Unknow Error";        break;
-    }
 
-    qCDebug(uartCh)<<"[handleErrorcmd]:Ch_"<<m_channel<<" Error: "<<errstr;
-    ScpiManager::instance().processCHStringResponse(errstr);
-}

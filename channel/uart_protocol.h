@@ -1,6 +1,10 @@
 #pragma once
 #include <QString>
 
+constexpr quint16 makeCmd(quint8 cmd, quint8 func) {
+    return (static_cast<quint16>(cmd) << 8) | func;
+}
+
 namespace JV6xxx {
     constexpr int Thread_CHSUM   = 0x09;
     constexpr quint8 HEADER_HIGH = 0xAA;
@@ -278,6 +282,16 @@ namespace JV6xxx {
         constexpr quint8 SET_SEQEDIT_LINKS           = 0x09;
         constexpr quint8 SET_SEQEDIT_LINKE           = 0x0A;
         constexpr quint8 SET_SEQEDIT_LINKC           = 0x0B;
+    }
+
+    namespace ERR {
+        constexpr quint8 CheckSum_Error              = 0x00;
+        constexpr quint8 Unknow_Command              = 0x01;
+        constexpr quint8 Unknow_Function             = 0x02;
+        constexpr quint8 Error_Length                = 0x03;
+        constexpr quint8 Invalid_Parameter           = 0x04;
+        constexpr quint8 Illegal_Command             = 0x05;
+        constexpr quint8 Unsupported_Command         = 0x06;
     }
 
     namespace Param {

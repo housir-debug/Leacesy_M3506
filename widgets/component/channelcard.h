@@ -13,6 +13,7 @@ private:
     Ui::channelcard *ui;
     QTimer *m_longPressTimer;
     bool m_longPressTriggered;
+    void pressedStatus(bool state);
 
 signals:
     // void longPressed();

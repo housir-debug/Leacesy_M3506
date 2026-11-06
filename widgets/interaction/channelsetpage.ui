@@ -72,7 +72,7 @@
 }
 
 #channelsetting #chselectframe,
-#channelsetting #frame_3{
+#channelsetting #setselectframe{
     background-color: #101C30;
     border: 1.8px solid #1E2E4A; 
     border-radius: 9px;
@@ -100,7 +100,7 @@
     color: #445470;
 }
 
-#channelsetting #frame_3 QComboBox {
+#channelsetting #setselectframe QComboBox {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                 stop:0 #1A2D50, stop:1 #142442);
     border: 1px solid #304b82;
@@ -108,13 +108,13 @@
     color: #9CB8E8;
     font-size: 14px;
     font-weight: bold;
-}#channelsetting #frame_3 QComboBox:disabled {
+}#channelsetting #setselectframe QComboBox:disabled {
     background: #111928;
     border: 1px solid #202b40;
     color: #445470;
-}#channelsetting #frame_3 QComboBox::drop-down {
+}#channelsetting #setselectframe QComboBox::drop-down {
     background: transparent;
-}#channelsetting #frame_3 QComboBox QAbstractItemView {
+}#channelsetting #setselectframe QComboBox QAbstractItemView {
     background-color: #142442;
     border: 1px solid #304b82;
     border-radius: 9px;
@@ -124,37 +124,41 @@
     outline: none;
     selection-background-color: #2A4A7A;
     selection-color: #FFFFFF;
-}#channelsetting #frame_3 QComboBox QAbstractItemView::item {
+}#channelsetting #setselectframe QComboBox QAbstractItemView::item {
     background: transparent;
  	border-radius: 6px;
 	color: #9CB8E8;
 	min-height: 27px;
     padding: 2px 8px;
-}#channelsetting #frame_3 QComboBox QAbstractItemView::item:selected {
+}#channelsetting #setselectframe QComboBox QAbstractItemView::item:selected {
     background-color: #2A4A7A;
     color: #FFFFFF;
-}#channelsetting #frame_3 #onoff_comboBox{
+}#channelsetting #setselectframe #onoff_comboBox{
     color: #e65454;
     border-color: #702424;
-}#channelsetting #frame_3 #onoff_comboBox[Outputed=true]{
+}#channelsetting #setselectframe #onoff_comboBox[Outputed=true]{
     color: #34b979;
     border-color: #1f5c40;
 }
 
-#channelsetting #frame_3 #frame_2,
-#channelsetting #frame_3 #frame{
+#channelsetting #setselectframe #comboframe,
+#channelsetting #setselectframe #pushframe{
 	background-color: #0E1A2E;
 	border: 1.2px solid #304b82;
 	border-radius: 9px;
-}#channelsetting #frame_3  #frame QPushButton {
-	background-color: transparent; 
-	border-radius: 9px;
+}#channelsetting #setselectframe  #pushframe QPushButton {
+	background:  #142442;
+	border-radius: 6px;
     font-weight: bold;
 	font-size: 12px;
 	color: #6A7288; 
-}#channelsetting #frame_3  #frame QPushButton:checked{
-    background-color: rgba(255, 255, 255, 0.04);
+}#channelsetting #setselectframe  #pushframe QPushButton:checked{
+	background-color: #2A4A7A;
 	color: #B0B8C5;
+}#channelsetting #setselectframe  #pushframe QPushButton:disabled {
+    background: #111928;
+    border: 1px solid #202b40;
+    color: #445470;
 }
 
 #channelsetting #keyframe {
@@ -359,18 +363,9 @@
      <property name="lineWidth">
       <number>0</number>
      </property>
-     <layout class="QGridLayout" name="gridLayout" rowstretch="1,1,1,1,1,1" columnstretch="1,1,1,1,1,1,1,1">
-      <property name="leftMargin">
-       <number>12</number>
-      </property>
-      <property name="topMargin">
-       <number>12</number>
-      </property>
-      <property name="rightMargin">
-       <number>12</number>
-      </property>
-      <property name="bottomMargin">
-       <number>12</number>
+     <layout class="QGridLayout" name="gridLayout">
+      <property name="spacing">
+       <number>3</number>
       </property>
       <item row="0" column="0" rowspan="6">
        <widget class="QLabel" name="selectch_label">
@@ -631,7 +626,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="7" rowspan="3">
+      <item row="0" column="7" rowspan="2">
        <widget class="QPushButton" name="allFO_pushButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1101,6 +1096,29 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="7" rowspan="2">
+       <widget class="QPushButton" name="allNO_pushButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="text">
+         <string>全
+选</string>
+        </property>
+       </widget>
+      </item>
       <item row="3" column="1">
        <widget class="QPushButton" name="pushButton19">
         <property name="enabled">
@@ -1320,29 +1338,6 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="7" rowspan="3">
-       <widget class="QPushButton" name="allNO_pushButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="cursor">
-         <cursorShape>BlankCursor</cursorShape>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
-        </property>
-        <property name="text">
-         <string>全
-选</string>
-        </property>
-       </widget>
-      </item>
       <item row="4" column="1">
        <widget class="QPushButton" name="pushButton25">
         <property name="enabled">
@@ -1559,6 +1554,29 @@
         </property>
         <property name="checkable">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="7" rowspan="2">
+       <widget class="QPushButton" name="sure_pushButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="cursor">
+         <cursorShape>BlankCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::NoContextMenu</enum>
+        </property>
+        <property name="text">
+         <string>选
+定</string>
         </property>
        </widget>
       </item>
@@ -1788,7 +1806,7 @@
     </widget>
    </item>
    <item row="1" column="1">
-    <widget class="QFrame" name="frame_3">
+    <widget class="QFrame" name="setselectframe">
      <property name="cursor">
       <cursorShape>BlankCursor</cursorShape>
      </property>
@@ -1828,7 +1846,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QFrame" name="frame_2">
+       <widget class="QFrame" name="comboframe">
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
         </property>
@@ -2018,7 +2036,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QFrame" name="frame">
+       <widget class="QFrame" name="pushframe">
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
         </property>
@@ -2041,8 +2059,11 @@
          <property name="bottomMargin">
           <number>6</number>
          </property>
-         <property name="spacing">
+         <property name="horizontalSpacing">
           <number>0</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>3</number>
          </property>
          <item row="0" column="0" rowspan="5">
           <widget class="QLabel" name="keyinput_label">

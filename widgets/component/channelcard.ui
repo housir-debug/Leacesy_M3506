@@ -43,10 +43,11 @@
     background-color: #101C30;
     border: 1.8px solid rgba(63, 63, 90, 0.81);
 	border-radius: 18px;
-}
-#channelcard[Outputed=true] &gt; QWidget{
+}#channelcard[Outputed=true] &gt; QWidget{
     background-color: #1A2A45;
     border-color: rgba(100, 100, 130, 0.9);
+}#channelcard[pressed=true] &gt; QWidget{
+	border-color: rgba(100, 100, 130, 0.9);
 }
 
 #channelcard #digitalch_label,
@@ -68,6 +69,9 @@
    <number>0</number>
   </property>
   <property name="Outputed" stdset="0">
+   <bool>false</bool>
+  </property>
+  <property name="pressed" stdset="0">
    <bool>false</bool>
   </property>
   <widget class="QWidget" name="digital">

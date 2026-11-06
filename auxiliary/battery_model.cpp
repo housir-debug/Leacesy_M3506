@@ -60,8 +60,6 @@ bool BatteryModelManager::removeModel(const QString &modelName)
 
     return false;
 }
-
-QStringList BatteryModelManager::getAvailableModels() const{return m_models.keys();}
 bool BatteryModelManager::loadAllModels()
 {
     m_models.clear();
@@ -132,6 +130,7 @@ bool BatteryModelManager::loadAllModels()
     return false;
 }
 
+BatteryModelManager::BatteryModelManager(QObject* parent): QObject(parent){}
 BatteryModelManager& BatteryModelManager::instance()
 {
     static BatteryModelManager inst;
@@ -201,6 +200,3 @@ float BatteryModelManager::interpolate(const QVector<BatteryDataPoint>& pts,floa
 
     return y1 + (y2 - y1)*(soc - p1.soc)/(p2.soc - p1.soc);
 }
-
-BatteryModelManager::BatteryModelManager(QObject* parent): QObject(parent)
-{}

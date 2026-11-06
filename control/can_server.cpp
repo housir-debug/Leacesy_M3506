@@ -425,7 +425,7 @@ bool CanServerManager::OpeningCanN()
     QStringList commands;
     commands << QString("ip link set %1 down").arg(m_interface);
     commands << QString("ip link set %1 txqueuelen 1000").arg(m_interface);
-    commands << QString("ip link set %1 type can bitrate %2 restart-ms 18 fd off loopback on")
+    commands << QString("ip link set %1 type can bitrate %2 restart-ms 18 fd off loopback off")
                 .arg(m_interface).arg(m_validBaudRates[ConfigManager::s_canBaudIndex]);
     commands << QString("ip link set %1 up").arg(m_interface);
 

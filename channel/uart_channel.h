@@ -49,6 +49,7 @@ private:
 
     void sendNextCmd();
     void handleReadyRead();
+    void handleErrorcmd          (quint8 func);
     void handleOutputcmd         (quint8 func);
     void handleSettingcmd        (quint8 func);
     void handleControlcmd        (quint8 func);
@@ -57,6 +58,5 @@ private:
     void handleCalibratecmd      (quint8 func);
     void handleCalibrationcmd    (quint8 func);
     void handleTriggercmd        (quint8 func);
-    void handleErrorcmd          (quint8 func);
 };
 

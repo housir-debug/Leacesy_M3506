@@ -22,6 +22,8 @@ void channelcard::mousePressEvent(QMouseEvent *event)
     m_pressPos = event->pos();
     m_isPressed = true;
     event->accept();
+
+    pressedStatus(m_isPressed);
 }
 void channelcard::mouseReleaseEvent(QMouseEvent *event)
 {
@@ -34,6 +36,16 @@ void channelcard::mouseReleaseEvent(QMouseEvent *event)
     m_longPressTimer->stop();
     m_isPressed = false;
     event->accept();
+
+    pressedStatus(m_isPressed);
+}
+void channelcard::pressedStatus(bool state)
+{
+    setProperty("pressed",state);
+    ui->digital->style()->unpolish(ui->digital);
+    ui->digital->style()->polish(ui->digital);
+    ui->battery->style()->unpolish(ui->battery);
+    ui->battery->style()->polish(ui->battery);
 }
 
 channelcard::channelcard(QWidget *parent) : QStackedWidget(parent),
@@ -41,7 +53,7 @@ channelcard::channelcard(QWidget *parent) : QStackedWidget(parent),
 {
     ui->setupUi(this);
 
-    QStringList models = BatteryModelManager::instance().getAvailableModels();
+    QStringList models = BatteryModelManager::instance().m_models.keys();
     if (!models.isEmpty()){setModelValue(models[0]);}
 
     m_longPressTimer = new QTimer(this);
