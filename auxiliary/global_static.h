@@ -30,7 +30,7 @@ Q_DECLARE_LOGGING_CATEGORY(tirpLoad)
 
 namespace Module {
     constexpr const bool enable_CanCh        = false;
-    constexpr const bool enable_UartCh       = true;
+    constexpr const bool enable_UartCh       = false;
     /* control */
     constexpr const bool enable_UartSer      = false;
     constexpr const bool enable_CanSer       = true;

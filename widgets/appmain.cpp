@@ -7,9 +7,9 @@
 #include "auxiliary/signal_bus.h"
 #include "channel/uart_protocol.h"
 #include "channel/uart_channel.h"
+#include "control/vxi11_server.h"
 #include "control/web_server.h"
 #include "control/can_server.h"
-#include "control/vxi_server.h"
 #include "control/r32_server.h"
 #include "ui_appmain.h"
 #include "appmain.h"
@@ -249,13 +249,13 @@ void Mainwindow::initO()
         }
 
         if (Module::enable_VxiSer){
-            vxiServer = new VxiServerManager();
+            vxi11_server::instance();
         }}, Qt::DirectConnection);
     QObject::connect(m_serThread, &QThread::finished, this, [this](){
-        if (uartServer) { delete uartServer; uartServer = nullptr; }
-        if (canServer)  { delete canServer;  canServer  = nullptr; }
-        if (webServer)  { delete webServer;  webServer  = nullptr; }
-        if (vxiServer)  { delete vxiServer;  vxiServer  = nullptr; }
+        if (Module::enable_UartSer) { delete uartServer; uartServer = nullptr; }
+        if (Module::enable_CanSer)  { delete canServer;  canServer  = nullptr; }
+        if (Module::enable_WebSer)  { delete webServer;  webServer  = nullptr; }
+        if (Module::enable_VxiSer)  { vxi11_server::instance().stop(); }
         }, Qt::DirectConnection);
 
     m_serThread->start();

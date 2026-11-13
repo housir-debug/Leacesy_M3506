@@ -44,6 +44,8 @@ signals:
     void interModelUpdate();
     void switchRemote(int reface);
 
+    void errorOccurred(const QString& errorMsg);
+
 public:
     struct UartConfig {
         QString port;

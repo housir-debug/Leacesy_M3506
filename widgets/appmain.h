@@ -34,7 +34,6 @@ private:
     UartServerManager* uartServer{nullptr};
     CanServerManager* canServer{nullptr};
     WebServerManager* webServer{nullptr};
-    VxiServerManager* vxiServer{nullptr};
     QThread* m_serThread{nullptr};
 
     remoteoverlay* m_RemoteOverlay{nullptr};
