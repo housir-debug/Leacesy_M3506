@@ -51,6 +51,7 @@ class ConfigManager
 {
 public:
     static std::atomic<int> control_Mode;
+    static bool isInteRemote(int Inte);
 
     static std::atomic<quint32> s_CANid;
     static quint32 s_rs232BaudIndex;

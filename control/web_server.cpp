@@ -16,38 +16,6 @@
 #include <QtMath>
 #include <QFile>
 
-const QHash<QString, QString> WebServerManager::m_staticFiles =
-{
-    {"/",                     ":/web/html/index.html"},
-    {"/index.html",           ":/web/html/index.html"},
-    {"/channels.html",        ":/web/html/channels.html"},
-    {"/import.html",          ":/web/html/import.html"},
-    {"/js/index.js",          ":/web/js/index.js"},
-    {"/js/channels.js",       ":/web/js/channels.js"},
-    {"/js/import.js",         ":/web/js/import.js"},
-    {"/js/header.js",         ":/web/js/header.js"},
-    {"/css/style.css",        ":/web/css/style.css"},
-    {"/css/index.css",        ":/web/css/index.css"},
-    {"/css/channels.css",     ":/web/css/channels.css"},
-    {"/css/import.css",       ":/web/css/import.css"},
-    {"/css/global.css",       ":/web/css/global.css"},
-    {"/icon/leacesylogo.png", ":/web/icon/leacesylogo.png"},
-    {"/icon/leacesyicon.png", ":/web/icon/leacesyicon.png"}
-};
-const QHash<QString, QString> WebServerManager::m_mimeTypes =
-{
-    {"html",                  "text/html"},
-    {"css",                   "text/css"},
-    {"js",                    "application/javascript"},
-    {"json",                  "application/json"},
-    {"png",                   "image/png"},
-    {"jpg",                   "image/jpeg"},
-    {"svg",                   "image/svg+xml"},
-    {"ico",                   "image/x-icon"},
-    {"txt",                   "text/plain"},
-    {"xml",                   "application/xml"},
-    {"pdf",                   "application/pdf"},
-};
 
 void WebServerManager::sendHttpResponse(QTcpSocket *client, const QByteArray &content,const QString &contentType, int statusCode)
 {
@@ -77,6 +45,19 @@ void WebServerManager::sendHttpResponse(QTcpSocket *client, const QByteArray &co
 }
 void WebServerManager::setupHTTPRoutes()
 {
+    m_apiRoutes["/lxi/identification"] = [this](QTcpSocket* client)
+    {
+        QByteArray xmlBody = QByteArray("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n")
+            + "<LXIDevice>\n"
+            + "  <Manufacturer>" + Device::Manufacturer + "</Manufacturer>\n"
+            + "  <Model>" + Device::ModelNumber + "</Model>\n"
+            + "  <SerialNumber>" + Device::Identifying + "</SerialNumber>\n"
+            + "  <FirmwareRevision>" + Device::SoftVer + "</FirmwareRevision>\n"
+            + "</LXIDevice>\n";
+
+        // Content-Type text/xml
+        sendHttpResponse(client, xmlBody, "text/xml", 200);
+    };
     m_apiRoutes["/api/device/info"] = [this](QTcpSocket* client)
     {
         QJsonObject response;
@@ -119,20 +100,50 @@ void WebServerManager::setupHTTPRoutes()
     };
 }
 
+const QHash<QString, QString> WebServerManager::m_staticFiles =
+{
+    {"/",                     ":/web/html/index.html"},
+    {"/index.html",           ":/web/html/index.html"},
+    {"/channels.html",        ":/web/html/channels.html"},
+    {"/import.html",          ":/web/html/import.html"},
+    {"/js/index.js",          ":/web/js/index.js"},
+    {"/js/channels.js",       ":/web/js/channels.js"},
+    {"/js/import.js",         ":/web/js/import.js"},
+    {"/js/header.js",         ":/web/js/header.js"},
+    {"/css/style.css",        ":/web/css/style.css"},
+    {"/css/index.css",        ":/web/css/index.css"},
+    {"/css/channels.css",     ":/web/css/channels.css"},
+    {"/css/import.css",       ":/web/css/import.css"},
+    {"/css/global.css",       ":/web/css/global.css"},
+    {"/icon/leacesylogo.png", ":/web/icon/leacesylogo.png"},
+    {"/icon/leacesyicon.png", ":/web/icon/leacesyicon.png"}
+};
+const QHash<QString, QString> WebServerManager::m_mimeTypes =
+{
+    {"html",                  "text/html"},
+    {"css",                   "text/css"},
+    {"js",                    "application/javascript"},
+    {"json",                  "application/json"},
+    {"png",                   "image/png"},
+    {"jpg",                   "image/jpeg"},
+    {"svg",                   "image/svg+xml"},
+    {"ico",                   "image/x-icon"},
+    {"txt",                   "text/plain"},
+    {"xml",                   "application/xml"},
+    {"pdf",                   "application/pdf"},
+};
+
 WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
 {
     m_httpServer = new QTcpServer(this);
     connect(m_httpServer, &QTcpServer::newConnection,this,[this](){
         QTcpSocket* client = m_httpServer->nextPendingConnection();
         if (m_clients.size() < 9) { // restrict connect number = 9
-            client->setObjectName(QString("%1:%2").arg(client->peerAddress().toString()).arg(client->peerPort()));
-            qCDebug(webSer)<<"[WebServerManager]:New HTTP client: "<< client->objectName();
-
             connect(client, &QTcpSocket::errorOccurred,this, [client](QAbstractSocket::SocketError error){
-                qCWarning(webSer)<<"[WebServerManager]:("<< client->objectName()<<")"<<error<<client->errorString();
+                qCWarning(webSer)<<"(WebServerManager): "<< client->objectName()<<" | "<<error<<client->errorString();
                 }, Qt::DirectConnection);
             connect(client, &QTcpSocket::disconnected,this, [this, client](){
-                qCDebug(webSer)<<"[WebServerManager]: "<<client->objectName()<<" disconnected";
+                qCDebug(webSer)<<"(WebServerManager): "<<client->objectName()<<" disconnected";
                 m_clients.removeOne(client);
                 client->deleteLater();
                 }, Qt::DirectConnection);
@@ -144,7 +155,7 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
 
                     if (parts.size() >= 3) {
                         QString path = QUrl::fromPercentEncoding(parts[1].toUtf8());
-                        qCDebug(webSer)<<"[handleHttpRequest]:HTTP request: "<< parts[0] << path;
+                        qCDebug(webSer)<<"(WebServerManager):HTTP request: "<< parts[0] << path;
 
                         if (m_apiRoutes.contains(path)) {
                             m_apiRoutes[path](client);
@@ -156,7 +167,7 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
                             if (!m_fileCache.contains(path)) {
                                 QFile file(resourcePath);
                                 if (!file.open(QIODevice::ReadOnly)) {
-                                    qCWarning(webSer)<<"[handleHttpRequest]: open web file: "<<resourcePath<<"failed!";
+                                    qCWarning(webSer)<<"(WebServerManager): open web file: "<<resourcePath<<"failed!";
                                     sendHttpResponse(client, "500 Internal Server Error", "text/plain", 500);
                                     return;
                                 }
@@ -169,16 +180,18 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
                             return;
                         }
 
-                        qCWarning(webSer)<<"[handleHttpRequest]: request route method not exist!";
+                        qCWarning(webSer)<<"(WebServerManager): request route method not exist!";
                         sendHttpResponse(client, "404 Not Found", "text/plain", 404);
                         return;
                     }
                 }
 
                 sendHttpResponse(client, "Please access using a web browser.", "text/plain");
-                qCWarning(webSer)<<"[handleHttpRequest]: request format failed!";
+                qCDebug(webSer)<<"(WebServerManager): request format failed!";
                 }, Qt::DirectConnection);
 
+            client->setObjectName(QString("%1:%2").arg(client->peerAddress().toString()).arg(client->peerPort()));
+            qCDebug(webSer)<<"(WebServerManager):New HTTP client: "<< client->objectName();
             m_clients.append(client);
             return;
         }
@@ -188,46 +201,36 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
         },Qt::DirectConnection);
 
     if (m_httpServer->listen(QHostAddress::Any, Vxi11::HTTP_PORT)) {
-        setupHTTPRoutes();
+        setupHTTPRoutes(); // setup
 
         m_wsServer = new QWebSocketServer("Leacesy",QWebSocketServer::NonSecureMode, this);
         connect(m_wsServer, &QWebSocketServer::newConnection,this, [this](){
             QWebSocket* socket = m_wsServer->nextPendingConnection();
             if (m_sockets.size() < 9) { // restrict connect number = 9
-                socket->setObjectName(QString("%1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()));
-                qCDebug(webSer)<<"[WebServerManager]:New WebSocket client: "<< socket->objectName();
-
                 connect(socket,QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),this, [socket](QAbstractSocket::SocketError error){
-                    qCWarning(webSer)<<"[WebServerManager]:("<<socket->objectName()<<")"<< error <<socket->errorString();
+                    qCWarning(webSer)<<"(WebServerManager):("<<socket->objectName()<<")"<< error <<socket->errorString();
                     }, Qt::DirectConnection);
                 connect(socket, &QWebSocket::disconnected,this, [this, socket](){
-                    qCDebug(webSer)<<"[WebServerManager]: "<<socket->objectName()<<" disconnected";
+                    qCDebug(webSer)<<"(WebServerManager): "<<socket->objectName()<<" disconnected";
                     m_sockets.removeOne(socket);
                     socket->deleteLater();
                     }, Qt::DirectConnection);
                 connect(socket, &QWebSocket::textMessageReceived,this, [this, socket](const QString &message){
-                    qCDebug(webSer)<<"[onWsTextMessageReceived]:WEB request: "<<message;
+                    qCDebug(webSer)<<"(WebServerManager):WEB request: "<<message;
                     QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8());
                     if (!doc.isNull() && doc.isObject()) {
                         QJsonObject obj = doc.object();
                         QString type = obj["type"].toString();
                         if (m_webRoutes.contains(type)) {
-                            switch (ConfigManager::control_Mode.load()) {
-                                case InterSt::LOCAL:emit ChannelBus::instance().switchRemote(InterSt::LAN_WEB);// fall through
-                                case InterSt::LAN_WEB:m_webRoutes[type](socket,obj);break;
-                                default:QJsonObject response;
-                                        response["type"] = "scpi_response";
-                                        response["result"] = "Other interfaces of the instrument are currently in operation";
-                                        qCDebug(webSer)<<"[setupRoutes]:Currently in an alternative remote mode";
-                                        socket->sendTextMessage(QJsonDocument(response).toJson());
-                            }
-
+                            m_webRoutes[type](socket,obj);
                             return;
                         }
 
-                        qCWarning(webSer)<<"[onWsTextMessageReceived]: request route method not exist!";
+                        qCDebug(webSer)<<"(WebServerManager): request route method not exist!";
                     }}, Qt::DirectConnection);
 
+                socket->setObjectName(QString("%1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()));
+                qCDebug(webSer)<<"(WebServerManager):New WebSocket client: "<< socket->objectName();
                 m_sockets.append(socket);
                 return;
             }
@@ -241,12 +244,11 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
             return;
         }
 
-        qCCritical(webSer)<<"[startServer]: m_wsServer listen failed!";
+        qCCritical(webSer)<<"(WebServerManager): m_wsServer listen failed!";
         return;
     }
 
-    qCCritical(webSer)<<"[startServer]: m_httpServer listen failed!";
-    return;
+    qCCritical(webSer)<<"(WebServerManager): m_httpServer listen failed!";
 }
 WebServerManager::~WebServerManager()
 {
@@ -267,122 +269,28 @@ WebServerManager::~WebServerManager()
     m_sockets.clear();
 }
 
-void WebServerManager::set_network(bool isstatic)
-{
-    QFile file("/etc/network/interfaces");
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        // WriteOnly -> Clear the original content
-        QString configContent;
-        if(isstatic){
-            configContent =
-                "# interface file auto-generated by buildroot\n"
-                "auto lo\n"
-                "iface lo inet loopback\n\n"
-                "auto eth0\n"
-                "iface eth0 inet static\n"
-                "    address " + ConfigManager::IP + "\n"
-                "    netmask " + ConfigManager::SM + "\n"
-                "    gateway " + ConfigManager::Gate;
-        }else{
-            configContent =
-                "# interface file auto-generated by buildroot\n"
-                "auto lo\n"
-                "iface lo inet loopback\n\n"
-                "auto eth0\n"
-                "iface eth0 inet dhcp";
-        }
-
-        QTextStream out(&file);
-        out << configContent; file.close();
-        QString restartCmd = "/etc/init.d/S40network restart";
-        if (system(restartCmd.toStdString().c_str()) == 0) {
-            emit ChannelBus::instance().interAcUpdate();
-            return;
-        }
-
-        qCWarning(webSer)<< "[set_network]:/etc/init.d/S40network restart failed!";
-        return;
-    }
-
-    qCWarning(webSer)<< "[set_network]:Cannot open interfaces file for writing";
-    return;
-}
-
-bool WebServerManager::addModelFromNetwork(const QString &modelName, const QJsonArray &modelData)
-{
-    if (!BatteryModelManager::instance().m_models.contains(modelName)) {
-         QVector<BatteryDataPoint> pts;
-
-        for (const auto &item : modelData) {
-            if (!item.isNull() && item.isObject()) {
-                QJsonObject pointObj = item.toObject();
-
-                if (pointObj.contains("soc") && pointObj.contains("ocv") && pointObj.contains("imp")) {
-                    BatteryDataPoint point;
-                    point.soc = pointObj["soc"].toDouble();
-                    point.ocv = pointObj["ocv"].toDouble();
-                    point.imp = pointObj["imp"].toDouble();
-                    pts.append(point);
-                    continue;
-                }
-
-                qCWarning(webSer)<< "[addModelFromNetwork]:Parameter lack error!";
-                return false;
-            }
-
-            qCWarning(webSer)<< "[addModelFromNetwork]:Parameter model format error!";
-            return false;
-        }
-
-        // model->name = modelName;   saveModel to set model->name
-        return BatteryModelManager::instance().saveModel(pts, modelName);
-    }
-
-    qCWarning(webSer)<<"[addModelFromNetwork]:model incorrect!";
-    return false;
-}
-QJsonObject  WebServerManager::getModelsInfo() const
-{
-    QJsonObject result;
-    QJsonArray modelsArray;
-
-    for (auto it = BatteryModelManager::instance().m_models.begin(); it != BatteryModelManager::instance().m_models.end(); ++it) {
-        QJsonObject modelInfo;
-        modelInfo["name"] = it.key();
-
-        QJsonArray dataArray;
-        const auto &model = it.value();
-
-        for (const auto &point : model) {
-            QJsonObject pointObj;
-            pointObj["soc"] = std::round(point.soc * 10.0) / 10.0;
-            pointObj["ocv"] = std::round(point.ocv * 100.0) / 100.0;
-            pointObj["esr"] = std::round(point.imp * 1000.0) / 1000.0;
-            dataArray.append(pointObj);
-        }
-
-        modelInfo["data"] = dataArray;
-        modelsArray.append(modelInfo);
-    }
-
-    result["models"] = modelsArray;
-    result["status"] = "success";
-    return result;
-}
 void WebServerManager::setupWSRoutes()
 {
     m_webRoutes["scpi_command"] = [](QWebSocket* socket, const QJsonObject& obj)
     {
-        QByteArray cmd = (obj["command"].toString()+"\n").toUtf8();
-        qCDebug(webSer)<<"[setupRoutes]:SCPI command received:" << cmd;
-        QByteArray res = ScpiManager::instance().processCommand(cmd);
+        QJsonObject response;
 
-        if (!res.isEmpty()){
-            QJsonObject response;
-            response["type"] = "scpi_response";
-            response["result"] = QString::fromUtf8(res);
-            socket->sendTextMessage(QJsonDocument(response).toJson());
+        if (ConfigManager::isInteRemote(InterSt::LAN_WEB)){
+            QByteArray cmd = (obj["command"].toString()+"\n").toUtf8();
+            qCDebug(webSer)<<"[setupRoutes]:SCPI command received:" << cmd;
+            QByteArray res = ScpiManager::instance().processCommand(cmd);
+
+            if (!res.isEmpty()){
+                response["type"] = "scpi_response";
+                response["result"] = QString::fromUtf8(res);
+                socket->sendTextMessage(QJsonDocument(response).toJson());
+                return ;
+            };
         }
+
+        response["type"] = "scpi_response";
+        response["result"] = "Device on Other inter_Remote mode!";
+        socket->sendTextMessage(QJsonDocument(response).toJson());
     };
     m_webRoutes["channels_update"] = [this](QWebSocket* socket, const QJsonObject&)
     {
@@ -427,4 +335,106 @@ void WebServerManager::setupWSRoutes()
             socket->sendTextMessage(QJsonDocument(response).toJson());
         }
     };
+}
+QJsonObject  WebServerManager::getModelsInfo() const
+{
+    QJsonObject result;
+    QJsonArray modelsArray;
+
+    for (auto it = BatteryModelManager::instance().m_models.begin(); it != BatteryModelManager::instance().m_models.end(); ++it) {
+        QJsonObject modelInfo;
+        modelInfo["name"] = it.key();
+
+        QJsonArray dataArray;
+        const auto &model = it.value();
+
+        for (const auto &point : model) {
+            QJsonObject pointObj;
+            pointObj["soc"] = std::round(point.soc * 10.0) / 10.0;
+            pointObj["ocv"] = std::round(point.ocv * 100.0) / 100.0;
+            pointObj["esr"] = std::round(point.imp * 1000.0) / 1000.0;
+            dataArray.append(pointObj);
+        }
+
+        modelInfo["data"] = dataArray;
+        modelsArray.append(modelInfo);
+    }
+
+    result["models"] = modelsArray;
+    result["status"] = "success";
+    return result;
+}
+bool WebServerManager::addModelFromNetwork(const QString &modelName, const QJsonArray &modelData)
+{
+    if (!BatteryModelManager::instance().m_models.contains(modelName)) {
+         QVector<BatteryDataPoint> pts;
+
+        for (const auto &item : modelData) {
+            if (!item.isNull() && item.isObject()) {
+                QJsonObject pointObj = item.toObject();
+
+                if (pointObj.contains("soc") && pointObj.contains("ocv") && pointObj.contains("imp")) {
+                    BatteryDataPoint point;
+                    point.soc = pointObj["soc"].toDouble();
+                    point.ocv = pointObj["ocv"].toDouble();
+                    point.imp = pointObj["imp"].toDouble();
+                    pts.append(point);
+                    continue;
+                }
+
+                qCWarning(webSer)<< "(addModelFromNetwork):Parameter lack error!";
+                return false;
+            }
+
+            qCWarning(webSer)<< "(addModelFromNetwork):Parameter model format error!";
+            return false;
+        }
+
+        // model->name = modelName;   saveModel to set model->name
+        return BatteryModelManager::instance().saveModel(pts, modelName);
+    }
+
+    qCWarning(webSer)<<"(addModelFromNetwork):model incorrect!";
+    return false;
+}
+
+void WebServerManager::set_network(bool isstatic)
+{
+    QFile file("/etc/network/interfaces");
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        // WriteOnly -> Clear the original content
+        QString configContent;
+        if(isstatic){
+            configContent =
+                "# interface file auto-generated by buildroot\n"
+                "auto lo\n"
+                "iface lo inet loopback\n\n"
+                "auto eth0\n"
+                "iface eth0 inet static\n"
+                "    address " + ConfigManager::IP + "\n"
+                "    netmask " + ConfigManager::SM + "\n"
+                "    gateway " + ConfigManager::Gate;
+        }else{
+            configContent =
+                "# interface file auto-generated by buildroot\n"
+                "auto lo\n"
+                "iface lo inet loopback\n\n"
+                "auto eth0\n"
+                "iface eth0 inet dhcp";
+        }
+
+        QTextStream out(&file);
+        out << configContent; file.close();
+        QString restartCmd = "/etc/init.d/S40network restart";
+        if (system(restartCmd.toStdString().c_str()) == 0) {
+            emit ChannelBus::instance().interAcUpdate();
+            return;
+        }
+
+        qCWarning(webSer)<< "(set_network):/etc/init.d/S40network restart failed!";
+        return;
+    }
+
+    qCWarning(webSer)<< "(set_network):Cannot open interfaces file for writing";
+    return;
 }

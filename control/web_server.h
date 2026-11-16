@@ -8,7 +8,6 @@ class QTcpSocket;
 class QTcpServer;
 class QWebSocket;
 class QWebSocketServer;
-
 class WebServerManager : public QObject
 {
     Q_OBJECT
@@ -37,13 +36,13 @@ public:
     channelpage* m_ChPage;
 
 private:
+    void setupWSRoutes();
+    QJsonObject getModelsInfo() const;
+    bool addModelFromNetwork(const QString &modelName, const QJsonArray &modelData);
+
     QWebSocketServer *m_wsServer{nullptr};
     QList<QWebSocket*> m_sockets;
 
     using WebHandler = std::function<void(QWebSocket*, const QJsonObject&)>;
     QHash<QString, WebHandler> m_webRoutes;
-
-    bool addModelFromNetwork(const QString &modelName, const QJsonArray &modelData);
-    QJsonObject getModelsInfo() const;
-    void setupWSRoutes();
 };

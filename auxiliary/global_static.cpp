@@ -1,4 +1,5 @@
 #include "global_static.h"
+#include "signal_bus.h"
 #include <QNetworkInterface>
 #include <QSettings>
 #include <QtEndian>
@@ -33,6 +34,18 @@ Q_LOGGING_CATEGORY(tirpLoad,"tirpLoad:")
 
 std::unique_ptr<QSettings> ConfigManager::s_settings;
 std::atomic<int> ConfigManager::control_Mode{InterSt::LOCAL};
+bool ConfigManager::isInteRemote(int Inte)
+{
+    if(ConfigManager::control_Mode.load() == Inte){
+        return true;
+    }else if (ConfigManager::control_Mode.load() == InterSt::LOCAL){
+        emit ChannelBus::instance().switchRemote(Inte);
+        return true;
+    }
+
+    qCDebug(vxiSer)<<"(isVxiRemote): Device on Other Remote_mode!";
+    return false;
+}
 
 std::atomic<quint32> ConfigManager::s_CANid{0};
 quint32 ConfigManager::s_rs232BaudIndex{0};
