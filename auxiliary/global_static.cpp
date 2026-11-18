@@ -7,29 +7,29 @@
 #include <QFile>
 
 /* widgets */
-Q_LOGGING_CATEGORY(aMain,"[aMain]:")
-Q_LOGGING_CATEGORY(aPMain,"[aPMain]:")
+Q_LOGGING_CATEGORY(aMain,"[aMain]")
+Q_LOGGING_CATEGORY(aPMain,"[aPMain]")
 /* interaction */
-Q_LOGGING_CATEGORY(inDeSeP,"[inDeSeP]:")
-Q_LOGGING_CATEGORY(inChSeP,"[inChSeP]:")
-Q_LOGGING_CATEGORY(inChPaG,"[inChPaG]:")
+Q_LOGGING_CATEGORY(inDeSeP,"[inDeSeP]")
+Q_LOGGING_CATEGORY(inChSeP,"[inChSeP]")
+Q_LOGGING_CATEGORY(inChPaG,"[inChPaG]")
 /* component */
-Q_LOGGING_CATEGORY(coReOvL,"[coReOvL]:")
-Q_LOGGING_CATEGORY(coNuKeP,"[coNuKeP]:")
-Q_LOGGING_CATEGORY(coChCaD,"[coChCaD]:")
+Q_LOGGING_CATEGORY(coReOvL,"[coReOvL]")
+Q_LOGGING_CATEGORY(coNuKeP,"[coNuKeP]")
+Q_LOGGING_CATEGORY(coChCaD,"[coChCaD]")
 /* control */
-Q_LOGGING_CATEGORY(canSer,"[canSer]:")
-Q_LOGGING_CATEGORY(r32Ser,"[r32Ser]:")
-Q_LOGGING_CATEGORY(vxiSer,"[vxiSer]:")
-Q_LOGGING_CATEGORY(webSer,"[webSer]:")
+Q_LOGGING_CATEGORY(canSer,"[canSer]")
+Q_LOGGING_CATEGORY(r32Ser,"[r32Ser]")
+Q_LOGGING_CATEGORY(vxiSer,"[vxiSer]")
+Q_LOGGING_CATEGORY(webSer,"[webSer]")
 /* channel */
-Q_LOGGING_CATEGORY(canCh,"[canCh]:")
-Q_LOGGING_CATEGORY(scpi,"[scpi]:")
-Q_LOGGING_CATEGORY(uartCh,"[uartCh]:")
+Q_LOGGING_CATEGORY(canCh,"[canCh]")
+Q_LOGGING_CATEGORY(scpi,"[scpi]")
+Q_LOGGING_CATEGORY(uartCh,"[uartCh]")
 /* auxiliary */
-Q_LOGGING_CATEGORY(battMod,"[battMod]:")
-Q_LOGGING_CATEGORY(signBus,"[signBus]:")
-Q_LOGGING_CATEGORY(globalSt,"[globalSt]:")
+Q_LOGGING_CATEGORY(battMod,"[battMod]")
+Q_LOGGING_CATEGORY(signBus,"[signBus]")
+Q_LOGGING_CATEGORY(globalSt,"[globalSt]")
 
 QStringList ConfigManager::customList= {
     "[scpi]:",

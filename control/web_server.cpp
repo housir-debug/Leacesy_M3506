@@ -5,6 +5,7 @@
 #include "channel/scpi_handle.h"
 #include "vxi_protocol.h"
 #include "web_server.h"
+// --- QT package ---
 #include <QWebSocketServer>
 #include <QJsonDocument>
 #include <QJsonObject>

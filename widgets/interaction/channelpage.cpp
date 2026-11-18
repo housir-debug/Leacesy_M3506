@@ -4,6 +4,7 @@
 #include "auxiliary/signal_bus.h"
 #include "ui_channelpage.h"
 #include "channelpage.h"
+// --- QT package ---
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QtEndian>
@@ -13,7 +14,7 @@ void channelpage::on_dig_pushButton_clicked()
 {
     for (channelcard *card :  qAsConst(m_channels)) {
         if (card->getChmode() == ChCardindex::Battery && card->getChstatus()){
-            ChannelBus::instance().to_Channel(card->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "",false);
+            ChannelBus::instance().to_Channel(card->m_channel,JV6xxx::UartCMD::OUTP_OFF, "",false);
         }
 
         card->setChannelmode(ChCardindex::Digital);
@@ -23,7 +24,7 @@ void channelpage::on_batt_pushButton_clicked()
 {
     for (channelcard *card :  qAsConst(m_channels)) {
         if (card->getChmode() == ChCardindex::Digital && card->getChstatus()){
-            ChannelBus::instance().to_Channel(card->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "",false);
+            ChannelBus::instance().to_Channel(card->m_channel,JV6xxx::UartCMD::OUTP_OFF, "",false);
         }
 
         card->setChannelmode(ChCardindex::Battery);
@@ -100,8 +101,8 @@ channelcard* channelpage::create_chcard(int ch)
          card->setChannel(ch);
 
          connect(card, &channelcard::clicked, this, [card](bool switchs) {
-             quint8 func = switchs ? JV6xxx::Output::SET_OUTPSTATUS_ON : JV6xxx::Output::SET_OUTPSTATUS_OFF;
-             ChannelBus::instance().to_Channel(card->m_channel,JV6xxx::OUTPUT, func, "",false);
+             quint16 cmds = switchs ? JV6xxx::UartCMD::OUTP_ON : JV6xxx::UartCMD::OUTP_OFF;
+             ChannelBus::instance().to_Channel(card->m_channel,cmds, "",false);
              });
          //connect(card, &channelcard::longPressed, this, [this]() {emit jump_chsetpage();});
 
@@ -132,15 +133,15 @@ void channelpage::update_Voltage(int ch,float voltage)
 
                 float ocvval = itcard.value()->getcurrentOCV();
                 qToBigEndian(ocvval, reinterpret_cast<uint8_t*>(data.data()));
-                ChannelBus::instance().to_Channel(ch,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURVOLT, data,false);
+                ChannelBus::instance().to_Channel(ch,JV6xxx::UartCMD::VOLT, data,false);
 
                 float esrval = itcard.value()->getcurrentESR();
                 qToBigEndian(esrval, reinterpret_cast<uint8_t*>(data.data()));
-                ChannelBus::instance().to_Channel(ch,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURIMP, data,false);
+                ChannelBus::instance().to_Channel(ch,JV6xxx::UartCMD::CURR, data,false);
                 return;
             }
 
-            ChannelBus::instance().to_Channel(itcard.value()->m_channel,JV6xxx::OUTPUT, JV6xxx::Output::SET_OUTPSTATUS_OFF, "",false);
+            ChannelBus::instance().to_Channel(itcard.value()->m_channel,JV6xxx::UartCMD::OUTP_OFF, "",false);
         }
     }
 }

@@ -36,18 +36,18 @@ const std::vector<ChannelBus::UartConfig> ChannelBus::configs = {
     {"/dev/ttyWCH25", QSerialPort::Baud38400, 0x1f},
     {"/dev/ttyWCH26", QSerialPort::Baud38400, 0x20},
     {"/dev/ttyWCH27", QSerialPort::Baud38400, 0x21},   // 33*/
-    {"/dev/ttyS2",    QSerialPort::Baud38400, 0x01},   // test
+    {"/dev/ttyS1",    QSerialPort::Baud38400, 0x01},   // test
 };
 
-void ChannelBus::to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param,bool isScpi)
+void ChannelBus::to_Channel(int channel,quint16 cmds,const QByteArray& param,bool isScpi)
 {
     switch(channel) {
         case 0:
-            #define CHANNEL(n) emit to_UartChannel##n(cmd, func, param,isScpi);
+            #define CHANNEL(n) emit to_UartChannel##n(cmds, param,isScpi);
             CHANNEL_COUNT
             #undef CHANNEL
             return;
-        #define CHANNEL(n) case n: return emit to_UartChannel##n(cmd, func, param,isScpi);
+        #define CHANNEL(n) case n: return emit to_UartChannel##n(cmds, param,isScpi);
         CHANNEL_COUNT
         #undef CHANNEL
         default:return;

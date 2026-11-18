@@ -2,6 +2,7 @@
 #include "auxiliary/signal_bus.h"
 #include "ui_devicesetpage.h"
 #include "devicesetpage.h"
+// --- QT package ---
 #include <QStandardItem>
 #include <QTimer>
 

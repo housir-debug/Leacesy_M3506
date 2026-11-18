@@ -1,6 +1,7 @@
 #include "auxiliary/global_static.h"
 #include "auxiliary/signal_bus.h"
 #include "scpi_handle.h"
+// --- QT package ---
 #include <QtEndian>
 #include <QFile>
 
@@ -88,9 +89,9 @@ scpi_result_t ScpiManager::SCPI_OutputState(scpi_t* context)
 {
     scpi_bool_t OpenOut;
     if(SCPI_ParamBool(context, &OpenOut,true)){
-        quint8 func = OpenOut ? JV6xxx::Output::SET_OUTPSTATUS_ON : JV6xxx::Output::SET_OUTPSTATUS_OFF;
+        quint16 cmds = OpenOut ? JV6xxx::UartCMD::OUTP_ON : JV6xxx::UartCMD::OUTP_OFF;
         qCDebug(scpi)<<"(SCPI_OutputState)SCPI_Output OpenOut: "<<OpenOut;
-        return sendQueryCmd(context,JV6xxx::OUTPUT,func,"");
+        return sendQueryCmd(context,cmds,"");
     }
 
     return SCPI_RES_ERR;
@@ -106,7 +107,7 @@ scpi_result_t ScpiManager::SCPI_MeasureFunc(scpi_t* context)
         QByteArray data(1, static_cast<quint8>(choice));
         self->m_querymode = choice;
         switch (choice){
-            case 0: case 1: case 2: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSFUNC,data);
+            case 0: case 1: case 2: return sendQueryCmd(context,JV6xxx::UartCMD::SetFUNC,data);
             default:return SCPI_RES_OK;
         }
     }
@@ -120,11 +121,12 @@ scpi_result_t ScpiManager::SCPI_CalibrateStep(scpi_t* context)
     int32_t step;
     float parameter;
     if (SCPI_ParamInt(context, &step, true)) {
-        if (SCPI_ParamFloat(context, &parameter, true)) {
+        if (step <= JV6xxx::UartCMD::CalStepItemMax && SCPI_ParamFloat(context, &parameter, true)) {
             QByteArray data(4, 0);
+            quint16 cmds = JV6xxx::UartCMD::CalStepOffset | static_cast<quint16>(step);
             qCDebug(scpi) <<"(SCPI_CalibrateStep)step: "<<step<<" param: "<<parameter;
             qToBigEndian(parameter, reinterpret_cast<uint8_t*>(data.data()));
-            return sendQueryCmd(context,JV6xxx::CALIBRATION,step,data);
+            return sendQueryCmd(context,cmds,data);
         }
     }
 
@@ -133,10 +135,13 @@ scpi_result_t ScpiManager::SCPI_CalibrateStep(scpi_t* context)
 // -
 scpi_result_t ScpiManager::SCPI_CalibrateStepQ(scpi_t* context)
 {
-    int value;
-    if (SCPI_ParamInt(context, &value, true)) {
-        qCDebug(scpi) <<"(SCPI_CalibrateStepQ)Step Value: "<< value;
-        return sendQueryCmd(context,JV6xxx::CALIBRATION,value);
+    int step;
+    if (SCPI_ParamInt(context, &step, true)) {
+        if (step <= JV6xxx::UartCMD::CalStepItemMax){
+            quint16 cmds = JV6xxx::UartCMD::CalStepOffset | static_cast<quint16>(step);
+            qCDebug(scpi) <<"(SCPI_CalibrateStepQ)Step Value: "<< step;
+            return sendQueryCmd(context,cmds);
+        }
     }
 
     return SCPI_RES_ERR;
@@ -148,40 +153,40 @@ scpi_result_t ScpiManager::SCPI_Query(scpi_t* context)
     auto* self = static_cast<ScpiManager*>(context->user_context);
 
     switch (self->m_querymode){ // Only query ,not response. Read -> response
-        case 0: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASCURR);
-        case 1: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASDVM);
-        case 2: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASVOLT);
-        case 3: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASSCUR);
-        case 4: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASBTMP);
-        case 5: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASHTMP);
-        case 6: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASTMP1);
-        case 7: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASTMP2);
-        case 8: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASTMP3);
+        case 0: return sendQueryCmd(context,JV6xxx::UartCMD::RCurrent);
+        case 1: return sendQueryCmd(context,JV6xxx::UartCMD::RDVMDC);
+        case 2: return sendQueryCmd(context,JV6xxx::UartCMD::RVoltage);
+        case 3: return sendQueryCmd(context,JV6xxx::UartCMD::RSCurrent);
+        case 4: return sendQueryCmd(context,JV6xxx::UartCMD::RBT);
+        case 5: return sendQueryCmd(context,JV6xxx::UartCMD::RHT);
+        case 6: return sendQueryCmd(context,JV6xxx::UartCMD::TMP1);
+        case 7: return sendQueryCmd(context,JV6xxx::UartCMD::TMP2);
+        case 8: return sendQueryCmd(context,JV6xxx::UartCMD::TMP3);
         default:return SCPI_RES_ERR;
     }
 }
 
 // Basic execution
-scpi_result_t ScpiManager::sendBoolCmd(scpi_t* context, quint8 cmd, quint8 func)
+scpi_result_t ScpiManager::sendBoolCmd(scpi_t* context,quint16 cmds)
 {
     scpi_bool_t OpenOut;
     if(SCPI_ParamBool(context, &OpenOut,true)){
         qCDebug(scpi)<<"(sendBoolCmd)SCPI_Output OpenOut: "<<OpenOut;
         quint8 swi = OpenOut ? 0x01 : 0x00;
         QByteArray data(1, swi);
-        return sendQueryCmd(context,cmd,func,data);
+        return sendQueryCmd(context,cmds,data);
     }
 
     return SCPI_RES_ERR;
 }
-scpi_result_t ScpiManager::sendFloatCmd(scpi_t* context, quint8 cmd, quint8 func)
+scpi_result_t ScpiManager::sendFloatCmd(scpi_t* context,quint16 cmds)
 {
     float value;
     if (SCPI_ParamFloat(context, &value, true)) {
         qCDebug(scpi) <<"(sendFloatCmd)Channel Set Value:"<< value;
         QByteArray data(4, 0);
         qToBigEndian(value, reinterpret_cast<uint8_t*>(data.data()));
-        return sendQueryCmd(context,cmd,func,data);
+        return sendQueryCmd(context,cmds,data);
     }
 
     return SCPI_RES_ERR;
@@ -226,18 +231,18 @@ const scpi_choice_def_t ScpiManager::m_CmdparaChoices[] =
     {"EITHer",   3},
     SCPI_CHOICE_LIST_END
 };
-scpi_result_t ScpiManager::sendChoiceCmd(scpi_t* context,quint8 cmd, quint8 func)
+scpi_result_t ScpiManager::sendChoiceCmd(scpi_t* context,quint16 cmds)
 {
     int32_t choice;
     if (SCPI_ParamChoice(context, m_CmdparaChoices, &choice, true)) {
         qCDebug(scpi) <<"(sendChoiceCmd)Channel choice: "<< choice;
         QByteArray data(1, static_cast<quint8>(choice));
-        return sendQueryCmd(context,cmd,func,data);
+        return sendQueryCmd(context,cmds,data);
     }
 
     return SCPI_RES_ERR;
 }
-scpi_result_t ScpiManager::sendIntCmd(scpi_t* context, quint8 cmd, quint8 func,quint8 bytes)
+scpi_result_t ScpiManager::sendIntCmd(scpi_t* context,quint16 cmds,quint8 bytes)
 {
     int value;
     if (SCPI_ParamInt(context, &value, true)) {
@@ -254,14 +259,14 @@ scpi_result_t ScpiManager::sendIntCmd(scpi_t* context, quint8 cmd, quint8 func,q
             qToBigEndian(val, data.data());
         }
 
-        return sendQueryCmd(context,cmd,func,data);
+        return sendQueryCmd(context,cmds,data);
     }
 
     return SCPI_RES_ERR;
 }
 
 // ********************************* Basic helper *************************************
-scpi_result_t ScpiManager::sendQueryCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data)
+scpi_result_t ScpiManager::sendQueryCmd(scpi_t* context,quint16 cmds, const QByteArray &data)
 {
     int32_t ch{0};
     if(SCPI_CommandNumbers(context, &ch, 1, -1)){ // Array 1, Default Channel -1
@@ -276,7 +281,7 @@ scpi_result_t ScpiManager::sendQueryCmd(scpi_t* context, quint8 cmd, quint8 func
             channels = parseChannelList(context);
         }
 
-        return sendMultiCHCmd(context, cmd, func, data, channels);
+        return sendMultiCHCmd(context, cmds, data, channels);
     }
 
     SCPI_ErrorPush(context, SCPI_ERROR_EXECUTION_ERROR);
@@ -343,18 +348,23 @@ std::vector<ScpiManager::ChannelAddress> ScpiManager::parseChannelList(scpi_t* c
     return channelList; // emtry or true list
 }
 
-scpi_result_t ScpiManager::sendMultiCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data, const std::vector<ChannelAddress> &channels)
+scpi_result_t ScpiManager::sendMultiCHCmd(scpi_t* context,quint16 cmds, const QByteArray &data, const std::vector<ChannelAddress> &channels)
 {
     if (!channels.empty()) {
         auto* self = static_cast<ScpiManager*>(context->user_context);
         self->m_responseBuffer.append("[");
 
         for (ChannelAddress chaddress : channels) {
-            qCDebug(scpi)<<"(sendSingleCHCmd)Single-Channel: "<<chaddress.channel;
-            ChannelBus::instance().to_Channel(chaddress.channel,cmd,func,data,true);
+            //qCDebug(scpi)<<"(sendSingleCHCmd)Single-Channel: "<<chaddress.channel;
+            ChannelBus::instance().to_Channel(chaddress.channel,cmds,data,true);
+        }
 
-            if(!self->m_syncCondition.wait(&self->m_syncMutex, 120) || SCPI_ReadQ(context) == SCPI_RES_ERR){
-                self->m_responseBuffer.append("Null");
+        for (size_t i = 0; i < channels.size(); ++i) {
+            if(self->m_syncCondition.wait(&self->m_syncMutex, JV6xxx::RES_WAIT_TIME+1)){
+                self->m_responseBuffer.append(QString("CH-%1:").arg(self->m_channel).toUtf8());
+                SCPI_ReadQ(context);//write value
+            }else{
+                self->m_responseBuffer.append("Null"); //write null
             }
             self->m_responseBuffer.append(",");
         }
@@ -366,65 +376,69 @@ scpi_result_t ScpiManager::sendMultiCHCmd(scpi_t* context, quint8 cmd, quint8 fu
 
     return SCPI_RES_ERR;
 }
-
 namespace chResType
 {
     constexpr const int Void     = 0x00;
-    constexpr const int Bool     = 0x01;
-    constexpr const int Float    = 0x02;
-    constexpr const int Int      = 0x03;
+    constexpr const int Int      = 0x01;
+    constexpr const int Bool     = 0x02;
+    constexpr const int Float    = 0x03;
     constexpr const int String   = 0x04;
 }
-scpi_result_t ScpiManager::SCPI_ReadQ(scpi_t* context)
+void ScpiManager::SCPI_ReadQ(scpi_t* context)
 {
     auto* self = static_cast<ScpiManager*>(context->user_context);
     switch (self->m_ReType){
-        case chResType::Void: return SCPI_RES_OK;
-        case chResType::Bool: SCPI_ResultBool(context, self->m_CHStateReturn);                         return SCPI_RES_OK;
-        case chResType::Float: SCPI_ResultFloat(context, self->m_CHFloatReturn);                       return SCPI_RES_OK;
-        case chResType::Int: SCPI_ResultInt(context, self->m_CHIntReturn);                             return SCPI_RES_OK;
-        case chResType::String: SCPI_ResultText(context, self->m_CHStringReturn.toUtf8().constData()); return SCPI_RES_OK;
-        default:return SCPI_RES_ERR;
+        case chResType::Void: return;
+        case chResType::Int: SCPI_ResultInt(context, self->m_CHIntReturn);return;
+        case chResType::Bool: SCPI_ResultBool(context, self->m_CHStateReturn);return;
+        case chResType::Float: SCPI_ResultFloat(context, self->m_CHFloatReturn);return;
+        case chResType::String: SCPI_ResultText(context, self->m_CHStringReturn.toUtf8().constData());return ;
+        default:qCCritical(scpi)<<"(SCPI_ReadQ)Unexpected ReType: "<< self->m_ReType;return;
     }
 }
 // ********************************** external API **********************************
 
-void ScpiManager::processCHVoidResponse()
+void ScpiManager::processCHVoidResponse(quint8 ch)
 {
     m_syncMutex.lock();
     m_ReType = chResType::Void;
+    m_channel = ch;
     m_syncMutex.unlock();
     m_syncCondition.wakeAll();
 }
-void ScpiManager::processCHBoolResponse(bool state)
-{
-    m_syncMutex.lock();
-    m_ReType = chResType::Bool;
-    m_CHStateReturn = state;
-    m_syncMutex.unlock();
-    m_syncCondition.wakeAll();
-}
-void ScpiManager::processCHFloatResponse(float chf)
-{
-    m_syncMutex.lock();
-    m_ReType = chResType::Float;
-    m_CHFloatReturn = chf;
-    m_syncMutex.unlock();
-    m_syncCondition.wakeAll();
-}
-void ScpiManager::processCHIntResponse(int cht)
+void ScpiManager::processCHIntResponse(quint8 ch,int cht)
 {
     m_syncMutex.lock();
     m_ReType = chResType::Int;
     m_CHIntReturn = cht;
+    m_channel = ch;
     m_syncMutex.unlock();
     m_syncCondition.wakeAll();
 }
-void ScpiManager::processCHStringResponse(const QString& val)
+void ScpiManager::processCHBoolResponse(quint8 ch,bool state)
+{
+    m_syncMutex.lock();
+    m_ReType = chResType::Bool;
+    m_CHStateReturn = state;
+    m_channel = ch;
+    m_syncMutex.unlock();
+    m_syncCondition.wakeAll();
+}
+void ScpiManager::processCHFloatResponse(quint8 ch,float chf)
+{
+    m_syncMutex.lock();
+    m_ReType = chResType::Float;
+    m_CHFloatReturn = chf;
+    m_channel = ch;
+    m_syncMutex.unlock();
+    m_syncCondition.wakeAll();
+}
+void ScpiManager::processCHStringResponse(quint8 ch,const QString& val)
 {
     m_syncMutex.lock();
     m_ReType = chResType::String;
     m_CHStringReturn = val;
+    m_channel = ch;
     m_syncMutex.unlock();
     m_syncCondition.wakeAll();
 }

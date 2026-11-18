@@ -2,6 +2,7 @@
 #include <QString>
 
 namespace JV6xxx {
+    constexpr int RES_WAIT_TIME  = 119; // ms
     constexpr int MAX_QUEUE_CNT  = 9999;
     constexpr int Thread_CHSUM   = 0x09;
 
@@ -110,7 +111,7 @@ namespace JV6xxx {
         CalUPTC         = 0X0618,
         // Calibration
         CalStepOffset   = 0X0700,
-        CalStepItemMax  = 0X7F,
+        CalStepItemMax  = 0X007F,
         // Trigger
         ABOR            = 0X0800,
         INIT            = 0X0801,

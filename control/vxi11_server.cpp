@@ -3,6 +3,7 @@
 #include "channel/scpi_handle.h"
 #include "vxi_protocol.h"
 #include "vxi11_server.h"
+// --- QT package ---
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QUdpSocket>

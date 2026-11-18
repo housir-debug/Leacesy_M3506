@@ -72,7 +72,7 @@ channelsetting::channelsetting(QWidget *parent) :QWidget(parent),
             for (int i = 1; i <= 36; ++i) {
                 auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
                 if (btn && btn->isChecked()){
-                    ChannelBus::instance().to_Channel(i,JV6xxx::OUTPUT,JV6xxx::Output::SET_OUTPSTATUS_OFF,"",false);
+                    ChannelBus::instance().to_Channel(i,JV6xxx::UartCMD::OUTP_OFF,"",false);
                 }
             }
             ui->onoff_comboBox->setProperty("Outputed",false);
@@ -80,7 +80,7 @@ channelsetting::channelsetting(QWidget *parent) :QWidget(parent),
             for (int i = 1; i <= 36; ++i) {
                 auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
                 if (btn && btn->isChecked()){
-                    ChannelBus::instance().to_Channel(i,JV6xxx::OUTPUT,JV6xxx::Output::SET_OUTPSTATUS_ON,"",false);
+                    ChannelBus::instance().to_Channel(i,JV6xxx::UartCMD::OUTP_ON,"",false);
                 }
             }
             ui->onoff_comboBox->setProperty("Outputed",true);
@@ -95,21 +95,21 @@ channelsetting::channelsetting(QWidget *parent) :QWidget(parent),
             for (int i = 1; i <= 36; ++i) {
                 auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
                 if (btn && btn->isChecked()){
-                    ChannelBus::instance().to_Channel(i,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1,JV6xxx::Param::A),false);
+                    ChannelBus::instance().to_Channel(i,JV6xxx::UartCMD::CurrRANG,QByteArray(1,JV6xxx::Param::A),false);
                 }
             }
         }else if(text == "mA"){
             for (int i = 1; i <= 36; ++i) {
                 auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
                 if (btn && btn->isChecked()){
-                    ChannelBus::instance().to_Channel(i,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1,JV6xxx::Param::mA),false);
+                    ChannelBus::instance().to_Channel(i,JV6xxx::UartCMD::CurrRANG,QByteArray(1,JV6xxx::Param::mA),false);
                 }
             }
         }else{
             for (int i = 1; i <= 36; ++i) {
                 auto *btn = ui->chselectframe->findChild<QPushButton*>(QString("pushButton%1").arg(i));
                 if (btn && btn->isChecked()){
-                    ChannelBus::instance().to_Channel(i,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,QByteArray(1,JV6xxx::Param::Auto),false);
+                    ChannelBus::instance().to_Channel(i,JV6xxx::UartCMD::CurrRANG,QByteArray(1,JV6xxx::Param::Auto),false);
                 }
             }
         }
@@ -152,13 +152,13 @@ channelsetting::channelsetting(QWidget *parent) :QWidget(parent),
                 if (btn && btn->isChecked()){
                     switch (m_setmode) {
                         case channelSet_mode::cv:
-                            ChannelBus::instance().to_Channel(i,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURVOLT,data,false);
+                            ChannelBus::instance().to_Channel(i,JV6xxx::UartCMD::VOLT,data,false);
                             break;
                         case channelSet_mode::cc:
-                            ChannelBus::instance().to_Channel(i,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURCURR,data,false);
+                            ChannelBus::instance().to_Channel(i,JV6xxx::UartCMD::CURR,data,false);
                             break;
                         case channelSet_mode::ovp:
-                            ChannelBus::instance().to_Channel(i,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURVOLT_PROT,data,false);
+                            ChannelBus::instance().to_Channel(i,JV6xxx::UartCMD::OVP,data,false);
                             break;
                         case channelSet_mode::soc:
                             emit to_chSOC(i,val);

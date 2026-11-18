@@ -20,7 +20,7 @@ public:
     };
     static const std::vector<UartConfig> configs;
 
-    void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param, bool isScpi);
+    void to_Channel(int channel,quint16 cmds,const QByteArray& param, bool isScpi);
     void to_ChannelReset(int channel);
     static ChannelBus& instance();
 
@@ -32,7 +32,7 @@ private:
 signals:
     /* control,UI -> channel */
     #define CHANNEL(n) \
-        void to_UartChannel##n(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi); \
+        void to_UartChannel##n(quint16 cmds, const QByteArray& param,bool isScpi); \
         void to_UartChannel##n##Reset();
     CHANNEL_COUNT
     #undef CHANNEL

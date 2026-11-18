@@ -179,7 +179,7 @@ void Mainwindow::testUi()
 void Mainwindow::initO()
 {
     if (Module::enable_UartCh){
-        using ChannelBus_toUartCh = void (ChannelBus::*)(quint8 cmd, quint8 func, const QByteArray& param,bool isScpi);
+        using ChannelBus_toUartCh = void (ChannelBus::*)(quint16 cmds, const QByteArray& param,bool isScpi);
         std::vector<ChannelBus_toUartCh> Bus_toUCh =
         {
             #define CHANNEL(n) static_cast<ChannelBus_toUartCh>(&ChannelBus::to_UartChannel##n),

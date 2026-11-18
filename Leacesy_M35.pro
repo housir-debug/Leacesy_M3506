@@ -51,6 +51,7 @@ SOURCES += \
     channel/can_channel.cpp \
     channel/scpi_handle.cpp \
     channel/uart_channel.cpp \
+    control/can_protocol.cpp \
     control/can_server.cpp \
     control/r32_server.cpp \
     control/vxi11_server.cpp \
