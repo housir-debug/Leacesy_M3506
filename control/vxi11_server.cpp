@@ -7,7 +7,9 @@
 #include <QTcpSocket>
 #include <QUdpSocket>
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 #include "vxi11core.h"
 extern void device_core_1(struct svc_req* rqstp, SVCXPRT* transp);
 extern void device_async_1(struct svc_req* rqstp, SVCXPRT* transp);
@@ -20,10 +22,10 @@ Device_Error* device_abort_1_svc(Device_Link* argp, struct svc_req* rqstp)
 
     // Repeats the SCPI instruction. Not supported.
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(device_abort): Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp;
+        qCDebug(vxiSer)<<"(device_abort)Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp;
         resp.error = Vxi11::ErrorCode::NO_ERROR;
     }else{
-        qCWarning(vxiSer)<<"(device_abort):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(device_abort)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
     }
 
@@ -34,7 +36,7 @@ Create_LinkResp* create_link_1_svc(Create_LinkParms* argp, struct svc_req* rqstp
     static Create_LinkResp resp;
 
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(create_link): Ser_Id "<<rqstp->rq_xprt;
+        qCDebug(vxiSer)<<"(create_link)Ser_Id "<<rqstp->rq_xprt;
 
         if (argp->device != nullptr && strcmp(argp->device, "inst0") == 0){
             if (!argp->lockDevice || vxi11_server::instance().m_lockLinkId == -1){
@@ -64,7 +66,7 @@ Create_LinkResp* create_link_1_svc(Create_LinkParms* argp, struct svc_req* rqstp
             resp.lid = 0;
         }
     }else{
-        qCWarning(vxiSer)<<"(create_link):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(create_link)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
         resp.abortPort = 0;
         resp.lid = 0;
@@ -78,14 +80,14 @@ Device_WriteResp* device_write_1_svc(Device_WriteParms* argp, struct svc_req* rq
     static Device_WriteResp resp;
 
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(device_write): Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
+        qCDebug(vxiSer)<<"(device_write)Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
 
         if (ConfigManager::isInteRemote(InterSt::LAN_VXI)){
             if (argp->lid > 0 && vxi11_server::instance().m_activeLinks.contains(argp->lid)){
                 if (vxi11_server::instance().m_lockLinkId == argp->lid || vxi11_server::instance().m_lockLinkId == -1) {
-                    qCDebug(vxiSer)<<"[device_write]: SCPI-Command: "<<argp->data.data_val;
+                    qCDebug(vxiSer)<<"[device_write]SCPI-Command: "<<argp->data.data_val;
                     vxi11_server::instance().m_tempbuffer = ScpiManager::instance().processCommand(argp->data.data_val);
-                    qCDebug(vxiSer)<<"[device_write]: SCPI-Response: "<<vxi11_server::instance().m_tempbuffer;
+                    qCDebug(vxiSer)<<"[device_write]SCPI-Response: "<<vxi11_server::instance().m_tempbuffer;
 
                     resp.error = Vxi11::ErrorCode::NO_ERROR;
                     resp.size = argp->data.data_len;
@@ -102,7 +104,7 @@ Device_WriteResp* device_write_1_svc(Device_WriteParms* argp, struct svc_req* rq
             resp.size = 0;
         }
     }else{
-        qCWarning(vxiSer)<<"(device_write):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(device_write)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
         resp.size = 0;
     }
@@ -114,7 +116,7 @@ Device_ReadResp* device_read_1_svc(Device_ReadParms* argp, struct svc_req* rqstp
     static Device_ReadResp resp;
 
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(device_read): Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
+        qCDebug(vxiSer)<<"(device_read)Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
 
         if (argp->lid > 0 && vxi11_server::instance().m_activeLinks.contains(argp->lid)){
             if (vxi11_server::instance().m_lockLinkId == argp->lid || vxi11_server::instance().m_lockLinkId == -1) {
@@ -132,7 +134,7 @@ Device_ReadResp* device_read_1_svc(Device_ReadParms* argp, struct svc_req* rqstp
             resp.data.data_len = 0;
         }
     }else{
-        qCWarning(vxiSer)<<"(device_read):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(device_read)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
         resp.data.data_val = nullptr;
         resp.data.data_len = 0;
@@ -146,7 +148,7 @@ Device_ReadStbResp* device_readstb_1_svc(Device_GenericParms* argp, struct svc_r
     static Device_ReadStbResp resp;
 
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(device_readstb): Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
+        qCDebug(vxiSer)<<"(device_readstb)Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
 
         if (argp->lid > 0 && vxi11_server::instance().m_activeLinks.contains(argp->lid)){
             if (vxi11_server::instance().m_lockLinkId == argp->lid || vxi11_server::instance().m_lockLinkId == -1) {
@@ -162,7 +164,7 @@ Device_ReadStbResp* device_readstb_1_svc(Device_GenericParms* argp, struct svc_r
             resp.stb = 0;
         }
     }else{
-        qCWarning(vxiSer)<<"(device_readstb):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(device_readstb)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
         resp.stb = 0;
     }
@@ -175,10 +177,10 @@ Device_Error* device_trigger_1_svc(Device_GenericParms* argp, struct svc_req* rq
 
     // Repeats the SCPI instruction. Not supported.
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(device_trigger): Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
+        qCDebug(vxiSer)<<"(device_trigger)Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
         resp.error = Vxi11::ErrorCode::NO_ERROR;
     }else{
-        qCWarning(vxiSer)<<"(device_trigger):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(device_trigger)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
     }
 
@@ -189,7 +191,7 @@ Device_Error* device_clear_1_svc(Device_GenericParms* argp, struct svc_req* rqst
     static Device_Error resp;
 
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(device_clear): Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
+        qCDebug(vxiSer)<<"(device_clear)Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
 
         if (argp->lid > 0 && vxi11_server::instance().m_activeLinks.contains(argp->lid)){
             if (vxi11_server::instance().m_lockLinkId == argp->lid || vxi11_server::instance().m_lockLinkId == -1) {
@@ -203,7 +205,7 @@ Device_Error* device_clear_1_svc(Device_GenericParms* argp, struct svc_req* rqst
             resp.error = Vxi11::ErrorCode::INVALID_LINK_IDENTIFIER;
         }
     }else{
-        qCWarning(vxiSer)<<"(device_clear):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(device_clear)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
     }
 
@@ -214,7 +216,7 @@ Device_Error* device_remote_1_svc(Device_GenericParms* argp, struct svc_req* rqs
     static Device_Error resp;
 
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(device_remote): Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
+        qCDebug(vxiSer)<<"(device_remote)Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
 
         if (argp->lid > 0 && vxi11_server::instance().m_activeLinks.contains(argp->lid)){
             if (vxi11_server::instance().m_lockLinkId == argp->lid || vxi11_server::instance().m_lockLinkId == -1) {
@@ -227,7 +229,7 @@ Device_Error* device_remote_1_svc(Device_GenericParms* argp, struct svc_req* rqs
             resp.error = Vxi11::ErrorCode::INVALID_LINK_IDENTIFIER;
         }
     }else{
-        qCWarning(vxiSer)<<"(device_remote):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(device_remote)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
     }
 
@@ -238,7 +240,7 @@ Device_Error* device_local_1_svc(Device_GenericParms* argp, struct svc_req* rqst
     static Device_Error resp;
 
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(device_local): Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
+        qCDebug(vxiSer)<<"(device_local)Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
 
         if (argp->lid > 0 && vxi11_server::instance().m_activeLinks.contains(argp->lid)){
             if (vxi11_server::instance().m_lockLinkId == argp->lid || vxi11_server::instance().m_lockLinkId == -1) {
@@ -251,7 +253,7 @@ Device_Error* device_local_1_svc(Device_GenericParms* argp, struct svc_req* rqst
             resp.error = Vxi11::ErrorCode::INVALID_LINK_IDENTIFIER;
         }
     }else{
-        qCWarning(vxiSer)<<"(device_local):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(device_local)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
     }
 
@@ -262,7 +264,7 @@ Device_Error* device_lock_1_svc(Device_LockParms* argp, struct svc_req* rqstp)
     static Device_Error resp;
 
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(device_lock): Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
+        qCDebug(vxiSer)<<"(device_lock)Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->lid;
 
         if (argp->lid > 0 && vxi11_server::instance().m_activeLinks.contains(argp->lid)){
             if (vxi11_server::instance().m_lockLinkId == argp->lid || vxi11_server::instance().m_lockLinkId == -1) {
@@ -278,7 +280,7 @@ Device_Error* device_lock_1_svc(Device_LockParms* argp, struct svc_req* rqstp)
             resp.error = Vxi11::ErrorCode::INVALID_LINK_IDENTIFIER;
         }
     }else{
-        qCWarning(vxiSer)<<"(device_lock):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(device_lock)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
     }
 
@@ -289,7 +291,7 @@ Device_Error* device_unlock_1_svc(Device_Link* argp, struct svc_req* rqstp)
     static Device_Error resp;
 
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(device_unlock): Ser_Id "<<rqstp->rq_xprt<<",Link "<<*argp;
+        qCDebug(vxiSer)<<"(device_unlock)Ser_Id "<<rqstp->rq_xprt<<",Link "<<*argp;
 
         if (*argp > 0 && vxi11_server::instance().m_activeLinks.contains(*argp)){
             if (vxi11_server::instance().m_lockLinkId == *argp || vxi11_server::instance().m_lockLinkId == -1) {
@@ -305,7 +307,7 @@ Device_Error* device_unlock_1_svc(Device_Link* argp, struct svc_req* rqstp)
             resp.error = Vxi11::ErrorCode::INVALID_LINK_IDENTIFIER;
         }
     }else{
-        qCWarning(vxiSer)<<"(device_unlock):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(device_unlock)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
     }
 
@@ -317,10 +319,10 @@ Device_Error* device_enable_srq_1_svc(Device_EnableSrqParms* argp, struct svc_re
 
     // Repeats the SCPI instruction. Not supported.
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(device_enable_srq): Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->enable;
+        qCDebug(vxiSer)<<"(device_enable_srq)Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->enable;
         resp.error = Vxi11::ErrorCode::NO_ERROR;
     }else{
-        qCWarning(vxiSer)<<"(device_enable_srq):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(device_enable_srq)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
     }
 
@@ -332,10 +334,10 @@ Device_DocmdResp* device_docmd_1_svc(Device_DocmdParms* argp, struct svc_req* rq
 
     // Repeats the SCPI instruction. Not supported.
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(device_docmd): Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->cmd;
+        qCDebug(vxiSer)<<"(device_docmd)Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->cmd;
         resp.error = Vxi11::ErrorCode::NO_ERROR;
     }else{
-        qCWarning(vxiSer)<<"(device_docmd):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(device_docmd)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
     }
 
@@ -348,7 +350,7 @@ Device_Error* destroy_link_1_svc(Device_Link* argp, struct svc_req* rqstp)
     static Device_Error resp;
 
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(destroy_link): Ser_Id "<<rqstp->rq_xprt<<",Link "<<*argp;
+        qCDebug(vxiSer)<<"(destroy_link)Ser_Id "<<rqstp->rq_xprt<<",Link "<<*argp;
 
         if (*argp > 0 && vxi11_server::instance().m_activeLinks.contains(*argp)){
             if (vxi11_server::instance().m_lockLinkId == *argp){
@@ -362,7 +364,7 @@ Device_Error* destroy_link_1_svc(Device_Link* argp, struct svc_req* rqstp)
             resp.error = Vxi11::ErrorCode::INVALID_LINK_IDENTIFIER;
         }
     }else{
-        qCWarning(vxiSer)<<"(destroy_link):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(destroy_link)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
     }
 
@@ -374,10 +376,10 @@ Device_Error* create_intr_chan_1_svc(Device_RemoteFunc* argp, struct svc_req* rq
 
     // Repeats the SCPI instruction. Not supported.
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(create_intr_chan): Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->hostAddr;
+        qCDebug(vxiSer)<<"(create_intr_chan)Ser_Id "<<rqstp->rq_xprt<<",Link "<<argp->hostAddr;
         resp.error = Vxi11::ErrorCode::NO_ERROR;
     }else{
-        qCWarning(vxiSer)<<"(create_intr_chan):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(create_intr_chan)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
     }
 
@@ -389,16 +391,18 @@ Device_Error* destroy_intr_chan_1_svc(void* argp, struct svc_req* rqstp)
 
     // Repeats the SCPI instruction. Not supported.
     if (argp != nullptr && rqstp != nullptr){
-        qCDebug(vxiSer)<<"(destroy_intr_chan): Ser_Id "<<rqstp->rq_xprt;
+        qCDebug(vxiSer)<<"(destroy_intr_chan)Ser_Id "<<rqstp->rq_xprt;
         resp.error = Vxi11::ErrorCode::NO_ERROR;
     }else{
-        qCWarning(vxiSer)<<"(destroy_intr_chan):PARAMETER_ERROR";
+        qCWarning(vxiSer)<<"(destroy_intr_chan)PARAMETER_ERROR";
         resp.error = Vxi11::ErrorCode::PARAMETER_ERROR;
     }
 
     return &resp;
 }
+#ifdef __cplusplus
 }
+#endif
 
 vxi11_server::vxi11_server(QObject *parent) : QObject(parent)
 {
@@ -411,7 +415,7 @@ vxi11_server::vxi11_server(QObject *parent) : QObject(parent)
             m_readbuffer.clear();
             m_readbuffer.resize(m_sockUdp->pendingDatagramSize());
             m_sockUdp->readDatagram(m_readbuffer.data(), m_readbuffer.size(), &sender, &senderPort);
-            qCDebug(vxiSer)<<"(vxi11_server):SOCKET Request: "<<m_readbuffer;
+            qCDebug(vxiSer)<<"(vxi11_server)SOCKET Request: "<<m_readbuffer;
 
             if (ConfigManager::isInteRemote(InterSt::LAN_VXI)){
                 if (m_readbuffer.startsWith("*") || m_readbuffer.startsWith(":")) {
@@ -424,7 +428,7 @@ vxi11_server::vxi11_server(QObject *parent) : QObject(parent)
             }
 
             if (!m_respbuffer.isEmpty()){
-                qCDebug(vxiSer)<<"(vxi11_server):SOCKET Response: "<<m_respbuffer;
+                qCDebug(vxiSer)<<"(vxi11_server)SOCKET Response: "<<m_respbuffer;
                 m_sockUdp->writeDatagram(m_respbuffer, sender, senderPort);
             }
         }}, Qt::DirectConnection);
@@ -434,16 +438,16 @@ vxi11_server::vxi11_server(QObject *parent) : QObject(parent)
         QTcpSocket* client = m_sockTcp->nextPendingConnection();
         if (m_clients.size() < 9) { // restrict connect number = 9
             connect(client, &QTcpSocket::errorOccurred,this, [client](QAbstractSocket::SocketError error){
-                qCWarning(vxiSer)<<"(vxi11_server):("<< client->objectName()<<")"<<error<<client->errorString();
+                qCWarning(vxiSer)<<"(vxi11_server)"<< client->objectName()<<", "<<error<<client->errorString();
                 }, Qt::DirectConnection);
             connect(client, &QTcpSocket::disconnected,this,[this,client](){
-                qCDebug(vxiSer)<<"(vxi11_server): "<<client->objectName()<<" disconnected";
+                qCDebug(vxiSer)<<"(vxi11_server)"<<client->objectName()<<" disconnected";
                 m_clients.removeOne(client);
                 client->deleteLater();
                 }, Qt::DirectConnection);
             connect(client, &QTcpSocket::readyRead,this, [this, client](){
                 m_readbuffer = client->readAll();
-                qCDebug(vxiSer)<<"(vxi11_server):SOCKET Request: "<<m_readbuffer;
+                qCDebug(vxiSer)<<"(vxi11_server)SOCKET Request: "<<m_readbuffer;
 
                 if (ConfigManager::isInteRemote(InterSt::LAN_VXI)){
                     if (m_readbuffer.startsWith("*") || m_readbuffer.startsWith(":")) {
@@ -456,12 +460,12 @@ vxi11_server::vxi11_server(QObject *parent) : QObject(parent)
                 }
 
                 if (!m_respbuffer.isEmpty()){
-                    qCDebug(vxiSer)<<"(vxi11_server):SOCKET Response: "<<m_respbuffer;
+                    qCDebug(vxiSer)<<"(vxi11_server)SOCKET Response: "<<m_respbuffer;
                     client->write(m_respbuffer);
                 }}, Qt::DirectConnection);
 
             client->setObjectName(QString("%1:%2").arg(client->peerAddress().toString()).arg(client->peerPort()));
-            qCDebug(vxiSer)<<"(vxi11_server):New Connect-Client: "<<client->objectName();
+            qCDebug(vxiSer)<<"(vxi11_server)New Connect-Client: "<<client->objectName();
             m_clients.append(client);
             return;
         }
@@ -480,13 +484,13 @@ vxi11_server::vxi11_server(QObject *parent) : QObject(parent)
             if (m_transpUdp != NULL) {
                 svc_register(m_transpUdp , DEVICE_CORE, DEVICE_CORE_VERSION, device_core_1, IPPROTO_UDP);
                 svc_register(m_transpUdp , DEVICE_ASYNC, DEVICE_ASYNC_VERSION, device_async_1, IPPROTO_UDP);
-                qCDebug(vxiSer)<<"(vxi11_server):VXI-11 UDP "<<m_transpUdp<<",Port "<<m_transpUdp->xp_port;
+                qCDebug(vxiSer)<<"(vxi11_server)VXI-11 UDP "<<m_transpUdp<<",Port "<<m_transpUdp->xp_port;
 
                 m_transpTcp = svctcp_create(RPC_ANYSOCK, 0, 0);
                 if (m_transpTcp != NULL) {
                     svc_register(m_transpTcp, DEVICE_CORE, DEVICE_CORE_VERSION, device_core_1, IPPROTO_TCP);
                     svc_register(m_transpTcp, DEVICE_ASYNC, DEVICE_ASYNC_VERSION, device_async_1, IPPROTO_TCP);
-                    qCDebug(vxiSer)<<"(vxi11_server):VXI-11 TCP "<<m_transpTcp<<",Port "<<m_transpTcp->xp_port;
+                    qCDebug(vxiSer)<<"(vxi11_server)VXI-11 TCP "<<m_transpTcp<<",Port "<<m_transpTcp->xp_port;
 
                     m_rpcThread = new RpcThread();
                     m_rpcThread->setObjectName("vxiSubThread");
@@ -494,19 +498,19 @@ vxi11_server::vxi11_server(QObject *parent) : QObject(parent)
                     return;
                 }
 
-                qCCritical(vxiSer)<<"(vxi11_server):cannot create TCP_Server!!!";
+                qCCritical(vxiSer)<<"(vxi11_server)cannot create TCP_Server!!!";
                 return;
             }
 
-            qCCritical(vxiSer)<<"(vxi11_server):cannot create UDP_Server!!!";
+            qCCritical(vxiSer)<<"(vxi11_server)cannot create UDP_Server!!!";
             return;
         }
 
-        qCritical(vxiSer)<<"(vxi11_server): Fail bind_Socket UDP!!!";
+        qCritical(vxiSer)<<"(vxi11_server)Fail bind_Socket UDP!!!";
         return;
     }
 
-    qCritical(vxiSer)<<"(vxi11_server): Fail listen_Socket TCP!!!";
+    qCritical(vxiSer)<<"(vxi11_server)Fail listen_Socket TCP!!!";
 }
 vxi11_server& vxi11_server::instance()
 {
@@ -532,6 +536,7 @@ void vxi11_server::stop() {
         m_transpTcp = nullptr;
     }
     if (m_rpcThread) {
+        m_rpcThread->quit();
         m_rpcThread->wait(3000);
         delete m_rpcThread;
         m_rpcThread = nullptr;

@@ -4,6 +4,7 @@
 #include <QtEndian>
 #include <QFile>
 
+// Network
 scpi_result_t ScpiManager::SCPI_NETInform(scpi_t* context)
 {
     if (ConfigManager::getNetworkConfig()){
@@ -15,9 +16,10 @@ scpi_result_t ScpiManager::SCPI_NETInform(scpi_t* context)
         return SCPI_RES_OK;
     }
 
-    qCWarning(scpi)<<"[SCPI_NETInform]:getNetworkConfig failed!";
+    qCWarning(scpi)<<"(SCPI_NETInform)getNetworkConfig failed!";
     return SCPI_RES_ERR;
 }
+// -
 scpi_result_t ScpiManager::SET_NETWork(scpi_t* context,int staticmode,bool isstatic)
 {
     QFile file("/etc/network/interfaces");
@@ -30,7 +32,7 @@ scpi_result_t ScpiManager::SET_NETWork(scpi_t* context,int staticmode,bool issta
 
             if (SCPI_ParamCopyText(context, url, sizeof(url), &copy_len, true)) {
                 QByteArray data(url, copy_len);
-                qCDebug(scpi) << "[SCPI_NETIPADress]: "<<data;
+                qCDebug(scpi) << "(SCPI_NETIPADress)"<<data;
 
                 switch (staticmode) {
                     case 1:ConfigManager::IP = QString::fromUtf8(data);break;
@@ -73,14 +75,74 @@ scpi_result_t ScpiManager::SET_NETWork(scpi_t* context,int staticmode,bool issta
             return SCPI_RES_OK;
         }
 
-        qCWarning(scpi)<<"[SET_NETWork]:/etc/init.d/S40network restart failed!";
+        qCWarning(scpi)<<"(SET_NETWork)/etc/init.d/S40network restart failed!";
         return SCPI_RES_ERR;
     }
 
-    qCWarning(scpi)<<"[SET_NETWork]:Cannot open interfaces file for writing";
+    qCWarning(scpi)<<"(SET_NETWork)Cannot open interfaces file for writing";
     return SCPI_RES_ERR;
 }
 
+// Output
+scpi_result_t ScpiManager::SCPI_OutputState(scpi_t* context)
+{
+    scpi_bool_t OpenOut;
+    if(SCPI_ParamBool(context, &OpenOut,true)){
+        quint8 func = OpenOut ? JV6xxx::Output::SET_OUTPSTATUS_ON : JV6xxx::Output::SET_OUTPSTATUS_OFF;
+        qCDebug(scpi)<<"(SCPI_OutputState)SCPI_Output OpenOut: "<<OpenOut;
+        return sendQueryCmd(context,JV6xxx::OUTPUT,func,"");
+    }
+
+    return SCPI_RES_ERR;
+}
+
+// Measurement
+scpi_result_t ScpiManager::SCPI_MeasureFunc(scpi_t* context)
+{
+    int32_t choice;
+    auto* self = static_cast<ScpiManager*>(context->user_context);
+    if (SCPI_ParamChoice(context, m_CmdparaChoices, &choice, true)) {
+        qCDebug(scpi) <<"(SCPI_MeasureFunc)Param choice: "<< choice;
+        QByteArray data(1, static_cast<quint8>(choice));
+        self->m_querymode = choice;
+        switch (choice){
+            case 0: case 1: case 2: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSFUNC,data);
+            default:return SCPI_RES_OK;
+        }
+    }
+
+    return SCPI_RES_ERR;
+}
+
+// Calibrate
+scpi_result_t ScpiManager::SCPI_CalibrateStep(scpi_t* context)
+{
+    int32_t step;
+    float parameter;
+    if (SCPI_ParamInt(context, &step, true)) {
+        if (SCPI_ParamFloat(context, &parameter, true)) {
+            QByteArray data(4, 0);
+            qCDebug(scpi) <<"(SCPI_CalibrateStep)step: "<<step<<" param: "<<parameter;
+            qToBigEndian(parameter, reinterpret_cast<uint8_t*>(data.data()));
+            return sendQueryCmd(context,JV6xxx::CALIBRATION,step,data);
+        }
+    }
+
+    return SCPI_RES_ERR;
+}
+// -
+scpi_result_t ScpiManager::SCPI_CalibrateStepQ(scpi_t* context)
+{
+    int value;
+    if (SCPI_ParamInt(context, &value, true)) {
+        qCDebug(scpi) <<"(SCPI_CalibrateStepQ)Step Value: "<< value;
+        return sendQueryCmd(context,JV6xxx::CALIBRATION,value);
+    }
+
+    return SCPI_RES_ERR;
+}
+
+// Serial cmd query
 scpi_result_t ScpiManager::SCPI_Query(scpi_t* context)
 {
     auto* self = static_cast<ScpiManager*>(context->user_context);
@@ -98,70 +160,13 @@ scpi_result_t ScpiManager::SCPI_Query(scpi_t* context)
         default:return SCPI_RES_ERR;
     }
 }
-// Output
-scpi_result_t ScpiManager::SCPI_OutputState(scpi_t* context)
-{
-    scpi_bool_t OpenOut;
-    if(SCPI_ParamBool(context, &OpenOut,true)){
-        quint8 func = OpenOut ? JV6xxx::Output::SET_OUTPSTATUS_ON : JV6xxx::Output::SET_OUTPSTATUS_OFF;
-        qCDebug(scpi)<<"[SCPI_OutputState]:SCPI_Output OpenOut: "<<OpenOut;
-        return sendQueryCmd(context,JV6xxx::OUTPUT,func,"");
-    }
 
-    return SCPI_RES_ERR;
-}
-// Measurement
-scpi_result_t ScpiManager::SCPI_MeasureFunc(scpi_t* context)
-{
-    int32_t choice;
-    auto* self = static_cast<ScpiManager*>(context->user_context);
-    if (SCPI_ParamChoice(context, m_CmdparaChoices, &choice, true)) {
-        qCDebug(scpi) <<"[SCPI_MeasureFunc]:Param choice: "<< choice;
-        QByteArray data(1, static_cast<quint8>(choice));
-        self->m_querymode = choice;
-        switch (choice){
-            case 0: case 1: case 2: return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSFUNC,data);
-            default:return SCPI_RES_OK;
-        }
-    }
-
-    return SCPI_RES_ERR;
-}
-// Calibrate
-scpi_result_t ScpiManager::SCPI_CalibrateStep(scpi_t* context)
-{
-    int32_t step;
-    float parameter;
-    if (SCPI_ParamInt(context, &step, true)) {
-        if (SCPI_ParamFloat(context, &parameter, true)) {
-            QByteArray data(4, 0);
-            qCDebug(scpi) <<"[SCPI_CalibrateStep]:step: "<<step<<" param: "<<parameter;
-            qToBigEndian(parameter, reinterpret_cast<uint8_t*>(data.data()));
-            return sendQueryCmd(context,JV6xxx::CALIBRATION,step,data);
-        }
-    }
-
-    return SCPI_RES_ERR;
-}
-// -
-scpi_result_t ScpiManager::SCPI_CalibrateStepQ(scpi_t* context)
-{
-    int value;
-    if (SCPI_ParamInt(context, &value, true)) {
-        qCDebug(scpi) <<"[SCPI_CalibrateStepQ]:Step Value: "<< value;
-        return sendQueryCmd(context,JV6xxx::CALIBRATION,value);
-    }
-
-    return SCPI_RES_ERR;
-}
-
-// ******************************* Basic execution ************************************
-
+// Basic execution
 scpi_result_t ScpiManager::sendBoolCmd(scpi_t* context, quint8 cmd, quint8 func)
 {
     scpi_bool_t OpenOut;
     if(SCPI_ParamBool(context, &OpenOut,true)){
-        qCDebug(scpi)<<"[sendBoolCmd]:SCPI_Output OpenOut: "<<OpenOut;
+        qCDebug(scpi)<<"(sendBoolCmd)SCPI_Output OpenOut: "<<OpenOut;
         quint8 swi = OpenOut ? 0x01 : 0x00;
         QByteArray data(1, swi);
         return sendQueryCmd(context,cmd,func,data);
@@ -173,7 +178,7 @@ scpi_result_t ScpiManager::sendFloatCmd(scpi_t* context, quint8 cmd, quint8 func
 {
     float value;
     if (SCPI_ParamFloat(context, &value, true)) {
-        qCDebug(scpi) <<"[sendFloatCmd]:Channel Set Value:"<< value;
+        qCDebug(scpi) <<"(sendFloatCmd)Channel Set Value:"<< value;
         QByteArray data(4, 0);
         qToBigEndian(value, reinterpret_cast<uint8_t*>(data.data()));
         return sendQueryCmd(context,cmd,func,data);
@@ -225,7 +230,7 @@ scpi_result_t ScpiManager::sendChoiceCmd(scpi_t* context,quint8 cmd, quint8 func
 {
     int32_t choice;
     if (SCPI_ParamChoice(context, m_CmdparaChoices, &choice, true)) {
-        qCDebug(scpi) <<"[sendChoiceCmd]:Channel choice: "<< choice;
+        qCDebug(scpi) <<"(sendChoiceCmd)Channel choice: "<< choice;
         QByteArray data(1, static_cast<quint8>(choice));
         return sendQueryCmd(context,cmd,func,data);
     }
@@ -236,7 +241,7 @@ scpi_result_t ScpiManager::sendIntCmd(scpi_t* context, quint8 cmd, quint8 func,q
 {
     int value;
     if (SCPI_ParamInt(context, &value, true)) {
-        qCDebug(scpi) <<"[sendIntCmd]:Channel Set Value:"<< value;
+        qCDebug(scpi) <<"(sendIntCmd)Channel Set Value:"<< value;
         QByteArray data(bytes, 0);
 
         if (bytes == 1) {
@@ -256,7 +261,6 @@ scpi_result_t ScpiManager::sendIntCmd(scpi_t* context, quint8 cmd, quint8 func,q
 }
 
 // ********************************* Basic helper *************************************
-
 scpi_result_t ScpiManager::sendQueryCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data)
 {
     int32_t ch{0};
@@ -268,7 +272,7 @@ scpi_result_t ScpiManager::sendQueryCmd(scpi_t* context, quint8 cmd, quint8 func
             channels = allChannelList();
         }else if(ch > 0){
             channels = {{ch, 0}};
-        }else{
+        }else{ // -1 -> channel list
             channels = parseChannelList(context);
         }
 
@@ -338,6 +342,7 @@ std::vector<ScpiManager::ChannelAddress> ScpiManager::parseChannelList(scpi_t* c
 
     return channelList; // emtry or true list
 }
+
 scpi_result_t ScpiManager::sendMultiCHCmd(scpi_t* context, quint8 cmd, quint8 func, const QByteArray &data, const std::vector<ChannelAddress> &channels)
 {
     if (!channels.empty()) {
@@ -345,7 +350,7 @@ scpi_result_t ScpiManager::sendMultiCHCmd(scpi_t* context, quint8 cmd, quint8 fu
         self->m_responseBuffer.append("[");
 
         for (ChannelAddress chaddress : channels) {
-            qCDebug(scpi)<<"[sendSingleCHCmd]: Single-Channel: "<<chaddress.channel;
+            qCDebug(scpi)<<"(sendSingleCHCmd)Single-Channel: "<<chaddress.channel;
             ChannelBus::instance().to_Channel(chaddress.channel,cmd,func,data,true);
 
             if(!self->m_syncCondition.wait(&self->m_syncMutex, 120) || SCPI_ReadQ(context) == SCPI_RES_ERR){
@@ -382,7 +387,6 @@ scpi_result_t ScpiManager::SCPI_ReadQ(scpi_t* context)
         default:return SCPI_RES_ERR;
     }
 }
-
 // ********************************** external API **********************************
 
 void ScpiManager::processCHVoidResponse()
@@ -657,21 +661,21 @@ scpi_result_t ScpiManager::staticReset(scpi_t* context)
     Q_UNUSED(context);
     //auto* self = static_cast<ScpiManager*>(context->user_context);
     ChannelBus::instance().to_ChannelReset(0);
-    qCDebug(scpi) <<"[staticReset]: Reset";
+    qCDebug(scpi) <<"(staticReset)Reset";
     return SCPI_RES_OK;
 }
 int           ScpiManager::staticError(scpi_t* context, int_fast16_t err)
 {
     auto* self = static_cast<ScpiManager*>(context->user_context);
     QString errorMsg = QString("{%1,'%2'}").arg(err).arg(SCPI_ErrorTranslate(err));
-    qCDebug(scpi)<<"[staticError]:SCPI Error:"<< errorMsg;
+    qCDebug(scpi)<<"(staticError)SCPI Error:"<< errorMsg;
     self->m_responseBuffer.append(errorMsg.toUtf8());
     return 0;
 }
 size_t        ScpiManager::staticWrite(scpi_t* context, const char* data, size_t len)
 {
     auto* self = static_cast<ScpiManager*>(context->user_context);
-    qCDebug(scpi)<<"[staticWrite]:SCPI Response: "<< data;
+    qCDebug(scpi)<<"(staticWrite)SCPI Response: "<< data;
     self->m_responseBuffer.append(data, len);
     return len; // Automatically add \r\n
 }

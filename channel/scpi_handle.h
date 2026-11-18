@@ -15,17 +15,16 @@ class ScpiManager : public QObject
 {
     Q_OBJECT
 
-private:   // auto inline
+private:
+    // --- Network -------------------------------------------------------------------------------
     static scpi_result_t SCPI_NETInform(scpi_t* context);
-    static scpi_result_t SET_NETWork(scpi_t* context,int staticmode,bool isstatic);
+    // -
     static scpi_result_t SCPI_NETDHCP(scpi_t* context){return SET_NETWork(context,0,false);};
     static scpi_result_t SCPI_NETIPADress(scpi_t* context){return SET_NETWork(context,1,true);};
     static scpi_result_t SCPI_NETSUBNetmask(scpi_t* context){return SET_NETWork(context,2,true);};
     static scpi_result_t SCPI_NETGATeway(scpi_t* context){return SET_NETWork(context,3,true);};
-
-    int32_t m_querymode{0};
-    static scpi_result_t SCPI_Query(scpi_t* context);
-    // --- Output -------------------------------------------------------------------------------
+    static scpi_result_t SET_NETWork(scpi_t* context,int staticmode,bool isstatic);
+    // --- Output --------------------------------------------------------------------------------
     static scpi_result_t SCPI_OutputState(scpi_t* context);
     static scpi_result_t SCPI_OutputBand(scpi_t* context)            {return sendChoiceCmd(context,JV6xxx::OUTPUT,JV6xxx::Output::SET_OUTPBAND);};
     static scpi_result_t SCPI_OutputCompMode(scpi_t* context)        {return sendChoiceCmd(context,JV6xxx::OUTPUT,JV6xxx::Output::SET_OUTPCOMP_MODE);};
@@ -33,7 +32,7 @@ private:   // auto inline
     static scpi_result_t SCPI_OutputStateQ(scpi_t* context)          {return sendQueryCmd(context,JV6xxx::OUTPUT,JV6xxx::Output::QUERY_OUTPSTATUS);};
     static scpi_result_t SCPI_OutputBandQ(scpi_t* context)           {return sendQueryCmd(context,JV6xxx::OUTPUT,JV6xxx::Output::QUERY_OUTPBAND);};
     static scpi_result_t SCPI_OutputCompModeQ(scpi_t* context)       {return sendQueryCmd(context,JV6xxx::OUTPUT,JV6xxx::Output::QUERY_OUTPCOMP_MODE);};
-    // --- Setting ------------------------------------------------------------------------------
+    // --- Setting -------------------------------------------------------------------------------
     static scpi_result_t SCPI_SettingVolt(scpi_t* context)           {return sendFloatCmd(context,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURVOLT);};
     static scpi_result_t SCPI_SettingCurr(scpi_t* context)           {return sendFloatCmd(context,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURCURR);};
     static scpi_result_t SCPI_SettingImpedance(scpi_t* context)      {return sendFloatCmd(context,JV6xxx::SETTING,JV6xxx::Setting::SET_SOURIMP);};
@@ -47,7 +46,7 @@ private:   // auto inline
     static scpi_result_t SCPI_SettingProtQ(scpi_t* context)          {return sendQueryCmd(context,JV6xxx::SETTING,JV6xxx::Setting::QUERY_SOURVOLT_PROT);};
     static scpi_result_t SCPI_SettingTherQ(scpi_t* context)          {return sendQueryCmd(context,JV6xxx::SETTING,JV6xxx::Setting::QUERY_THERPROT);};
     static scpi_result_t SCPI_SettingLoadQ(scpi_t* context)          {return sendQueryCmd(context,JV6xxx::SETTING,JV6xxx::Setting::QUERY_LOADCURR);};
-    // --- Control ------------------------------------------------------------------------------
+    // --- Control -------------------------------------------------------------------------------
     static scpi_result_t SCPI_ControlClamp(scpi_t* context)          {return sendBoolCmd(context,JV6xxx::CONTROL,JV6xxx::Control::SET_SOURVOLT_CLAM);};
     static scpi_result_t SCPI_ControlCurr(scpi_t* context)           {return sendChoiceCmd(context,JV6xxx::CONTROL,JV6xxx::Control::SET_SOURCURR_TYPE);};
     static scpi_result_t SCPI_ControlSyst(scpi_t* context)           {return sendChoiceCmd(context,JV6xxx::CONTROL,JV6xxx::Control::SET_SYSTPOS);};
@@ -61,7 +60,7 @@ private:   // auto inline
     static scpi_result_t SCPI_ControlSystQ(scpi_t* context)          {return sendQueryCmd(context,JV6xxx::CONTROL,JV6xxx::Control::QUERY_SYSTPOS);};
     static scpi_result_t SCPI_ControlIndeQ(scpi_t* context)          {return sendQueryCmd(context,JV6xxx::CONTROL,JV6xxx::Control::QUERY_LOADINDE_STAT);};
     static scpi_result_t SCPI_ControlLoadQ(scpi_t* context)          {return sendQueryCmd(context,JV6xxx::CONTROL,JV6xxx::Control::QUERY_LOADCURR_TYPE);};
-    // --- Measurement --------------------------------------------------------------------------
+    // --- Measurement ---------------------------------------------------------------------------
     static scpi_result_t SCPI_MeasureNplc(scpi_t* context)           {return sendFloatCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSNPLC);};
     static scpi_result_t SCPI_MeasureRang(scpi_t* context)           {return sendIntCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSCURR_RANGE,1);};
     static scpi_result_t SCPI_MeasureAver(scpi_t* context)           {return sendIntCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::SET_SENSAVER,1);};
@@ -111,14 +110,14 @@ private:   // auto inline
     static scpi_result_t SCPI_MeasureAdofCurrQ(scpi_t* context)      {return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASADC_CURR);};
     static scpi_result_t SCPI_MeasureAdofScurQ(scpi_t* context)      {return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASADC_SCUR);};
     static scpi_result_t SCPI_MeasureAdofDvmQ(scpi_t* context)       {return sendQueryCmd(context,JV6xxx::MEASUREMENT,JV6xxx::Measurement::QUERY_MEASADC_DVM);};
-    // --- Register -----------------------------------------------------------------------------
+    // --- Register ------------------------------------------------------------------------------
     static scpi_result_t SCPI_RegisterCle(scpi_t* context)           {return sendQueryCmd(context,JV6xxx::REGISTER,JV6xxx::Register::SET_STATQUE_CLEAR);};
     // -
     static scpi_result_t SCPI_RegisterEvenQ(scpi_t* context)         {return sendQueryCmd(context,JV6xxx::REGISTER,JV6xxx::Register::QUERY_STATOPER_EVEN);};
     static scpi_result_t SCPI_RegisterEnabQ(scpi_t* context)         {return sendQueryCmd(context,JV6xxx::REGISTER,JV6xxx::Register::QUERY_SYSTENAB);};
     static scpi_result_t SCPI_RegisterCondQ(scpi_t* context)         {return sendQueryCmd(context,JV6xxx::REGISTER,JV6xxx::Register::QUERY_STATOPER_COND);};
     static scpi_result_t SCPI_RegisterNextQ(scpi_t* context)         {return sendQueryCmd(context,JV6xxx::REGISTER,JV6xxx::Register::QUERY_STATQUE_NEXT);};
-    // --- Calibrate ----------------------------------------------------------------------------
+    // --- Calibrate -----------------------------------------------------------------------------
     static scpi_result_t SCPI_CalibrateExit(scpi_t* context)         {return sendQueryCmd(context,JV6xxx::CALIBRATE,JV6xxx::Calibrate::SET_CALIEXIT);};
     static scpi_result_t SCPI_CalibrateInit(scpi_t* context)         {return sendQueryCmd(context,JV6xxx::CALIBRATE,JV6xxx::Calibrate::SET_CALIINIT);};
     static scpi_result_t SCPI_CalibrateRest(scpi_t* context)         {return sendQueryCmd(context,JV6xxx::CALIBRATE,JV6xxx::Calibrate::SET_CALIREST);};
@@ -134,7 +133,7 @@ private:   // auto inline
     // -
     static scpi_result_t SCPI_CalibrateAllQ(scpi_t* context)         {return sendQueryCmd(context,JV6xxx::CALIBRATE,JV6xxx::Calibrate::QUERY_CALISTAR_ALL);};
     static scpi_result_t SCPI_CalibrateStepQ(scpi_t* context);
-    // --- Trigger ------------------------------------------------------------------------------
+    // --- Trigger -------------------------------------------------------------------------------
     static scpi_result_t SCPI_TriggerAbort(scpi_t* context)          {return sendQueryCmd(context,JV6xxx::TRIGGER,JV6xxx::Trigger::SET_ABORT);};
     static scpi_result_t SCPI_TriggerSequene(scpi_t* context)        {return sendIntCmd(context,JV6xxx::TRIGGER,JV6xxx::Trigger::SET_INIT_IMM,1);};
     static scpi_result_t SCPI_TriggerCont(scpi_t* context)           {return sendBoolCmd(context,JV6xxx::TRIGGER,JV6xxx::Trigger::SET_INIT_CONT);};
@@ -158,6 +157,9 @@ private:   // auto inline
     static scpi_result_t SCPI_TriggerAmplQ(scpi_t* context)          {return sendQueryCmd(context,JV6xxx::TRIGGER,JV6xxx::Trigger::QUERY_SOURVOLT_AMPL_TRIG);};
     static scpi_result_t SCPI_TriggerCurrQ(scpi_t* context)          {return sendQueryCmd(context,JV6xxx::TRIGGER,JV6xxx::Trigger::QUERY_SOURCURR_TRIG);};
     static scpi_result_t SCPI_TriggerResQ(scpi_t* context)           {return sendQueryCmd(context,JV6xxx::TRIGGER,JV6xxx::Trigger::QUERY_SOURRES_TRIG);};
+    // --- Serial cmd query ----------------------------------------------------------------------
+    int32_t m_querymode{0};
+    static scpi_result_t SCPI_Query(scpi_t* context);
 
     /* Basic execution */
     static scpi_result_t sendBoolCmd(scpi_t* context, quint8 cmd, quint8 func);

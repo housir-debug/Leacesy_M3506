@@ -12,6 +12,22 @@
 class ChannelBus : public QObject
 {
     Q_OBJECT
+public:
+    struct UartConfig {
+        QString port;
+        int baudRate;
+        quint8 channel;
+    };
+    static const std::vector<UartConfig> configs;
+
+    void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param, bool isScpi);
+    void to_ChannelReset(int channel);
+    static ChannelBus& instance();
+
+private:
+    explicit ChannelBus(QObject *parent = nullptr);
+    ~ChannelBus() = default;
+    Q_DISABLE_COPY(ChannelBus)
 
 signals:
     /* control,UI -> channel */
@@ -43,23 +59,4 @@ signals:
     void interAcUpdate();
     void interModelUpdate();
     void switchRemote(int reface);
-
-    void errorOccurred(const QString& errorMsg);
-
-public:
-    struct UartConfig {
-        QString port;
-        int baudRate;
-        quint8 channel;
-    };
-    static const std::vector<UartConfig> configs;
-
-    static ChannelBus& instance();
-    void to_ChannelReset(int channel);
-    void to_Channel(int channel,quint8 cmd,quint8 func,const QByteArray& param, bool isScpi);
-
-private:
-    explicit ChannelBus(QObject *parent = nullptr);
-    ~ChannelBus() = default;
-    Q_DISABLE_COPY(ChannelBus)
 };

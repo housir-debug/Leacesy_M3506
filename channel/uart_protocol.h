@@ -1,290 +1,203 @@
 #pragma once
 #include <QString>
 
-constexpr quint16 makeCmd(quint8 cmd, quint8 func) {
-    return (static_cast<quint16>(cmd) << 8) | func;
-}
-
 namespace JV6xxx {
+    constexpr int MAX_QUEUE_CNT  = 9999;
     constexpr int Thread_CHSUM   = 0x09;
+
     constexpr quint8 HEADER_HIGH = 0xAA;
     constexpr quint8 HEADER_LOW  = 0x55;
     constexpr quint8 END_MARKER  = 0xEE;
 
-    enum Cmd : quint8 {
-        OUTPUT      = 0x01,
-        SETTING     = 0x02,
-        CONTROL     = 0x03,
-        MEASUREMENT = 0x04,
-        REGISTER    = 0x05,
-        CALIBRATE   = 0x06,
-        CALIBRATION = 0x07,
-        TRIGGER     = 0x08,
-        ISP         = 0x09,
-        BATTERY     = 0x0A,
-        SOC         = 0x0B,
-        SEQUENCE    = 0x0C,
-        SN          = 0x10,
-        ID          = 0x11,
-        READ        = 0x24,
-        CONFIG      = 0x12,
-        TEST        = 0xd0,
-        DEBUG       = 0xdb,
-        ERROR       = 0xFF
+    enum UartCMD : quint16 {
+        WRITE           = 0X0000,
+        READ            = 0X0080,
+        // OUTP
+        OUTP_OFF        = 0X0100,
+        OUTP_ON         = 0X0101,
+        OUTPMODE        = 0X0102,
+        OUTPBAND        = 0X0108,
+        OUTPCOMP        = 0X0109,
+        // SETTING
+        VOLT            = 0X0200,
+        CURR            = 0X0201,
+        IMP             = 0X0202,
+        OVP             = 0X0203,
+        OTP             = 0X0204,
+        SetLoadCurr     = 0X0205,
+        SetPowOPP       = 0X0209,
+        // Control
+        EnLOAD          = 0X0300,
+        EnOVP           = 0X0301,
+        EnOCP           = 0X0302,
+        EnOTP           = 0X0303,
+        EnIMPE          = 0X0304,
+        SetPON          = 0X0305,
+        SavPON          = 0X0306,
+        RecallPON       = 0X0307,
+        LoadINDE        = 0X0308,
+        LoadOCP         = 0X0309,
+        LoadCurrSta     = 0X030A,
+        SetOvpMod       = 0X030B,
+        PowOPPMod       = 0X030C, //250630 over power protcet
+        VoltTime        = 0X0311,
+        CurrTime        = 0X0312,
+        TherTime        = 0X0313,
+        // Measurement
+        RVoltage        = 0X0400,
+        RCurrent        = 0X0401,
+        RSCurrent       = 0X0402,
+        RBT             = 0X0403,
+        RHT             = 0X0404,
+        RDVMACDC        = 0X0405,
+        RDVMDC          = 0X0406,
+        RFSpeed         = 0X0407,
+        RDVMAC          = 0X0409,
+        TMP1            = 0X040A,
+        TMP2            = 0X040B,
+        NPLC            = 0X040C,
+        TMP3            = 0X040D,
+        CurrRANG        = 0X040E,
+        AverCount       = 0X040F,
+        SetFUNC         = 0X0410,
+        PCurrHIGH       = 0X0411,
+        PCurrLOW        = 0X0412,
+        PCurrMAX        = 0X0413,
+        PCurrMIN        = 0X0414,
+        PDvmHIGH        = 0X0415,
+        PDvmLOW         = 0X0416,
+        PDvmMAX         = 0X0417,
+        PDvmMIN         = 0X0418,
+        PVoltHIGH       = 0X0419,
+        PVoltLOW        = 0X041A,
+        PVoltMAX        = 0X041B,
+        PVoltMIN        = 0X041C,
+        SwePOIN         = 0X041D, // repeat cmd -> 0x0427
+        SweTINT         = 0X041E,
+        CurrRangTIM     = 0X041F,
+        RArrVOLT        = 0X0420,
+        RArrCURR        = 0X0421,
+        RArrDVM         = 0X0422,
+        SweOffPin       = 0X0423,
+        RFanDuty        = 0X0427, // -
+        RVoltADC        = 0X0430, //250113 adcoffset
+        RCurrADC        = 0X0431, //250113 adcoffset
+        RSCurrADC       = 0X0432, //250113 adcoffset
+        RDvmADC         = 0X0436, //250113 adcoffset
+        // Register
+        StaREG          = 0X0500,
+        EnREG           = 0X0501,
+        CondREG         = 0X0502,
+        ERR             = 0X0503,
+        SV              = 0X0504,
+        HV              = 0X0505,
+        CONF            = 0X0506,
+        COMREG          = 0X057F,
+        // Calibrate
+        CalExit         = 0X0600,
+        CalInit         = 0X0601,
+        CalRestore      = 0X0602,
+        CalSave         = 0X0603,
+        CalStarALL      = 0X0604,
+        CalStarADC      = 0X0605,
+        CalStarDAC      = 0X0606,
+        CalStarENAB     = 0X0607,
+        CalStarIMP      = 0X0608,
+        CalStarDCP      = 0X0610,
+        CalStarDCN      = 0X0611,
+        CalCTC          = 0X0616,
+        CalSTC          = 0X0617,
+        CalUPTC         = 0X0618,
+        // Calibration
+        CalStepOffset   = 0X0700,
+        CalStepItemMax  = 0X7F,
+        // Trigger
+        ABOR            = 0X0800,
+        INIT            = 0X0801,
+        CONT            = 0X0802,
+        SEQ1TRIG        = 0X0803,
+        SEQ2TRIG        = 0X0804,
+        ACQTRIGSOUR     = 0X0805,
+        COUN_COMM       = 0X0806,
+        HYST_COMM       = 0X0807,
+        LEV_COMM        = 0X0808,
+        SLOP_COMM       = 0X0809,
+        SOUR_VOLT_TRIG  = 0X080A,
+        SOUR_CURR_TRIG  = 0X080B,
+        SOUR_RES_TRIG   = 0X080C,
+        DCQTRIGSOUR     = 0X080D,
+        COUN_VOLT       = 0X080E,
+        COUN_DVM        = 0X080F,
+        HYST_CURR       = 0X0810,
+        // ISP
+        UPG51_ENISP     = 0X0900,
+        UPG51_DISAISP   = 0X0901,
+        UPG51_RSTISP    = 0X0902,
+        // Battery
+        MODE            = 0X0A00,
+        STATVOLT        = 0X0A01,
+        INCVOLT         = 0X0A02,
+        ENDVOLT         = 0X0A03,
+        OUTCURR         = 0X0A04,
+        INCURR          = 0X0A05,
+        STOPCURR        = 0X0A06,
+        STOPMODE        = 0X0A07,
+        INCTIME         = 0X0A08,
+        RES             = 0X0A09,
+        // SOC
+        FILE            = 0X0B00,
+        LENG            = 0X0B01,
+        STEP            = 0X0B02,
+        EDIT_Q          = 0X0B03,
+        EDIT_VOIT       = 0X0B04,
+        EDIT_OUTCURR    = 0X0B05,
+        EDIT_INCURR     = 0X0B06,
+        EDIT_RES        = 0X0B07,
+        RUN_STEP        = 0X0B08,
+        RUN_Q           = 0X0B09,
+        FILE_SAVE       = 0X0B0A,
+        FILE_CLEAR      = 0X0B0B,
+        // Sequence
+        DIT_FILE        = 0X0C00,
+        DIT_LENG        = 0X0C01,
+        DIT_CYCL        = 0X0C02,
+        DIT_STEP        = 0X0C03,
+        DIT_VOIT        = 0X0C04,
+        DIT_OUTCURR     = 0X0C05,
+        DIT_INCURR      = 0X0C06,
+        DIT_RES         = 0X0C07,
+        DIT_RUNT        = 0X0C08,
+        DIT_LINKS       = 0X0C09,
+        DIT_LINKE       = 0X0C0A,
+        DIT_LINKC       = 0X0C0B,
+        SQRUN_TIME      = 0X0C0C,
+        SQRUN_STEP      = 0X0C0D,
+        SQFILE_SAVE     = 0X0C0E,
+        SQFILE_CLEAR    = 0X0C0F,
+        // SN
+        SN1             = 0X1001,
+        SN2             = 0X1002,
+        SN3             = 0X1003,
+        SN4             = 0X1004,
+        // ID
+        IDBASE          = 0X1100,
+        ID1             = 0X1101,
+        ID2             = 0X1102,
+        ID3             = 0X1103,
+        ID4             = 0X1104,
+        // TEST
+        TEST_EXIT       = 0XD000,
+        TEST_STAR       = 0XD001,
+        TEST_SetFanDuty = 0XD002,
+        TEST_SetFanSpeed= 0XD003,
+        TEST_SetGPIOLow = 0XD004,
+        TEST_SetGPIOHigh= 0XD005,
+        // DEBUG
+        DEBUG_EEP       = 0XDB00,
+        DEBUG_DATA      = 0XDB01,
     };
-
-    namespace Output {
-        constexpr quint8 QUERY_OUTPSTATUS            = 0x80;
-        constexpr quint8 QUERY_OUTPMODE              = 0x82;
-        constexpr quint8 QUERY_OUTPBAND              = 0x88;
-        constexpr quint8 QUERY_OUTPCOMP_MODE         = 0x89;
-
-        constexpr quint8 SET_OUTPSTATUS_OFF          = 0x00;
-        constexpr quint8 SET_OUTPSTATUS_ON           = 0x01;
-        constexpr quint8 SET_OUTPMODE                = 0x02;
-        constexpr quint8 SET_OUTPBAND                = 0x08;
-        constexpr quint8 SET_OUTPCOMP_MODE           = 0x09;
-    }
-
-    namespace Setting {
-        constexpr quint8 QUERY_SOURVOLT              = 0x80;
-        constexpr quint8 QUERY_SOURCURR              = 0x81;
-        constexpr quint8 QUERY_SOURIMP               = 0x82;
-        constexpr quint8 QUERY_SOURVOLT_PROT         = 0x83;
-        constexpr quint8 QUERY_THERPROT              = 0x84;
-        constexpr quint8 QUERY_LOADCURR              = 0x85;
-
-        constexpr quint8 SET_SOURVOLT                = 0x00;
-        constexpr quint8 SET_SOURCURR                = 0x01;
-        constexpr quint8 SET_SOURIMP                 = 0x02;
-        constexpr quint8 SET_SOURVOLT_PROT           = 0x03;
-        constexpr quint8 SET_THERPROT                = 0x04;
-        constexpr quint8 SET_LOADCURR                = 0x05;
-    }
-
-    namespace Control {
-        constexpr quint8 QUERY_SOURVOLT_CLAM         = 0x81;
-        constexpr quint8 QUERY_SOURCURR_TYPE         = 0x82;
-        constexpr quint8 QUERY_SYSTPOS               = 0x85;
-        constexpr quint8 QUERY_LOADINDE_STAT         = 0x88;
-        constexpr quint8 QUERY_LOADCURR_TYPE         = 0x89;
-        constexpr quint8 QUERY_SOURCURR_PRIO         = 0x8a;
-        constexpr quint8 QUERY_SOURVOLT_ABS          = 0x8b;
-        constexpr quint8 QUERY_SOURVOLT_TIME         = 0x91;
-        constexpr quint8 QUERY_SOURCURR_TIME         = 0x92;
-        constexpr quint8 QUERY_THERTIME              = 0x93;
-
-        constexpr quint8 SET_SOURVOLT_CLAM           = 0x01;
-        constexpr quint8 SET_SOURCURR_TYPE           = 0x02;
-        constexpr quint8 SET_SYSTPOS                 = 0x05;
-        constexpr quint8 SET_SAV                     = 0x06;
-        constexpr quint8 SET_RCL                     = 0x07;
-        constexpr quint8 SET_LOADINDE_STAT           = 0x08;
-        constexpr quint8 SET_LOADCURR_TYPE           = 0x09;
-        constexpr quint8 SET_SOURCURR_PRIO           = 0x0a;
-        constexpr quint8 SET_SOURVOLT_ABS            = 0x0b;
-        constexpr quint8 SET_SOURVOLT_TIME           = 0x11;
-        constexpr quint8 SET_SOURCURR_TIME           = 0x12;
-        constexpr quint8 SET_THERTIME                = 0x13;
-    }
-
-    namespace Measurement { // not match new protocol
-        constexpr quint8 QUERY_MEASVOLT              = 0x80;
-        constexpr quint8 QUERY_MEASCURR              = 0x81;
-        constexpr quint8 QUERY_MEASSCUR              = 0x82;
-        constexpr quint8 QUERY_MEASBTMP              = 0x83;
-        constexpr quint8 QUERY_MEASHTMP              = 0x84;
-        constexpr quint8 QUERY_MEASDVM_ACDC          = 0x85;
-        constexpr quint8 QUERY_MEASDVM               = 0x86;
-        constexpr quint8 QUERY_THERFAN               = 0x87;
-        constexpr quint8 QUERY_MEASDVM_AC            = 0x89;
-        constexpr quint8 QUERY_MEASTMP1              = 0x8A;
-        constexpr quint8 QUERY_MEASTMP2              = 0x8B;
-        constexpr quint8 QUERY_SENSNPLC              = 0x8C;
-        constexpr quint8 QUERY_MEASTMP3              = 0x8D;
-        constexpr quint8 QUERY_SENSCURR_RANGE        = 0x8E;
-        constexpr quint8 QUERY_SENSAVER              = 0x8F;
-        constexpr quint8 QUERY_SENSFUNC              = 0x90;
-        constexpr quint8 QUERY_FETCCURR_HIGH         = 0x91;
-        constexpr quint8 QUERY_FETCCURR_LOW          = 0x92;
-        constexpr quint8 QUERY_FETCCURR_MAX          = 0x93;
-        constexpr quint8 QUERY_FETCCURR_MIN          = 0x94;
-        constexpr quint8 QUERY_FETCDVM_HIGH          = 0x95;
-        constexpr quint8 QUERY_FETCDVM_LOW           = 0x96;
-        constexpr quint8 QUERY_FETCDVM_MAX           = 0x97;
-        constexpr quint8 QUERY_FETCDVM_MIN           = 0x98;
-        constexpr quint8 QUERY_FETCVOLT_HIGH         = 0x99;
-        constexpr quint8 QUERY_FETCVOLT_LOW          = 0x9A;
-        constexpr quint8 QUERY_FETCVOLT_MAX          = 0x9B;
-        constexpr quint8 QUERY_FETCVOLT_MIN          = 0x9C;
-        constexpr quint8 QUERY_THERDUTY              = 0x9D; // repeat
-        constexpr quint8 QUERY_SENSSWE_TINT          = 0x9E;
-        constexpr quint8 QUERY_SENSCURR_RANGE_TIME   = 0x9F;
-        constexpr quint8 QUERY_MEASARR_VOLT          = 0xA0;
-        constexpr quint8 QUERY_MEASARR_CURR          = 0xA1;
-        constexpr quint8 QUERY_MEASARR_DVM           = 0xA2;
-        constexpr quint8 QUERY_SENSSWE_OFFS_POIN     = 0xA3;
-        constexpr quint8 QUERY_MEASADC_VOLT          = 0xB0;
-        constexpr quint8 QUERY_MEASADC_CURR          = 0xB1;
-        constexpr quint8 QUERY_MEASADC_SCUR          = 0xB2;
-        constexpr quint8 QUERY_MEASADC_DVM           = 0xB6;
-
-        constexpr quint8 SET_SENSNPLC                = 0x0C;
-        constexpr quint8 SET_SENSCURR_RANGE          = 0x0E;
-        constexpr quint8 SET_SENSAVER                = 0x0F;
-        constexpr quint8 SET_SENSFUNC                = 0x10;
-        constexpr quint8 SET_SENSSWE_POIN            = 0x1D;
-        constexpr quint8 SET_SENSSWE_TINT            = 0x1E;
-        constexpr quint8 SET_SENSCURR_RANGE_TIM      = 0x1F;
-        constexpr quint8 SET_SENSSWE_OFFS_POIN       = 0x23;
-    }
-
-    namespace Register {
-        constexpr quint8 QUERY_STATOPER_EVEN         = 0x80;
-        constexpr quint8 QUERY_SYSTENAB              = 0x81;
-        constexpr quint8 QUERY_STATOPER_COND         = 0x82;
-        constexpr quint8 QUERY_STATQUE_NEXT          = 0x83;
-        constexpr quint8 QUERY_SYSTSWV               = 0x84;
-        constexpr quint8 QUERY_SYSTHWV               = 0x85;
-        constexpr quint8 QUERY_SYSTCONF              = 0x86;
-        constexpr quint8 QUERY_SYSTREG               = 0xff;
-
-        constexpr quint8 SET_STATQUE_CLEAR           = 0x03;
-    }
-
-    namespace Calibrate {
-        constexpr quint8 QUERY_CALISTAR_ALL          = 0x84;
-
-        constexpr quint8 SET_CALIEXIT                = 0x00;
-        constexpr quint8 SET_CALIINIT                = 0x01;
-        constexpr quint8 SET_CALIREST                = 0x02;
-        constexpr quint8 SET_CALISAVE                = 0x03;
-        constexpr quint8 SET_CALISTART_ALL           = 0x04;
-        constexpr quint8 SET_CALISTART_ADC           = 0x05;
-        constexpr quint8 SET_CALISTART_DAC           = 0x06;
-        constexpr quint8 SET_CALITART_ENAB           = 0x07;
-        constexpr quint8 SET_CALISTART_IMP           = 0x08;
-        constexpr quint8 SET_CALISTART_DCP           = 0x10;
-        constexpr quint8 SET_CALISTART_DCN           = 0x11;
-        constexpr quint8 SET_CALICLEARTC             = 0x16;
-        constexpr quint8 SET_CALISAVETC              = 0x17;
-        constexpr quint8 SET_CALIUPDATETC            = 0x18;
-    }
-
-    namespace Trigger { // not match new protocol
-        constexpr quint8 QUERY_TRIGSEQ2_SOUR         = 0x85;
-        constexpr quint8 QUERY_TRIGSEQ2_COUN         = 0x86;
-        constexpr quint8 QUERY_TRIGSEQ2_HYST         = 0x87;
-        constexpr quint8 QUERY_TRIGSEQ2_LEV          = 0x88;
-        constexpr quint8 QUERY_TRIGSEQ2_SLOP         = 0x89;
-        constexpr quint8 QUERY_SOURVOLT_AMPL_TRIG    = 0x8A;
-        constexpr quint8 QUERY_SOURCURR_TRIG         = 0x8B;
-        constexpr quint8 QUERY_SOURRES_TRIG          = 0x8C;
-        constexpr quint8 QUERY_TRIGSEQ1_SOUR         = 0x8D;
-        constexpr quint8 QUERY_TRIGSEQ2_COUN_VOIT    = 0x8E;
-        constexpr quint8 QUERY_TRIGSEQ2_COUN_DVM     = 0x8F;
-        constexpr quint8 QUERY_TRIGSEQ2_HYST_CURR    = 0x90;
-
-        constexpr quint8 SET_ABORT                   = 0x00;
-        constexpr quint8 SET_INIT_IMM                = 0x01;
-        constexpr quint8 SET_INIT_CONT               = 0x02;
-        constexpr quint8 SET_TRIGSEQ1                = 0x03;
-        constexpr quint8 SET_TRIGSEQ2                = 0x04;
-        constexpr quint8 SET_TRIGSEQ2_SOUR           = 0x05;
-        constexpr quint8 SET_TRIGSEQ2_COUN           = 0x06;
-        constexpr quint8 SET_TRIGSEQ2_HYST           = 0x07;
-        constexpr quint8 SET_TRIGSEQ2_LEV            = 0x08;
-        constexpr quint8 SET_TRIGSEQ2_SLOP           = 0x09;
-        constexpr quint8 SET_SOURVOLT_AMPL_TRIG      = 0x0A;
-        constexpr quint8 SET_SOURCURR_TRIG           = 0x0B;
-        constexpr quint8 SET_SOURRES_TRIG            = 0x0C;
-        constexpr quint8 SET_TRIGSEQ1_SOUR           = 0x0D;
-        constexpr quint8 SET_TRIGSEQ2_COUN_VOIT      = 0x0E;
-        constexpr quint8 SET_TRIGSEQ2_COUN_DVM       = 0x0F;
-        constexpr quint8 SET_TRIGSEQ2_HYST_CURR      = 0x10;
-    }
-
-    namespace Battery {
-        constexpr quint8 QUERY_BATTMODE              = 0x80;
-        constexpr quint8 QUERY_BATTSTATVOLT          = 0x81;
-        constexpr quint8 QUERY_BATTINCVOLT           = 0x82;
-        constexpr quint8 QUERY_BATTENDVOLT           = 0x83;
-        constexpr quint8 QUERY_BATTOUTCURR           = 0x84;
-        constexpr quint8 QUERY_BATTINCURR            = 0x85;
-        constexpr quint8 QUERY_BATTSTOPCURR          = 0x86;
-        constexpr quint8 QUERY_BATTSTOPMODE          = 0x87;
-        constexpr quint8 QUERY_BATTINCTIME           = 0x88;
-        constexpr quint8 QUERY_BATTRES               = 0x89;
-
-        constexpr quint8 SET_BATTMODE                = 0x00;
-        constexpr quint8 SET_BATTSTATVOLT            = 0x01;
-        constexpr quint8 SET_BATTINCVOLT             = 0x02;
-        constexpr quint8 SET_BATTENDVOLT             = 0x03;
-        constexpr quint8 SET_BATTOUTCURR             = 0x04;
-        constexpr quint8 SET_BATTINCURR              = 0x05;
-        constexpr quint8 SET_BATTSTOPCURR            = 0x06;
-        constexpr quint8 SET_BATTSTOPMODE            = 0x07;
-        constexpr quint8 SET_BATTINCTIME             = 0x08;
-        constexpr quint8 SET_BATTRES                 = 0x09;
-    }
-
-    namespace Soc {
-        constexpr quint8 QUERY_SOCEDIT_FILE          = 0x80;
-        constexpr quint8 QUERY_SOCEDIT_LENG          = 0x81;
-        constexpr quint8 QUERY_SEQEDIT_STEP          = 0x82;
-        constexpr quint8 QUERY_SOCEDIT_Q             = 0x83;
-        constexpr quint8 QUERY_SOCEDIT_VOIT          = 0x84;
-        constexpr quint8 QUERY_SOCEDIT_OUTCURR       = 0x85;
-        constexpr quint8 QUERY_SOCEDIT_INCURR        = 0x86;
-        constexpr quint8 QUERY_SOCEDIT_RES           = 0x87;
-        constexpr quint8 QUERY_SOCRUN_STEP           = 0x88;
-        constexpr quint8 QUERY_SOCRUN_Q              = 0x89;
-        constexpr quint8 QUERY_SOCFILE_SAVE          = 0x8A;
-        constexpr quint8 QUERY_SOCFILE_CLEAR         = 0x8B;
-
-        constexpr quint8 SET_SOCEDIT_FILE            = 0x00;
-        constexpr quint8 SET_SOCEDIT_LENG            = 0x01;
-        constexpr quint8 SET_SEQEDIT_STEP            = 0x02;
-        constexpr quint8 SET_SOCEDIT_Q               = 0x03;
-        constexpr quint8 SET_SOCEDIT_VOIT            = 0x04;
-        constexpr quint8 SET_SOCEDIT_OUTCURR         = 0x05;
-        constexpr quint8 SET_SOCEDIT_INCURR          = 0x06;
-        constexpr quint8 SET_SOCEDIT_RES             = 0x07;
-    }
-
-    namespace Sequence {
-        constexpr quint8 QUERY_SEQEDIT_FILE          = 0x80;
-        constexpr quint8 QUERY_SEQEDIT_LENG          = 0x81;
-        constexpr quint8 QUERY_SEQEDIT_CYCL          = 0x82;
-        constexpr quint8 QUERY_SEQEDIT_STEP          = 0x83;
-        constexpr quint8 QUERY_SEQEDIT_VOIT          = 0x84;
-        constexpr quint8 QUERY_SEQEDIT_OUTCURR       = 0x85;
-        constexpr quint8 QUERY_SEQEDIT_INCURR        = 0x86;
-        constexpr quint8 QUERY_SEQEDIT_RES           = 0x87;
-        constexpr quint8 QUERY_SEQEDIT_RUNT          = 0x88;
-        constexpr quint8 QUERY_SEQEDIT_LINKS         = 0x89;
-        constexpr quint8 QUERY_SEQEDIT_LINKE         = 0x8A;
-        constexpr quint8 QUERY_SEQEDIT_LINKC         = 0x8B;
-        constexpr quint8 QUERY_SEQRUN_TIME           = 0x8C;
-        constexpr quint8 QUERY_SEQRUN_STEP           = 0x8D;
-        constexpr quint8 QUERY_SEQFILE_SAVE          = 0x8E;
-        constexpr quint8 QUERY_SEQFILE_CLEAR         = 0x8F;
-
-        constexpr quint8 SET_SEQEDIT_FILE            = 0x00;
-        constexpr quint8 SET_SEQEDIT_LENG            = 0x01;
-        constexpr quint8 SET_SEQEDIT_CYCL            = 0x02;
-        constexpr quint8 SET_SEQEDIT_STEP            = 0x03;
-        constexpr quint8 SET_SEQEDIT_VOIT            = 0x04;
-        constexpr quint8 SET_SEQEDIT_OUTCURR         = 0x05;
-        constexpr quint8 SET_SEQEDIT_INCURR          = 0x06;
-        constexpr quint8 SET_SEQEDIT_RES             = 0x07;
-        constexpr quint8 SET_SEQEDIT_RUNT            = 0x08;
-        constexpr quint8 SET_SEQEDIT_LINKS           = 0x09;
-        constexpr quint8 SET_SEQEDIT_LINKE           = 0x0A;
-        constexpr quint8 SET_SEQEDIT_LINKC           = 0x0B;
-    }
-
-    namespace ERR {
+    namespace Err {
+        constexpr quint8 Error                       = 0xFF;
         constexpr quint8 CheckSum_Error              = 0x00;
         constexpr quint8 Unknow_Command              = 0x01;
         constexpr quint8 Unknow_Function             = 0x02;
@@ -299,4 +212,8 @@ namespace JV6xxx {
         constexpr quint8 mA           = 0x01;
         constexpr quint8 Auto         = 0x10;
     }
+}
+
+constexpr quint16 QCmd(quint16 cmds) {
+    return cmds | JV6xxx::UartCMD::READ;
 }

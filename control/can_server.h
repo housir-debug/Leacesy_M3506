@@ -5,11 +5,9 @@
 #include <linux/can/raw.h>
 
 class QSocketNotifier;
-
 class CanServerManager : public QObject
 {
     Q_OBJECT
-
 private:
     static const std::array<quint32,9> m_validBaudRates;
     static const QHash<quint32, quint16> m_canToUart;

@@ -8,9 +8,7 @@ class QTcpSocket;
 class QUdpSocket;
 class vxi11_server : public QObject
 {
-
     Q_OBJECT
-
 private:
     class RpcThread : public QThread {
     protected:

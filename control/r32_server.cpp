@@ -6,7 +6,7 @@
 
 void UartServerManager::startLoopbackTest()
 {
-    qCDebug(r32Ser)<<"[startLoopbackTest]:Starting Loopback Test.";
+    qCDebug(r32Ser)<<"(startLoopbackTest)Starting Loopback Test.";
     QByteArray testData(1024, 0);
 
     m_testTimer.start();
@@ -48,7 +48,7 @@ UartServerManager::UartServerManager(QObject *parent): QObject(parent)
 
     if (m_uartServer->open(QIODevice::ReadWrite)) {
         connect(m_uartServer, &QSerialPort::errorOccurred, this, [this]() {
-            qCWarning(r32Ser)<<"[UartServerManager]:Uartserver Occur Error: "<<m_uartServer->errorString();
+            qCWarning(r32Ser)<<"(UartServerManager)Uartserver Occur Error: "<<m_uartServer->errorString();
             }, Qt::DirectConnection);
         connect(m_uartServer, &QSerialPort::readyRead,  this, [this](){
             // Test progressing
@@ -66,20 +66,16 @@ UartServerManager::UartServerManager(QObject *parent): QObject(parent)
                 m_readbuffer.clear();
             }*/
 
-            switch (ConfigManager::control_Mode.load()) {
-                case InterSt::LOCAL:emit ChannelBus::instance().switchRemote(InterSt::RS232);// fall through
-                case InterSt::RS232:
-                    m_readbuffer = m_uartServer->readAll();
-                    qCDebug(r32Ser)<<"[UartServerManager]:UartServer SCPI-Commend: "<< m_readbuffer;
+            if (ConfigManager::isInteRemote(InterSt::RS232)){
+                m_readbuffer = m_uartServer->readAll();
+                qCDebug(r32Ser)<<"(UartServerManager)UartServer SCPI-Commend: "<< m_readbuffer;
 
-                    m_responsebuffer = ScpiManager::instance().processCommand(m_readbuffer);
-                    if (!m_responsebuffer.isEmpty()){m_uartServer->write(m_responsebuffer);}
-                    qCDebug(r32Ser)<<"[UartServerManager]:UartServer SCPI Response: "<<m_responsebuffer;
-                    break;
-                default:
-                    QByteArray errMsg = "Other instrument interfaces are currently in remote mode.";
-                    qCDebug(r32Ser)<<"[UartServerManager]: "<<errMsg;
-                    m_uartServer->write(errMsg);
+                m_responsebuffer = ScpiManager::instance().processCommand(m_readbuffer);
+                if (!m_responsebuffer.isEmpty()){m_uartServer->write(m_responsebuffer);}
+                qCDebug(r32Ser)<<"(UartServerManager)UartServer SCPI Response: "<<m_responsebuffer;
+            }else{
+                QByteArray errMsg = "Device on Other inter_Remote mode!";
+                m_uartServer->write(errMsg);
             }}, Qt::DirectConnection);
 
         return;

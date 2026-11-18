@@ -370,13 +370,11 @@ CanServerManager::CanServerManager(QObject *parent): QObject(parent)
                         QByteArray data(reinterpret_cast<const char*>(frame.data), frame.can_dlc);
                         qCDebug(canSer)<<"[CanServerManager]:Received Data: "<<data.toHex();
 
-                        switch (ConfigManager::control_Mode.load()) {
-                            case InterSt::LOCAL:emit ChannelBus::instance().switchRemote(InterSt::CAN);// fall through
-                            case InterSt::CAN:processFrame(data); break;
-                            default:
-                                qCDebug(canSer)<<"[CanServerManager]: remoteMode[!=can-1]: "<<ConfigManager::control_Mode.load();
-                                quint8 channel = static_cast<quint8>(data[0]);
-                                sendFrame(channel,0xffff,""); break;
+                        if (ConfigManager::isInteRemote(InterSt::CAN)){
+                            processFrame(data);
+                        }else{
+                            quint8 channel = static_cast<quint8>(data[0]);
+                            sendFrame(channel,0xffff,"");
                         }
                     }
 

@@ -3,11 +3,9 @@
 #include <QElapsedTimer>
 
 class QSerialPort;
-
 class UartServerManager : public QObject
 {
     Q_OBJECT
-
 private:
     void startLoopbackTest();
     QElapsedTimer m_testTimer;

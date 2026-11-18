@@ -13,6 +13,7 @@
 #include "control/r32_server.h"
 #include "ui_appmain.h"
 #include "appmain.h"
+// --- QT package ---
 #include <QGraphicsProxyWidget>
 #include <QGraphicsView>
 #include <QThread>
@@ -21,42 +22,42 @@
 Mainwindow::Mainwindow(QWidget *parent) : QWidget(parent), ui(new Ui::Mainwindow)
 {
     QString configPath = QDir(QApplication::applicationDirPath()).filePath("..");
-    if (QDir(configPath).exists() && ConfigManager::init(configPath)) { // init log
-        BatteryModelManager::instance().m_modelDirectory = configPath + "/battery_models";
-        BatteryModelManager::instance().loadAllModels();
+    if (QDir(configPath).exists()) {
+        ConfigManager::setLogRules(LogLevel::Normal);
+        BatteryModelManager::instance().loadAllModels(configPath);
 
-        // testUi();
-        initUi();
-        initO();
+        if (ConfigManager::init(configPath)){
+            initUi(); // testUi(); initUi();
+            initO();
+            return;
+        }
+
+        qCCritical(aPMain)<<"(Mainwindow)inital APP-config fail!!!";
+        return;
     }
+
+    qCCritical(aPMain)<<"(Mainwindow)APP parent path not exist!!!";
 }
 Mainwindow::~Mainwindow()
 {
-    for (UartChannelManager* ch : channels) {
-        if (ch) {
-            QMetaObject::invokeMethod(ch, [ch]() { delete ch; },Qt::BlockingQueuedConnection);
-        }
-    }
-    channels.clear();
-
-    for (auto& t : threads) {
-        if (t) {
-            t->quit();
-            if (!t->wait(1000)) {
-                t->terminate();
-                t->wait();
-            }
-        }
-    }
-    threads.clear();
-
-    if (m_serThread) {
+    // stop m_serThread -> finished signed
+    if (m_serThread && m_serThread->isRunning()) {
         m_serThread->quit();
-        if (!m_serThread->wait(1000)) {
-            m_serThread->terminate();
-            m_serThread->wait();
+        m_serThread->wait(3000);
+    }//inherit this -> auto delete
+
+    for (auto& t : m_chThreads) {
+        if (t && t->isRunning()) {
+            t->quit();
+            t->wait(3000);
         }
-    }
+    }//inherit this -> auto delete
+    m_chThreads.clear();
+
+    for (UartChannelManager* ch : channels) {
+        delete ch;
+    }//not inherit, mannel delete
+    channels.clear();
 
     delete view;
     delete ui;
@@ -169,7 +170,7 @@ void Mainwindow::testUi()
     /*devicesetpage* m_DeviceSetPage = new devicesetpage(this);
     ui->stackedwidget->addWidget(m_DeviceSetPage);// 2*/
 
-    qCDebug(aPTest) << "objectName:" << m_ChPage->objectName();
+    qCDebug(aPMain) << "objectName:" << m_ChPage->objectName();
 
     //numberkeypad *key = new numberkeypad(this);
     //key->setContentsMargins(0, 0, 0, 0);
@@ -197,21 +198,20 @@ void Mainwindow::initO()
         for (const auto& config : ChannelBus::instance().configs) {
             QThread* worker = nullptr;
 
-            if (!threads.empty()) {
-                QThread* latest = threads.back().get();
+            if (!m_chThreads.empty()) {
+                QThread* latest = m_chThreads.back();
                 if (threadLoad.value(latest, 0) < JV6xxx::Thread_CHSUM) {
                     worker = latest;
                 }
             }
 
             if (!worker){
-                auto t = std::make_unique<QThread>();
-                t->setObjectName(QString("UartChThread_%1").arg(threads.size()));
-                t->start();
+                worker = new QThread(this);
+                worker->setObjectName(QString("UartChThread_%1").arg(m_chThreads.size()));
+                worker->start();
 
-                worker = t.get();
                 threadLoad.insert(worker, 0);
-                threads.push_back(std::move(t));
+                m_chThreads.push_back(worker);
             }
 
             auto channel = new UartChannelManager();
@@ -224,12 +224,12 @@ void Mainwindow::initO()
             QObject::connect(&ChannelBus::instance(),Bus_toUChRe[config.channel-1],channel,&UartChannelManager::sendInitCommand,Qt::QueuedConnection);
 
             threadLoad[worker] += 1;
-            channels.push_back(std::move(channel));
+            channels.push_back(channel);
         }
     }
 
     m_serThread = new QThread(this);
-    m_serThread->setObjectName("ServerThread");
+
     QObject::connect(m_serThread, &QThread::started, this,[this](){
         if (Module::enable_UartSer){
             uartServer = new UartServerManager();
@@ -258,5 +258,6 @@ void Mainwindow::initO()
         if (Module::enable_VxiSer)  { vxi11_server::instance().stop(); }
         }, Qt::DirectConnection);
 
+    m_serThread->setObjectName("ServerThread");
     m_serThread->start();
 }

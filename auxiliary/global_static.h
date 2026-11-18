@@ -3,7 +3,6 @@
 
 /* widgets */
 Q_DECLARE_LOGGING_CATEGORY(aMain)
-Q_DECLARE_LOGGING_CATEGORY(aPTest)
 Q_DECLARE_LOGGING_CATEGORY(aPMain)
 /* interaction */
 Q_DECLARE_LOGGING_CATEGORY(inDeSeP)
@@ -26,7 +25,6 @@ Q_DECLARE_LOGGING_CATEGORY(uartCh)
 Q_DECLARE_LOGGING_CATEGORY(battMod)
 Q_DECLARE_LOGGING_CATEGORY(signBus)
 Q_DECLARE_LOGGING_CATEGORY(globalSt)
-Q_DECLARE_LOGGING_CATEGORY(tirpLoad)
 
 namespace Module {
     constexpr const bool enable_CanCh        = false;
@@ -50,13 +48,15 @@ class QSettings;
 class ConfigManager
 {
 public:
+    static QStringList customList;
+    static void setLogRules(int level);
+
     static std::atomic<int> control_Mode;
     static bool isInteRemote(int Inte);
 
     static std::atomic<quint32> s_CANid;
     static quint32 s_rs232BaudIndex;
     static quint32 s_canBaudIndex;
-    static int log_Level;
 
     static bool init(const QString &configDir);
     static bool saveNewValue(const QString &key,const QVariant &val);
@@ -79,7 +79,12 @@ namespace ConfAddress {
     constexpr const char*  CanId      = "Device/CANID";
     constexpr const char*  CanBaud    = "Device/CANBaud";
     constexpr const char*  R23Baud    = "Device/RS232Baud";
-    constexpr const char*  LogType    = "Device/LogLevel";
+}
+namespace LogLevel {
+    constexpr const int Custom    = 0x00;
+    constexpr const int Release   = 0x01;
+    constexpr const int Debug     = 0x02;
+    constexpr const int Normal    = 0x03;
 }
 namespace InterSt {
     constexpr int LOCAL      = 0x00;

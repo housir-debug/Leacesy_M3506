@@ -1,24 +1,41 @@
 #pragma once
 #include <QWidget>
-namespace Ui {class Mainwindow;}
-
+// --- channel ---
 class UartChannelManager;
+// --- control ---
 class UartServerManager;
 class CanServerManager;
-class VxiServerManager;
 class WebServerManager;
-
+// --- UI page ---
 class remoteoverlay;
 class devicesetpage;
 class channelsetting;
 class channelpage;
-
+// --- UI view ---
 class QGraphicsScene;
 class QGraphicsView;
-
+namespace Ui {class Mainwindow;}
 class Mainwindow : public QWidget
 {
     Q_OBJECT
+private:
+    // --- channel ---
+    std::vector<UartChannelManager*> channels;
+    std::vector<QThread*> m_chThreads;
+    // --- control ---
+    UartServerManager* uartServer{nullptr};
+    CanServerManager* canServer{nullptr};
+    WebServerManager* webServer{nullptr};
+    QThread* m_serThread{nullptr};
+    // --- UI page ---
+    remoteoverlay* m_RemoteOverlay{nullptr};
+    devicesetpage* m_DeviceSetPage{nullptr};
+    channelsetting* m_ChSetPage{nullptr};
+    channelpage* m_ChPage{nullptr};
+    Ui::Mainwindow *ui;
+    // --- UI view ---
+    QGraphicsScene* scene{nullptr};
+    QGraphicsView* view{nullptr};
 
 public:
     explicit Mainwindow(QWidget *parent = nullptr);
@@ -27,21 +44,4 @@ public:
     void initUi();
     void testUi();
     void initO();
-
-private:
-    std::vector<std::unique_ptr<QThread>> threads;
-    std::vector<UartChannelManager*> channels;
-    UartServerManager* uartServer{nullptr};
-    CanServerManager* canServer{nullptr};
-    WebServerManager* webServer{nullptr};
-    QThread* m_serThread{nullptr};
-
-    remoteoverlay* m_RemoteOverlay{nullptr};
-    devicesetpage* m_DeviceSetPage{nullptr};
-    channelsetting* m_ChSetPage{nullptr};
-    channelpage* m_ChPage{nullptr};
-    Ui::Mainwindow *ui;
-
-    QGraphicsScene* scene{nullptr};
-    QGraphicsView* view{nullptr};
 };

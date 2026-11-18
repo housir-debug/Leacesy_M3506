@@ -5,9 +5,11 @@
 bool BatteryModelManager::saveModel(QVector<BatteryDataPoint>& pts,const QString &modelName)
 {
     QDir modelDir(m_modelDirectory);
-    if (!modelDir.exists()) {modelDir.mkpath(".");}
-    QString filePath = modelDir.filePath(modelName + ".csv");
+    if (!modelDir.exists()) {
+        modelDir.mkpath(".");
+    }
 
+    QString filePath = modelDir.filePath(modelName + ".csv");
     if(!QFile::exists(filePath)){ // check , not create
         std::sort(pts.begin(), pts.end(),[]
             (const BatteryDataPoint &a, const BatteryDataPoint &b){
@@ -31,11 +33,11 @@ bool BatteryModelManager::saveModel(QVector<BatteryDataPoint>& pts,const QString
             return true;
         }
 
-        qCWarning(battMod)<<"[saveModel]: not create model file: "<<filePath;
+        qCWarning(battMod)<<"(saveModel)not create model file: "<<filePath;
         return false;
     }
 
-    qCWarning(battMod)<<"[saveModel]: model file already exist!";
+    qCWarning(battMod)<<"(saveModel)model file already exist!";
     return false;
 }
 bool BatteryModelManager::removeModel(const QString &modelName)
@@ -54,80 +56,84 @@ bool BatteryModelManager::removeModel(const QString &modelName)
                 return true;
             }
 
-            qCWarning(battMod)<<"[removeModel]: delete model: "<<modelName<<" | error:"<<file.errorString();
+            qCWarning(battMod)<<"(removeModel)delete model: "<<modelName<<" | error:"<<file.errorString();
         }
     }
 
     return false;
 }
-bool BatteryModelManager::loadAllModels()
+void BatteryModelManager::loadAllModels(const QString &path)
 {
-    m_models.clear();
+    m_modelDirectory = path + "/battery_models";
     QDir modelDir(m_modelDirectory);
-    if (!modelDir.exists()) {modelDir.mkpath(".");}
 
-    QFileInfoList fileList = modelDir.entryInfoList({"*.csv", "*.CSV"}, QDir::Files);
-    if (!fileList.isEmpty()) {
-        for (const auto &fileInfo : qAsConst(fileList)) {
-            QFile file(fileInfo.absoluteFilePath());
-            if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                QTextStream stream(&file);
-                QStringList columns = stream.readLine().trimmed().split(','); // first line
+    if (modelDir.exists()) {
+        QFileInfoList fileList = modelDir.entryInfoList({"*.csv", "*.CSV"}, QDir::Files);
 
-                int socCol = -1, ocvCol = -1, esrCol = -1;
-                for (int i = 0; i < columns.size(); ++i) {
-                    QString normalized = columns[i].trimmed();
-                    if (normalized=="SOC_%")        {socCol = i;}
-                    else if (normalized=="OCV_V")   {ocvCol = i;}
-                    else if (normalized=="IMP_Ohm") {esrCol = i;}
-                }
+        if (!fileList.isEmpty()) {
+            for (const auto &fileInfo : qAsConst(fileList)) {
+                QFile file(fileInfo.absoluteFilePath());
+                if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                    QTextStream stream(&file);
+                    QStringList columns = stream.readLine().trimmed().split(','); // first line
 
-                if (socCol != -1 && ocvCol != -1 && esrCol != -1){
-                    QVector<BatteryDataPoint> pts;
-                    bool readOver = true;
+                    int socCol = -1, ocvCol = -1, esrCol = -1;
+                    for (int i = 0; i < columns.size(); ++i) {
+                        QString normalized = columns[i].trimmed();
+                        if (normalized=="SOC_%")        {socCol = i;}
+                        else if (normalized=="OCV_V")   {ocvCol = i;}
+                        else if (normalized=="IMP_Ohm") {esrCol = i;}
+                    }
 
-                    while (!stream.atEnd()) {
-                        columns = stream.readLine().trimmed().split(',');
+                    if (socCol != -1 && ocvCol != -1 && esrCol != -1){
+                        QVector<BatteryDataPoint> pts;
+                        bool readOver = true;
 
-                        if (columns.size() == 3) {
-                            BatteryDataPoint point;
-                            point.soc = columns[socCol].toFloat();
-                            if (0.0f <= point.soc && point.soc <= 100.0f) {
-                                point.ocv = columns[ocvCol].toFloat();
-                                if (0.0f <= point.ocv && point.ocv <= 6.0f) {
-                                    point.imp = columns[esrCol].toFloat();
-                                    if (0.0f <= point.imp && point.imp <= 1.0f) {
-                                        pts.append(point);
-                                        continue; // access next line
+                        while (!stream.atEnd()) {
+                            columns = stream.readLine().trimmed().split(',');
+
+                            if (columns.size() == 3) {
+                                BatteryDataPoint point;
+                                point.soc = columns[socCol].toFloat();
+                                if (0.0f <= point.soc && point.soc <= 100.0f) {
+                                    point.ocv = columns[ocvCol].toFloat();
+                                    if (0.0f <= point.ocv && point.ocv <= 6.0f) {
+                                        point.imp = columns[esrCol].toFloat();
+                                        if (0.0f <= point.imp && point.imp <= 1.0f) {
+                                            pts.append(point);
+                                            continue; // access next line
+                                        }
                                     }
                                 }
                             }
+
+                            qCWarning(battMod)<<"(loadAllModels)line failed: "<< columns;
+                            readOver = false;
+                            break;
                         }
 
-                        qCWarning(battMod)<<"[parseCSV]: line failed: "<< columns;
-                        readOver = false;
-                        break;
+                        // be sorted when savemodel
+                        if (readOver){
+                            m_models.insert(fileInfo.baseName(), std::move(pts));
+                            continue;
+                        }
                     }
 
-                    // be sorted when savemodel
-                    if (readOver){
-                        m_models.insert(fileInfo.baseName(), std::move(pts));
-                        continue;
-                    }
+                    qCWarning(battMod)<<"(loadAllModels)format failed:" << fileInfo.absoluteFilePath();
+                    continue;
                 }
 
-                qCWarning(battMod)<<"[parseCSV]: format failed!" << fileInfo.absoluteFilePath();
-                continue;
+                qCWarning(battMod)<<"(loadAllModels)failed open file:" << fileInfo.absoluteFilePath();
             }
 
-            qCWarning(battMod)<<"[parseCSV]:failed open file!" << fileInfo.absoluteFilePath();
+            return;
         }
 
-        return true;
+        qCDebug(battMod)<<"(loadAllModels)not find csv file";
+        return;
     }
 
-    qCWarning(battMod)<<"[loadAllModels]:No model file exists.";
-    return false;
+    modelDir.mkpath(".");
 }
 
 BatteryModelManager::BatteryModelManager(QObject* parent): QObject(parent){}

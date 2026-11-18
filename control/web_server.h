@@ -11,7 +11,6 @@ class QWebSocketServer;
 class WebServerManager : public QObject
 {
     Q_OBJECT
-
 private:
     static const QHash<QString, QString> m_staticFiles;
     static const QHash<QString, QString> m_mimeTypes;

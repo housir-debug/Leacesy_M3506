@@ -140,10 +140,10 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
         QTcpSocket* client = m_httpServer->nextPendingConnection();
         if (m_clients.size() < 9) { // restrict connect number = 9
             connect(client, &QTcpSocket::errorOccurred,this, [client](QAbstractSocket::SocketError error){
-                qCWarning(webSer)<<"(WebServerManager): "<< client->objectName()<<" | "<<error<<client->errorString();
+                qCWarning(webSer)<<"(WebServerManager)"<< client->objectName()<<" | "<<error<<client->errorString();
                 }, Qt::DirectConnection);
             connect(client, &QTcpSocket::disconnected,this, [this, client](){
-                qCDebug(webSer)<<"(WebServerManager): "<<client->objectName()<<" disconnected";
+                qCDebug(webSer)<<"(WebServerManager)"<<client->objectName()<<" disconnected";
                 m_clients.removeOne(client);
                 client->deleteLater();
                 }, Qt::DirectConnection);
@@ -155,7 +155,7 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
 
                     if (parts.size() >= 3) {
                         QString path = QUrl::fromPercentEncoding(parts[1].toUtf8());
-                        qCDebug(webSer)<<"(WebServerManager):HTTP request: "<< parts[0] << path;
+                        qCDebug(webSer)<<"(WebServerManager)HTTP request: "<< parts[0] << path;
 
                         if (m_apiRoutes.contains(path)) {
                             m_apiRoutes[path](client);
@@ -167,7 +167,7 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
                             if (!m_fileCache.contains(path)) {
                                 QFile file(resourcePath);
                                 if (!file.open(QIODevice::ReadOnly)) {
-                                    qCWarning(webSer)<<"(WebServerManager): open web file: "<<resourcePath<<"failed!";
+                                    qCWarning(webSer)<<"(WebServerManager)open web file: "<<resourcePath<<"failed!";
                                     sendHttpResponse(client, "500 Internal Server Error", "text/plain", 500);
                                     return;
                                 }
@@ -180,18 +180,18 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
                             return;
                         }
 
-                        qCWarning(webSer)<<"(WebServerManager): request route method not exist!";
+                        qCWarning(webSer)<<"(WebServerManager)request route method not exist!";
                         sendHttpResponse(client, "404 Not Found", "text/plain", 404);
                         return;
                     }
                 }
 
                 sendHttpResponse(client, "Please access using a web browser.", "text/plain");
-                qCDebug(webSer)<<"(WebServerManager): request format failed!";
+                qCDebug(webSer)<<"(WebServerManager)request format failed!";
                 }, Qt::DirectConnection);
 
             client->setObjectName(QString("%1:%2").arg(client->peerAddress().toString()).arg(client->peerPort()));
-            qCDebug(webSer)<<"(WebServerManager):New HTTP client: "<< client->objectName();
+            qCDebug(webSer)<<"(WebServerManager)New HTTP client: "<< client->objectName();
             m_clients.append(client);
             return;
         }
@@ -208,15 +208,15 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
             QWebSocket* socket = m_wsServer->nextPendingConnection();
             if (m_sockets.size() < 9) { // restrict connect number = 9
                 connect(socket,QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),this, [socket](QAbstractSocket::SocketError error){
-                    qCWarning(webSer)<<"(WebServerManager):("<<socket->objectName()<<")"<< error <<socket->errorString();
+                    qCWarning(webSer)<<"(WebServerManager)"<<socket->objectName()<<", "<< error <<socket->errorString();
                     }, Qt::DirectConnection);
                 connect(socket, &QWebSocket::disconnected,this, [this, socket](){
-                    qCDebug(webSer)<<"(WebServerManager): "<<socket->objectName()<<" disconnected";
+                    qCDebug(webSer)<<"(WebServerManager)"<<socket->objectName()<<" disconnected";
                     m_sockets.removeOne(socket);
                     socket->deleteLater();
                     }, Qt::DirectConnection);
                 connect(socket, &QWebSocket::textMessageReceived,this, [this, socket](const QString &message){
-                    qCDebug(webSer)<<"(WebServerManager):WEB request: "<<message;
+                    qCDebug(webSer)<<"(WebServerManager)WEB request: "<<message;
                     QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8());
                     if (!doc.isNull() && doc.isObject()) {
                         QJsonObject obj = doc.object();
@@ -226,11 +226,11 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
                             return;
                         }
 
-                        qCDebug(webSer)<<"(WebServerManager): request route method not exist!";
+                        qCDebug(webSer)<<"(WebServerManager)request route method not exist!";
                     }}, Qt::DirectConnection);
 
                 socket->setObjectName(QString("%1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()));
-                qCDebug(webSer)<<"(WebServerManager):New WebSocket client: "<< socket->objectName();
+                qCDebug(webSer)<<"(WebServerManager)New WebSocket client: "<< socket->objectName();
                 m_sockets.append(socket);
                 return;
             }
@@ -244,11 +244,11 @@ WebServerManager::WebServerManager(QObject *parent) : QObject(parent)
             return;
         }
 
-        qCCritical(webSer)<<"(WebServerManager): m_wsServer listen failed!";
+        qCCritical(webSer)<<"(WebServerManager)m_wsServer listen failed!";
         return;
     }
 
-    qCCritical(webSer)<<"(WebServerManager): m_httpServer listen failed!";
+    qCCritical(webSer)<<"(WebServerManager)m_httpServer listen failed!";
 }
 WebServerManager::~WebServerManager()
 {
@@ -382,11 +382,11 @@ bool WebServerManager::addModelFromNetwork(const QString &modelName, const QJson
                     continue;
                 }
 
-                qCWarning(webSer)<< "(addModelFromNetwork):Parameter lack error!";
+                qCWarning(webSer)<< "(addModelFromNetwork)Parameter lack error!";
                 return false;
             }
 
-            qCWarning(webSer)<< "(addModelFromNetwork):Parameter model format error!";
+            qCWarning(webSer)<< "(addModelFromNetwork)Parameter model format error!";
             return false;
         }
 
@@ -394,7 +394,7 @@ bool WebServerManager::addModelFromNetwork(const QString &modelName, const QJson
         return BatteryModelManager::instance().saveModel(pts, modelName);
     }
 
-    qCWarning(webSer)<<"(addModelFromNetwork):model incorrect!";
+    qCWarning(webSer)<<"(addModelFromNetwork)model incorrect!";
     return false;
 }
 
@@ -431,10 +431,10 @@ void WebServerManager::set_network(bool isstatic)
             return;
         }
 
-        qCWarning(webSer)<< "(set_network):/etc/init.d/S40network restart failed!";
+        qCWarning(webSer)<< "(set_network)/etc/init.d/S40network restart failed!";
         return;
     }
 
-    qCWarning(webSer)<< "(set_network):Cannot open interfaces file for writing";
+    qCWarning(webSer)<< "(set_network)Cannot open interfaces file for writing!";
     return;
 }
