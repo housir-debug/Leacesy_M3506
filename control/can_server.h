@@ -11,7 +11,6 @@ class CanServerManager : public QObject
 private:
     static const QHash<quint32, quint16> m_canToUart;
     static const QHash<quint16, quint32> m_uartToCan;
-    static const std::array<quint32,9> m_validBaudRates;
 
 public:
     void changebaud();

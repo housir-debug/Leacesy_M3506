@@ -9,21 +9,26 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+#include "auxiliary/global_static.h"
 #include "uart_protocol.h"
 
 class ScpiManager : public QObject
 {
     Q_OBJECT
-
 private:
-    // --- Network -------------------------------------------------------------------------------
-    static scpi_result_t SCPI_NETInform(scpi_t* context);
-    // -
-    static scpi_result_t SCPI_NETDHCP(scpi_t* context){return SET_NETWork(context,0,false);};
-    static scpi_result_t SCPI_NETIPADress(scpi_t* context){return SET_NETWork(context,1,true);};
-    static scpi_result_t SCPI_NETSUBNetmask(scpi_t* context){return SET_NETWork(context,2,true);};
-    static scpi_result_t SCPI_NETGATeway(scpi_t* context){return SET_NETWork(context,3,true);};
-    static scpi_result_t SET_NETWork(scpi_t* context,int staticmode,bool isstatic);
+    static scpi_result_t SCPI_SERBaud(scpi_t* context);
+    static scpi_result_t SCPI_SERBaudQ(scpi_t* context);
+    static scpi_result_t SCPI_CANBaud(scpi_t* context);
+    static scpi_result_t SCPI_CANBaudQ(scpi_t* context);
+    static scpi_result_t SCPI_CANId(scpi_t* context);
+    static scpi_result_t SCPI_CANIdQ(scpi_t* context);
+
+    static scpi_result_t SCPI_LANIP(scpi_t* context){return SET_NETWork(context,NetMode::IP);};
+    static scpi_result_t SCPI_LANSmask(scpi_t* context){return SET_NETWork(context,NetMode::MASK);};
+    static scpi_result_t SCPI_LANGate(scpi_t* context){return SET_NETWork(context,NetMode::GATE);};
+    static scpi_result_t SCPI_LANDHCP(scpi_t* context){return SET_NETWork(context,NetMode::DHCP);};
+    static scpi_result_t SET_NETWork(scpi_t* context,int mode);
+    static scpi_result_t SCPI_LANInfQ(scpi_t* context);
     // --- Output --------------------------------------------------------------------------------
     static scpi_result_t SCPI_OutputState(scpi_t* context);
     static scpi_result_t SCPI_OutputBand(scpi_t* context)            {return sendChoiceCmd(context,JV6xxx::UartCMD::OUTPBAND);};

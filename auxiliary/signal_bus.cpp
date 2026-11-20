@@ -1,7 +1,8 @@
 #include "signal_bus.h"
 #include <QSerialPort>
 
-const std::vector<ChannelBus::UartConfig> ChannelBus::configs = {
+const std::vector<ChannelBus::UartConfig> ChannelBus::configs =
+{
     //{"/dev/ttyS3",    QSerialPort::Baud38400, 0x01}, // debug-Uart
     /*{"/dev/ttyS4",    QSerialPort::Baud38400, 0x01},
     {"/dev/ttyS5",    QSerialPort::Baud38400, 0x02},
@@ -37,6 +38,29 @@ const std::vector<ChannelBus::UartConfig> ChannelBus::configs = {
     {"/dev/ttyWCH26", QSerialPort::Baud38400, 0x20},
     {"/dev/ttyWCH27", QSerialPort::Baud38400, 0x21},   // 33*/
     {"/dev/ttyS1",    QSerialPort::Baud38400, 0x01},   // test
+};
+constexpr std::array<quint32, 8> ChannelBus::m_RS232BaudRates =
+{
+    QSerialPort::Baud115200,//0
+    QSerialPort::Baud57600,//1
+    QSerialPort::Baud38400,//2
+    QSerialPort::Baud19200,//3
+    QSerialPort::Baud9600,//4
+    QSerialPort::Baud4800,//5
+    QSerialPort::Baud2400,//6
+    QSerialPort::Baud1200,//7
+};
+constexpr std::array<quint32, 9> ChannelBus::m_CanBaudRates =
+{
+    1000000,//0
+    800000,//1
+    500000,//2
+    250000,//3
+    125000,//4
+    100000,//5
+    50000,//6
+    20000,//7
+    10000,//8
 };
 
 void ChannelBus::to_Channel(int channel,quint16 cmds,const QByteArray& param,bool isScpi)

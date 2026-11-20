@@ -14,7 +14,6 @@ private:
     QByteArray m_responsebuffer;
 
     QSerialPort *m_uartServer{nullptr};
-    static const std::array<quint32,8> m_validBaudRates;
 
 public:
     void changeBaudRate();

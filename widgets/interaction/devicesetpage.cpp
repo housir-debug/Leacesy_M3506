@@ -59,12 +59,12 @@ void devicesetpage::on_dhcp_pushButton_clicked()
     ui->ipradioButton->setEnabled(false);
     ui->maskradioButton->setEnabled(false);
     ui->gateradioButton->setEnabled(false);
+
     ui->iplabel->setText("---.---.---.---");
     ui->masklabel->setText("---.---.---.---");
     ui->gatelabel->setText("---.---.---.---");
     ui->keyframe->setPlaceholderText("设置中...");
-
-    emit ChannelBus::instance().set_network(false);
+    emit ChannelBus::instance().set_network(NetMode::DHCP,"");
 }
 void devicesetpage::on_static_pushButton_clicked()
 {
@@ -80,6 +80,20 @@ void devicesetpage::on_refreshpushButton_clicked()
         ui->iplabel->setText(ConfigManager::IP);
         ui->masklabel->setText(ConfigManager::SM);
         ui->gatelabel->setText(ConfigManager::Gate);
+
+        if (ConfigManager::isDHCP){
+            on_canidradioButton_clicked();
+            ui->ipradioButton->setEnabled(false);
+            ui->maskradioButton->setEnabled(false);
+            ui->gateradioButton->setEnabled(false);
+            ui->refreshpushButton->setEnabled(true);
+        }else{
+            on_ipradioButton_clicked();
+            ui->ipradioButton->setEnabled(true);
+            ui->maskradioButton->setEnabled(true);
+            ui->gateradioButton->setEnabled(true);
+            ui->refreshpushButton->setEnabled(false);
+        }
     }
 }
 
@@ -128,25 +142,18 @@ devicesetpage::devicesetpage(QWidget *parent) :QWidget(parent),
     QObject::connect(ui->keyframe, &numberkeypad::valueEntered, this, [this](const QString &value) {
         if (!value.isEmpty()){
             switch (m_Inmode) {
-                case Setmode::ip:case Setmode::mask:case Setmode::gate:{
-                    QString *fields[] = { &ConfigManager::IP, &ConfigManager::SM, &ConfigManager::Gate };
-                    QLabel *valueLabels[] = { ui->iplabel, ui->masklabel, ui->gatelabel };
-                    valueLabels[m_Inmode]->setText("Temp: " + value);
-                    *fields[m_Inmode] = value;
-
-                    if (ConfigManager::IP == "---.---.---.---"){
-                        on_ipradioButton_clicked();
-                    }else if(ConfigManager::SM == "---.---.---.---"){
-                        on_maskradioButton_clicked();
-                    }else if(ConfigManager::Gate == "---.---.---.---"){
-                        on_gateradioButton_clicked();
-                    }else{
-                        emit ChannelBus::instance().set_network(true);
-                        ui->keyframe->setPlaceholderText("设置中...");
-                    }
-
-                    return;
-                }
+                case Setmode::ip:
+                    emit ChannelBus::instance().set_network(NetMode::IP,value);
+                    ui->iplabel->setText("Temp: " + value);
+                    break;
+                case Setmode::mask:
+                    emit ChannelBus::instance().set_network(NetMode::MASK,value);
+                    ui->masklabel->setText("Temp: " + value);
+                    break;
+                case Setmode::gate:
+                    emit ChannelBus::instance().set_network(NetMode::GATE,value);
+                    ui->gatelabel->setText("Temp: " + value);
+                    break;
                 case Setmode::canid:
                     if (ConfigManager::saveNewValue(ConfAddress::CanId,value.toUInt())){
                         ConfigManager::s_CANid = value.toUInt();
@@ -163,24 +170,23 @@ devicesetpage::~devicesetpage()
 }
 
 /* update card style */
-void devicesetpage::responseUpdate()
+void devicesetpage::responseUpdate(int mode)
 {
-    if (m_Inmode == Setmode::canbaud){
-        ui->canidlabel->setText(QString::number(ConfigManager::s_CANid.load()));
-        ui->canBaud_comboBox->setCurrentIndex(ConfigManager::s_canBaudIndex);
-        ui->keyframe->setPlaceholderText("Please input");
-    }else if(m_Inmode == Setmode::rs32baud){
-        ui->keyframe->setPlaceholderText("Please input");
-        ui->rs32Baud_comboBox->setCurrentIndex(ConfigManager::s_rs232BaudIndex);
-    }else if(m_Inmode == Setmode::canid){
-        QTimer::singleShot(8100, this,[this]() { // 8.1s
-            ui->keyframe->setPlaceholderText("Please input");
-            ui->refreshpushButton->setEnabled(true);
+    ui->keyframe->setPlaceholderText("Please input");
+
+    switch (mode) {
+        case InterSt::CAN:
+            ui->canidlabel->setText(QString::number(ConfigManager::s_CANid.load()));
+            ui->canBaud_comboBox->setCurrentIndex(ConfigManager::s_canBaudIndex);
+            break;
+        case InterSt::RS232:
+            ui->rs32Baud_comboBox->setCurrentIndex(ConfigManager::s_rs232BaudIndex);
+            break;
+        case InterSt::LAN_WEB:
             on_refreshpushButton_clicked();
-            });
-    }else{
-        ui->keyframe->setPlaceholderText("Please input");
-        ui->refreshpushButton->setEnabled(false);
-        on_refreshpushButton_clicked();
+            break;
+        default:
+            qCCritical(inDeSeP)<<"(responseUpdate)Unexpected mode: "<<mode;
+            break;
     }
 }

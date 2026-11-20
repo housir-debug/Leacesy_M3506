@@ -19,6 +19,8 @@ public:
         quint8 channel;
     };
     static const std::vector<UartConfig> configs;
+    static const std::array<quint32,8> m_RS232BaudRates;
+    static const std::array<quint32,9> m_CanBaudRates;
 
     void to_Channel(int channel,quint16 cmds,const QByteArray& param, bool isScpi);
     void to_ChannelReset(int channel);
@@ -54,9 +56,9 @@ signals:
     /* UI -> control */
     void set_canbaud();
     void set_RS232Baud();
-    void set_network(bool isstatic);
+    void set_network(int mode,const QString& str);
     /* control -> UI */
-    void interAcUpdate();
     void interModelUpdate();
+    void interAcUpdate(int mode);
     void switchRemote(int reface);
 };

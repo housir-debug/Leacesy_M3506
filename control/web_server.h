@@ -31,7 +31,7 @@ public:
     explicit WebServerManager(QObject *parent = nullptr);
     ~WebServerManager();
 
-    void set_network(bool isstatic);
+    void set_network(int mode,const QString& str);
     channelpage* m_ChPage;
 
 private:

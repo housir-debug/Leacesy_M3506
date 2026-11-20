@@ -9,23 +9,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-constexpr std::array<quint32, 9> CanServerManager::m_validBaudRates =
-{
-    1000000,//0
-    800000,//1
-    500000,//2
-    250000,//3
-    125000,//4
-    100000,//5
-    50000,//6
-    20000,//7
-    10000,//8
-};
 void CanServerManager::changebaud()
 {
     if (OpeningCanN()) {
         ConfigManager::saveNewValue(ConfAddress::CanBaud,ConfigManager::s_canBaudIndex);
-        emit ChannelBus::instance().interAcUpdate();
+        emit ChannelBus::instance().interAcUpdate(InterSt::CAN);
     }
 }
 
@@ -315,7 +303,7 @@ bool CanServerManager::OpeningCanN()
     commands << QString("ip link set %1 down").arg(m_interface);
     commands << QString("ip link set %1 txqueuelen 1000").arg(m_interface);
     commands << QString("ip link set %1 type can bitrate %2 restart-ms 18 fd off loopback off")
-                .arg(m_interface).arg(m_validBaudRates[ConfigManager::s_canBaudIndex]);
+                .arg(m_interface).arg(ChannelBus::m_CanBaudRates[ConfigManager::s_canBaudIndex]);
     commands << QString("ip link set %1 up").arg(m_interface);
 
     for (const QString &cmd : qAsConst(commands)) {

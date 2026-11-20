@@ -93,3 +93,9 @@ namespace InterSt {
     constexpr int LAN_VXI    = 0x03;
     constexpr int LAN_WEB    = 0x04;
 }
+namespace NetMode {
+    constexpr int DHCP      = 0x00;
+    constexpr int IP        = 0x01;
+    constexpr int MASK      = 0x02;
+    constexpr int GATE      = 0x03;
+}

@@ -13,22 +13,12 @@ void UartServerManager::startLoopbackTest()
     m_uartServer->write(testData);
 }
 
-constexpr std::array<quint32, 8> UartServerManager::m_validBaudRates =
-{
-    QSerialPort::Baud115200,//0
-    QSerialPort::Baud57600,//1
-    QSerialPort::Baud38400,//2
-    QSerialPort::Baud19200,//3
-    QSerialPort::Baud9600,//4
-    QSerialPort::Baud4800,//5
-    QSerialPort::Baud2400,//6
-    QSerialPort::Baud1200,//7
-};
+
 void UartServerManager::changeBaudRate()
 {
-    if (m_uartServer->setBaudRate(m_validBaudRates[ConfigManager::s_rs232BaudIndex])) {
+    if (m_uartServer->setBaudRate(ChannelBus::m_RS232BaudRates[ConfigManager::s_rs232BaudIndex])) {
         ConfigManager::saveNewValue(ConfAddress::R23Baud,ConfigManager::s_rs232BaudIndex);
-        emit ChannelBus::instance().interAcUpdate();
+        emit ChannelBus::instance().interAcUpdate(InterSt::RS232);
     }
 }
 
@@ -43,7 +33,7 @@ UartServerManager::UartServerManager(QObject *parent): QObject(parent)
     m_uartServer->setStopBits(QSerialPort::OneStop);
     // HardwareControl: Requires wiring support | SoftwareControl: Applicable only to written text
     m_uartServer ->setFlowControl(QSerialPort::NoFlowControl);
-    m_uartServer->setBaudRate(m_validBaudRates[ConfigManager::s_rs232BaudIndex]);
+    m_uartServer->setBaudRate(ChannelBus::m_RS232BaudRates[ConfigManager::s_rs232BaudIndex]);
     m_uartServer->setPortName("/dev/ttyS1");
 
     if (m_uartServer->open(QIODevice::ReadWrite)) {

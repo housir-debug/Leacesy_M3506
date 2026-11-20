@@ -30,7 +30,7 @@ public:
     explicit devicesetpage(QWidget *parent = nullptr);
     ~devicesetpage();
 
-    void responseUpdate();
+    void responseUpdate(int mode);
 };
 
 namespace Setmode {
